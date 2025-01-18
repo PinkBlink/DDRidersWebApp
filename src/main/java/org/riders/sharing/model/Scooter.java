@@ -7,14 +7,14 @@ public class Scooter {
     private boolean available;
     private ScooterRent scooterRent;
     private ScooterType scooterType;
-    private int battery;
+    private int batteryLevel;
 
-    public Scooter(int id, boolean available, ScooterRent scooterRent, ScooterType scooterType, int battery) {
+    public Scooter(int id, boolean available, ScooterRent scooterRent, ScooterType scooterType, int batteryLevel) {
         this.id = id;
         this.available = available;
         this.scooterRent = scooterRent;
         this.scooterType = scooterType;
-        this.battery = battery;
+        this.batteryLevel = batteryLevel;
     }
 
     public int getId() {
@@ -49,12 +49,12 @@ public class Scooter {
         this.scooterType = scooterType;
     }
 
-    public int getBattery() {
-        return battery;
+    public int getBatteryLevel() {
+        return batteryLevel;
     }
 
-    public void setBattery(int battery) {
-        this.battery = battery;
+    public void setBatteryLevel(int batteryLevel) {
+        this.batteryLevel = batteryLevel;
     }
 
     @Override
