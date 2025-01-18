@@ -30,7 +30,7 @@ public class PasswordUtilsTest {
         hashedPassword2 = PasswordUtils.hashPassword(password);
 
         //Then
-        Assertions.assertTrue(PasswordUtils.checkPassword(password, hashedPassword1));
-        Assertions.assertTrue(PasswordUtils.checkPassword(password, hashedPassword2));
+        Assertions.assertTrue(PasswordUtils.checkPassword(password, hashedPassword1), "Should be true");
+        Assertions.assertTrue(PasswordUtils.checkPassword(password, hashedPassword2), "Should be true");
     }
 }
