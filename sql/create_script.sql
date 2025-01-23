@@ -1,4 +1,7 @@
-CREATE TABLE ScooterRents(
+CREATE DATABASE IF NOT EXISTS dd_riders_db
+CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS ScooterRents(
 scooter_rent_id BIGINT PRIMARY KEY NOT NULL,
 is_ongoing BOOLEAN NOT NULL,
 period TIME NOT NULL,
@@ -16,7 +19,7 @@ REFERENCES Scooters(scooter_id)
 
 CREATE TYPE scooter_type AS ENUM ('long_range', 'urban', 'folding');
 
-CREATE TABLE Customers(
+CREATE TABLE IF NOT EXISTS Customers(
 customer_id BIGINT PRIMARY KEY NOT NULL,
 name VARCHAR(40),
 surname VARCHAR(40),
@@ -29,11 +32,11 @@ FOREIGN KEY (scooter_rent_id)
 REFERENCES ScooterRents(scooter_rent_id)
 );
 
-CREATE TABLE Scooters(
+CREATE TABLE IF NOT EXISTS Scooters(
 scooter_id BIGINT PRIMARY KEY NOT NULL,
 available BOOLEAN NOT NULL,
 type scooter_type NOT NULL,
-battery_level INT CHECK (battery_level>=0 AND battery_level<=100)
+battery_level INT CHECK (battery_level>=0 AND battery_level<=100),
 scooter_rent_id BIGINT,
 
 CONSTRAINT fk_scooter_rent_id_scooters
