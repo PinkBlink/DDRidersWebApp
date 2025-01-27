@@ -14,36 +14,53 @@ import java.sql.Statement;
 import java.util.List;
 
 public class SQLUtils {
-    private static Logger logger = LogManager.getLogger(SQLUtils.class);
+    private static final Logger logger = LogManager.getLogger(SQLUtils.class);
 
     public static void initDatabase() {
-        if (!SQLValidator.isCreatedDB()) {
-            try (Connection connection = DriverManager.getConnection(DataBaseInfo.INITIAL_URL
+        if (SQLValidator.isCreatedDB(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD)) {
+            logger.info("Database dd_riders_db has already been created.;");
+        } else {
+            sendCreateFile(DataBaseInfo.PATH_TO_CREATE_DATABASE_FILE
+                    , DataBaseInfo.POSTGRES_URL
                     , DataBaseInfo.USER
-                    , DataBaseInfo.PASSWORD)) {
-                Statement statement = connection.createStatement();
-                String createScript = getCreateScript();
-                statement.execute(createScript);
-                statement.close();
-            } catch (SQLException e) {
-                logger.error("Can't connect to :" + DataBaseInfo.INITIAL_URL);
-                throw new RuntimeException(e);
-            }
+                    , DataBaseInfo.PASSWORD);
+
+            sendCreateFile(DataBaseInfo.PATH_TO_CREATE_TABLES_FILE
+                    , DataBaseInfo.DD_RIDERS_URL
+                    , DataBaseInfo.USER
+                    , DataBaseInfo.PASSWORD);
+
         }
     }
 
-    private static String getCreateScript() {
+    private static void sendCreateFile(String path, String URL, String user, String password) {
+        try (Connection connection = DriverManager.getConnection(URL
+                , user
+                , password)) {
+            logger.info("Created connection with " + URL);
+
+            Statement statement = connection.createStatement();
+            String createScript = getStringCreateScriptFromFile(path);
+            statement.execute(createScript);
+            statement.close();
+            logger.info("Script is sent successfully;");
+        } catch (SQLException e) {
+            logger.error(e);
+            throw new RuntimeException();
+        }
+    }
+
+    private static String getStringCreateScriptFromFile(String path) {
         try {
             StringBuilder stringBuilder = new StringBuilder();
-            List<String> script = Files.readAllLines(Path.of(DataBaseInfo.PATH_TO_DATABASE_CREATE_FILE));
+            List<String> script = Files.readAllLines(Path.of(path));
             for (String line : script) {
-                stringBuilder.append(line.trim())
-                        .append("\n");
+                stringBuilder.append(line.trim()).append("\n");
             }
             return stringBuilder.toString().trim();
 
         } catch (IOException e) {
-            logger.error("File doesn't exist. Path " + DataBaseInfo.PATH_TO_DATABASE_CREATE_FILE, e);
+            logger.error("File doesn't exist. Path " + DataBaseInfo.PATH_TO_CREATE_DATABASE_FILE, e);
             throw new RuntimeException(e);
         }
     }

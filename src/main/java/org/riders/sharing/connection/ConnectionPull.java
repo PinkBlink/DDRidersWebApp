@@ -6,9 +6,7 @@ import org.riders.sharing.exception.ConnectionException;
 import org.riders.sharing.utils.SQLUtils;
 import org.riders.sharing.utils.constants.DataBaseInfo;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +19,7 @@ public class ConnectionPull {
     private BlockingQueue<Connection> availableConnections;
     private BlockingQueue<Connection> busyConnections;
     private static final int DEFAULT_CAPACITY = 16;
-    private static AtomicBoolean isCreated = new AtomicBoolean(false);
+    private static final AtomicBoolean isCreated = new AtomicBoolean(false);
 
     private ConnectionPull() {
         registerDriver();
@@ -86,7 +84,7 @@ public class ConnectionPull {
     private Connection createConnection() throws ConnectionException {
         Connection connection;
         try {
-            connection = DriverManager.getConnection(DataBaseInfo.URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
+            connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
             logger.info("Create new connection: " + connection.toString());
 
         } catch (SQLException e) {

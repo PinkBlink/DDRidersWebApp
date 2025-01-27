@@ -1,14 +1,12 @@
 package org.riders.sharing.utils;
 
-import org.riders.sharing.utils.constants.DataBaseInfo;
-
 import java.sql.*;
 
 public class SQLValidator {
-    public static boolean isCreatedDB() {
-        try (Connection connection = DriverManager.getConnection(DataBaseInfo.URL
-                , DataBaseInfo.USER
-                , DataBaseInfo.PASSWORD)) {
+    public static boolean isCreatedDB(String URL, String user, String password) {
+        try (Connection connection = DriverManager.getConnection(URL
+                , user
+                , password)) {
             connection.createStatement()
                     .executeQuery("SELECT * FROM Customers LIMIT 1;")
                     .close();
