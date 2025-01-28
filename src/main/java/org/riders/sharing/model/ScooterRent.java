@@ -8,14 +8,13 @@ public class ScooterRent {
     private Customer customer;
     private Scooter scooter;
     private Period rentPeriod;
-    private boolean isOngoing;
+    private boolean isOngoing = true;
 
-    public ScooterRent(int id, Customer customer, Scooter scooter, Period rentPeriod, boolean isOngoing) {
+    public ScooterRent(int id, Customer customer, Scooter scooter, Period rentPeriod) {
         this.id = id;
         this.customer = customer;
         this.scooter = scooter;
         this.rentPeriod = rentPeriod;
-        this.isOngoing = isOngoing;
     }
 
     public int getId() {
@@ -60,9 +59,17 @@ public class ScooterRent {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ScooterRent that)) return false;
-        return id == that.id && isOngoing == that.isOngoing && Objects.equals(customer, that.customer) && Objects.equals(scooter, that.scooter) && Objects.equals(rentPeriod, that.rentPeriod);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ScooterRent that)) {
+            return false;
+        }
+        return id == that.id
+                && isOngoing == that.isOngoing
+                && Objects.equals(customer, that.customer)
+                && Objects.equals(scooter, that.scooter)
+                && Objects.equals(rentPeriod, that.rentPeriod);
     }
 
     @Override

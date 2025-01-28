@@ -9,12 +9,11 @@ public class Scooter {
     private ScooterType scooterType;
     private int batteryLevel;
 
-    public Scooter(int id, boolean available, ScooterRent scooterRent, ScooterType scooterType, int batteryLevel) {
+    public Scooter(int id,ScooterType scooterType) {
         this.id = id;
-        this.available = available;
-        this.scooterRent = scooterRent;
+        this.available = true;
         this.scooterType = scooterType;
-        this.batteryLevel = batteryLevel;
+        this.batteryLevel = 100;
     }
 
     public int getId() {

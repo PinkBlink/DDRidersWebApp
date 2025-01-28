@@ -7,6 +7,8 @@ import org.riders.sharing.utils.SQLUtils;
 import org.riders.sharing.utils.constants.DataBaseInfo;
 
 import java.sql.*;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,7 +19,7 @@ public class ConnectionPull {
     private static final ReentrantLock lock = new ReentrantLock();
     private static ConnectionPull instance;
     private BlockingQueue<Connection> availableConnections;
-    private BlockingQueue<Connection> busyConnections;
+    private Queue<Connection> busyConnections;
     private static final int DEFAULT_CAPACITY = 16;
     private static final AtomicBoolean isCreated = new AtomicBoolean(false);
 
@@ -63,7 +65,7 @@ public class ConnectionPull {
 
     private void initConnections() {
         availableConnections = new LinkedBlockingDeque<>(DEFAULT_CAPACITY);
-        busyConnections = new LinkedBlockingDeque<>();
+        busyConnections = new ArrayDeque<>();
         try {
             for (int i = 0; i < DEFAULT_CAPACITY; i++) {
                 Connection connection = createConnection();

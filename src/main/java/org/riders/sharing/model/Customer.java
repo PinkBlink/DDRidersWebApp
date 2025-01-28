@@ -8,7 +8,6 @@ public class Customer extends BaseEntity {
     private String surname;
     private String email;
     private String passwordHash;
-
     private ScooterRent scooterRent;
 
     public Customer(int id, String name, String surname, String email, String passwordHash) {
