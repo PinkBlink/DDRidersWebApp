@@ -5,11 +5,10 @@ import java.util.Objects;
 public class Scooter {
     private int id;
     private boolean available;
-    private ScooterRent scooterRent;
     private ScooterType scooterType;
     private int batteryLevel;
 
-    public Scooter(int id,ScooterType scooterType) {
+    public Scooter(int id, ScooterType scooterType) {
         this.id = id;
         this.available = true;
         this.scooterType = scooterType;
@@ -30,14 +29,6 @@ public class Scooter {
 
     public void setAvailable(boolean available) {
         this.available = available;
-    }
-
-    public ScooterRent getScooterRent() {
-        return scooterRent;
-    }
-
-    public void setScooterRent(ScooterRent scooterRent) {
-        this.scooterRent = scooterRent;
     }
 
     public ScooterType getScooterType() {
@@ -66,12 +57,11 @@ public class Scooter {
         }
         return id == scooter.id
                 && available == scooter.available
-                && Objects.equals(scooterRent, scooter.scooterRent)
                 && Objects.equals(scooterType, scooter.scooterType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, available, scooterRent, scooterType);
+        return Objects.hash(id, available, scooterType);
     }
 }

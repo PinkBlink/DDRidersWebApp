@@ -8,11 +8,10 @@ import org.riders.sharing.factory.CustomerFactory;
 import org.riders.sharing.factory.impl.CustomerFactoryImpl;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
+import org.riders.sharing.utils.constants.CustomerSqlColumns;
 import org.riders.sharing.utils.constants.CustomerSqlQueries;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,14 +28,18 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             connection = connectionPull.getConnection();
             statement = connection.prepareStatement(CustomerSqlQueries.INSERT_QUERY);
 
-            int id = customer.getId();
-            String name = customer.getEmail();
+            int id = customer.getCustomerId();
+            String name = customer.getName();
             String surname = customer.getSurname();
             String email = customer.getEmail();
-            String passwordHash = customer.getPasswordHash();//rework
+            String passwordHash = customer.getPasswordHash();
 
-            statement.setInt(1, id);
-            setPreparedStatement(statement, customer);
+            statement.setInt(CustomerSqlColumns.CUSTOMER_ID, id);
+            statement.setString(CustomerSqlColumns.NAME, name);
+            statement.setString(CustomerSqlColumns.SURNAME, surname);
+            statement.setString(CustomerSqlColumns.EMAIL, email);
+            statement.setString(CustomerSqlColumns.PASSWORD_HASH, passwordHash);
+
             statement.execute();
         } catch (SQLException e) {
             logger.error("Can't save customer: " + customer, e);
@@ -48,26 +51,41 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void updateCustomer(Customer customer) throws RepositoryException {
+    public void changeCustomerName(int customerId, String name) {
+
+    }
+
+    @Override
+    public void changeCustomerSurname(int customerId, String surname) {
+
+    }
+
+    @Override
+    public void changeCustomerEmail(int customerId, String email) {
+
+    }
+
+    @Override
+    public void changeCustomerPassword(int customerId, String password) {
+
+    }
+
+    @Override
+    public Optional<Customer> findCustomerById(int id) throws RepositoryException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.UPDATE_QUERY);
-            setPreparedStatement(statement, customer); //!!! continue from this
+            statement = connection.prepareStatement(CustomerSqlQueries.FIND_USER_BY_ID);
+            statement.setInt(CustomerSqlColumns.CUSTOMER_ID, id);
+            ResultSet resultSet = statement.executeQuery();
+            return customerFactory.createCustomerFromResultSet(resultSet);
         } catch (SQLException e) {
-            logger.error("Can't update customer: " + customer, e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             connectionPull.releaseConnection(connection);
             closeStatement(statement);
         }
-
-    }
-
-    @Override
-    public Optional<Customer> findCustomerById(int id) {
-        return Optional.empty();
     }
 
     @Override
@@ -83,19 +101,5 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void deleteCustomer(Customer customer) {
 
-    }
-
-    private void setPreparedStatement(PreparedStatement statement, Customer customer) throws SQLException {
-        statement.setString(2, customer.getName());
-        statement.setString(3, customer.getSurname());
-        statement.setString(4, customer.getEmail());
-        statement.setString(5, customer.getPasswordHash());
-    }
-
-    public static void main(String[] args) throws RepositoryException {
-        CustomerRepository repository = new CustomerRepositoryImpl();
-        repository.saveCustomer(
-                new CustomerFactoryImpl()
-                        .createCustomer(1, "2", "3", "4", "5"));
     }
 }

@@ -60,7 +60,7 @@ public class SQLUtils {
             return stringBuilder.toString().trim();
 
         } catch (IOException e) {
-            logger.error("File doesn't exist. Path " + DataBaseInfo.PATH_TO_CREATE_DATABASE_FILE, e);
+            logger.error("File doesn't exist. Path: " + path, e);
             throw new RuntimeException(e);
         }
     }

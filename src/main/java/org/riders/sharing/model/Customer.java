@@ -3,27 +3,26 @@ package org.riders.sharing.model;
 import java.util.Objects;
 
 public class Customer extends BaseEntity {
-    private int id;
+    private int customerId;
     private String name;
     private String surname;
     private String email;
     private String passwordHash;
-    private ScooterRent scooterRent;
 
-    public Customer(int id, String name, String surname, String email, String passwordHash) {
-        this.id = id;
+    public Customer(int customerId, String name, String surname, String email, String passwordHash) {
+        this.customerId = customerId;
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.passwordHash = passwordHash;
     }
 
-    public int getId() {
-        return id;
+    public int getCustomerId() {
+        return customerId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
     }
 
     public String getName() {
@@ -58,14 +57,6 @@ public class Customer extends BaseEntity {
         this.passwordHash = passwordHash;
     }
 
-    public ScooterRent getScooterRent() {
-        return scooterRent;
-    }
-
-    public void setScooterRent(ScooterRent scooterRent) {
-        this.scooterRent = scooterRent;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -74,16 +65,15 @@ public class Customer extends BaseEntity {
         if (!(o instanceof Customer customer)) {
             return false;
         }
-        return id == customer.id
+        return customerId == customer.customerId
                 && passwordHash.equals(customer.passwordHash)
                 && Objects.equals(name, customer.name)
                 && Objects.equals(surname, customer.surname)
-                && Objects.equals(email, customer.email)
-                && Objects.equals(scooterRent, customer.scooterRent);
+                && Objects.equals(email, customer.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, email, passwordHash, scooterRent);
+        return Objects.hash(customerId, name, surname, email, passwordHash);
     }
 }

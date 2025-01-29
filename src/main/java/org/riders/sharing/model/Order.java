@@ -3,14 +3,14 @@ package org.riders.sharing.model;
 import java.time.Period;
 import java.util.Objects;
 
-public class ScooterRent {
+public class Order {
     private int id;
     private Customer customer;
     private Scooter scooter;
     private Period rentPeriod;
     private boolean isOngoing = true;
 
-    public ScooterRent(int id, Customer customer, Scooter scooter, Period rentPeriod) {
+    public Order(int id, Customer customer, Scooter scooter, Period rentPeriod) {
         this.id = id;
         this.customer = customer;
         this.scooter = scooter;
@@ -62,7 +62,7 @@ public class ScooterRent {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ScooterRent that)) {
+        if (!(o instanceof Order that)) {
             return false;
         }
         return id == that.id
