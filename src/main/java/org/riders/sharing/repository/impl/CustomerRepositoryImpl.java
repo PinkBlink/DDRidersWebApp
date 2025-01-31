@@ -8,10 +8,10 @@ import org.riders.sharing.factory.CustomerFactory;
 import org.riders.sharing.factory.impl.CustomerFactoryImpl;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
-import org.riders.sharing.utils.constants.CustomerSqlColumns;
 import org.riders.sharing.utils.constants.CustomerSqlQueries;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,15 +34,15 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             String email = customer.getEmail();
             String passwordHash = customer.getPasswordHash();
 
-            statement.setInt(CustomerSqlColumns.CUSTOMER_ID, id);
-            statement.setString(CustomerSqlColumns.NAME, name);
-            statement.setString(CustomerSqlColumns.SURNAME, surname);
-            statement.setString(CustomerSqlColumns.EMAIL, email);
-            statement.setString(CustomerSqlColumns.PASSWORD_HASH, passwordHash);
+            statement.setInt(1, id);
+            statement.setString(2, name);
+            statement.setString(3, surname);
+            statement.setString(4, email);
+            statement.setString(5, passwordHash);
 
-            statement.execute();
+            statement.executeUpdate();
         } catch (SQLException e) {
-            logger.error("Can't save customer: " + customer, e);
+            logger.error("Error occurred while trying to save customer: " + customer, e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             connectionPull.releaseConnection(connection);
@@ -51,36 +51,56 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void changeCustomerName(int customerId, String name) {
+    public void updateCustomer(Customer customer) throws RepositoryException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            int id = customer.getCustomerId();
+            String name = customer.getName();
+            String surname = customer.getSurname();
+            String email = customer.getEmail();
+            String passwordHash = customer.getPasswordHash();
 
+            connection = connectionPull.getConnection();
+            statement = connection.prepareStatement(CustomerSqlQueries.UPDATE_CUSTOMER_FIELDS);
+            statement.setString(1, name);
+            statement.setString(2, surname);
+            statement.setString(3, email);
+            statement.setString(4, passwordHash);
+            statement.setInt(5, id);
+
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                logger.info("Customer with id " + id + " updated successfully;");
+            } else {
+                logger.info("Couldn't find customer with id " + id);
+            }
+        } catch (SQLException e) {
+            logger.error("Error occurred while trying to update customer");
+            throw new RepositoryException(e.getMessage(), e);
+        } finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(statement);
+        }
     }
 
     @Override
-    public void changeCustomerSurname(int customerId, String surname) {
-
-    }
-
-    @Override
-    public void changeCustomerEmail(int customerId, String email) {
-
-    }
-
-    @Override
-    public void changeCustomerPassword(int customerId, String password) {
-
-    }
-
-    @Override
-    public Optional<Customer> findCustomerById(int id) throws RepositoryException {
+    public Optional<Customer> findCustomerById(int customerId) throws RepositoryException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
             statement = connection.prepareStatement(CustomerSqlQueries.FIND_USER_BY_ID);
-            statement.setInt(CustomerSqlColumns.CUSTOMER_ID, id);
+            statement.setInt(1, customerId);
             ResultSet resultSet = statement.executeQuery();
-            return customerFactory.createCustomerFromResultSet(resultSet);
+            if (resultSet.next()) {
+                logger.info("Successfully found customer with customerId: " + customerId);
+                return Optional.of(customerFactory.createCustomerFromResultSet(resultSet));
+            }
+            logger.info("Can't find customer with id: " + customerId);
+            return Optional.empty();
         } catch (SQLException e) {
+            logger.error("Error occurred while attempting to find customer with id: " + customerId);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             connectionPull.releaseConnection(connection);
@@ -89,17 +109,53 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findCustomerByEmail(String email) {
-        return Optional.empty();
+    public List<Customer> findAll() throws RepositoryException {
+        List<Customer> customerList = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = connectionPull.getConnection();
+            statement = connection.prepareStatement(CustomerSqlQueries.FIND_ALL_CUSTOMERS);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Customer customer = customerFactory.createCustomerFromResultSet(resultSet);
+                customerList.add(customer);
+            }
+            if (customerList.isEmpty()) {
+                logger.info("Customer list is empty;");
+            } else {
+                logger.info("Successfully find " + customerList.size() + " customer(s)");
+            }
+            return customerList;
+        } catch (SQLException e) {
+            logger.error("Error occurred while attempting to find all customers.");
+            throw new RepositoryException(e.getMessage(), e);
+        } finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(statement);
+        }
     }
 
     @Override
-    public List<Customer> findAll() {
-        return null;
-    }
-
-    @Override
-    public void deleteCustomer(Customer customer) {
-
+    public void deleteCustomer(int customerId) throws RepositoryException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = connectionPull.getConnection();
+            statement = connection.prepareStatement(CustomerSqlQueries.DELETE_CUSTOMER_BY_ID);
+            statement.setInt(1, customerId);
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                logger.info("Customer with id :" + customerId + " successfully deleted");
+            } else {
+                logger.info("Can't find customer with id: " + customerId);
+            }
+        } catch (SQLException e) {
+            logger.error("Error while deleting customer with id=" + customerId, e);
+            throw new RepositoryException(e.getMessage(), e);
+        } finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(statement);
+        }
     }
 }

@@ -6,7 +6,6 @@ import org.riders.sharing.utils.constants.CustomerSqlColumns;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class CustomerFactoryImpl implements CustomerFactory {
 
@@ -16,22 +15,18 @@ public class CustomerFactoryImpl implements CustomerFactory {
     }
 
     @Override
-    public Optional<Customer> createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
-        if (resultSet.next()) {
-            int customerId = resultSet.getInt(CustomerSqlColumns.CUSTOMER_ID);
-            String name = resultSet.getString(CustomerSqlColumns.NAME);
-            String surname = resultSet.getString(CustomerSqlColumns.SURNAME);
-            String email = resultSet.getString(CustomerSqlColumns.EMAIL);
-            String passwordHash = resultSet.getString(CustomerSqlColumns.PASSWORD_HASH);
+    public Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
+        int customerId = resultSet.getInt(CustomerSqlColumns.CUSTOMER_ID.getColumnNumber());
+        String name = resultSet.getString(CustomerSqlColumns.NAME.getColumnNumber());
+        String surname = resultSet.getString(CustomerSqlColumns.SURNAME.getColumnNumber());
+        String email = resultSet.getString(CustomerSqlColumns.EMAIL.getColumnNumber());
+        String passwordHash = resultSet.getString(CustomerSqlColumns.PASSWORD_HASH.getColumnNumber());
 
-            return Optional.of(createCustomer(
-                    customerId
-                    , name
-                    , surname
-                    , email
-                    , passwordHash)
-            );
-        }
-        return Optional.empty();
+        return createCustomer(
+                customerId
+                , name
+                , surname
+                , email
+                , passwordHash);
     }
 }

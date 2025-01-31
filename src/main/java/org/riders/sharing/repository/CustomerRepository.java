@@ -11,21 +11,13 @@ public interface CustomerRepository extends BaseRepository {
     void saveCustomer(Customer customer) throws RepositoryException;
 
     //update
-    void changeCustomerName(int customerId, String name);
-
-    void changeCustomerSurname(int customerId, String surname);
-
-    void changeCustomerEmail(int customerId, String email);
-
-    void changeCustomerPassword(int customerId, String password);
+    void updateCustomer(Customer customer) throws RepositoryException;
 
     //read
     Optional<Customer> findCustomerById(int id) throws RepositoryException;
 
-    Optional<Customer> findCustomerByEmail(String email) throws RepositoryException;
-
     List<Customer> findAll() throws RepositoryException;
 
     //delete
-    void deleteCustomer(Customer customer) throws RepositoryException;
+    void deleteCustomer(int customerId) throws RepositoryException;
 }

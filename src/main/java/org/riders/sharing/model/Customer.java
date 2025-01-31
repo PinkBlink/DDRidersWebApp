@@ -76,4 +76,15 @@ public class Customer extends BaseEntity {
     public int hashCode() {
         return Objects.hash(customerId, name, surname, email, passwordHash);
     }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "customerId=" + customerId +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", passwordHash='" + passwordHash + '\'' +
+                '}';
+    }
 }

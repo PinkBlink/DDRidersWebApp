@@ -1,9 +1,26 @@
 package org.riders.sharing.utils.constants;
 
-public class CustomerSqlColumns {
-    public static final int CUSTOMER_ID = 1;
-    public static final int NAME = 2;
-    public static final int SURNAME = 3;
-    public static final int EMAIL = 4;
-    public static final int PASSWORD_HASH = 5;
+public enum CustomerSqlColumns {
+    CUSTOMER_ID(1, "customer_id"),
+    NAME(2, "name"),
+    SURNAME(3, "surname"),
+
+    EMAIL(4, "email"),
+
+    PASSWORD_HASH(5, "password_hash");
+    private final int columnNumber;
+    private final String columnName;
+
+    CustomerSqlColumns(int columnNumber, String columnName) {
+        this.columnNumber = columnNumber;
+        this.columnName = columnName;
+    }
+
+    public int getColumnNumber() {
+        return columnNumber;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
 }
