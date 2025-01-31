@@ -26,7 +26,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.INSERT_QUERY);
+            statement = connection.prepareStatement(CustomerSqlQueries.INSERT_CUSTOMER);
 
             int id = customer.getCustomerId();
             String name = customer.getName();
@@ -62,7 +62,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             String passwordHash = customer.getPasswordHash();
 
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.UPDATE_CUSTOMER_FIELDS);
+            statement = connection.prepareStatement(CustomerSqlQueries.UPDATE_CUSTOMER);
             statement.setString(1, name);
             statement.setString(2, surname);
             statement.setString(3, email);
@@ -90,7 +90,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.FIND_USER_BY_ID);
+            statement = connection.prepareStatement(CustomerSqlQueries.FIND_CUSTOMER_BY_ID);
             statement.setInt(1, customerId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {

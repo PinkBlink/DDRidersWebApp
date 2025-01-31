@@ -1,10 +1,10 @@
 package org.riders.sharing.utils.constants;
 
 public class CustomerSqlQueries {
-    public static final String INSERT_QUERY =
+    public static final String INSERT_CUSTOMER =
             "INSERT INTO customers(customer_id,name,surname,email,password_hash) " +
                     "VALUES(?, ?, ?, ?, ?);";
-    public static final String FIND_USER_BY_ID =
+    public static final String FIND_CUSTOMER_BY_ID =
             "SELECT * " +
                     "FROM customers " +
                     "WHERE id = ?;";
@@ -15,7 +15,7 @@ public class CustomerSqlQueries {
     public static final String DELETE_CUSTOMER_BY_ID =
             "DELETE FROM customers" +
                     "WHERE customer_id = ?;";
-    public static final String UPDATE_CUSTOMER_FIELDS =
+    public static final String UPDATE_CUSTOMER =
             "UPDATE customers " +
                     "SET name = ?" +
                     "SET surname = ?" +

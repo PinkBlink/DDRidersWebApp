@@ -1,5 +1,7 @@
 package org.riders.sharing.model;
 
+import org.riders.sharing.model.enums.OrderStatus;
+
 import java.time.Period;
 import java.util.Objects;
 
@@ -8,13 +10,14 @@ public class Order {
     private Customer customer;
     private Scooter scooter;
     private Period rentPeriod;
-    private boolean isOngoing = true;
+    private OrderStatus status;
 
     public Order(int id, Customer customer, Scooter scooter, Period rentPeriod) {
         this.id = id;
         this.customer = customer;
         this.scooter = scooter;
         this.rentPeriod = rentPeriod;
+        this.status = OrderStatus.ONGOING;
     }
 
     public int getId() {
@@ -49,12 +52,12 @@ public class Order {
         this.rentPeriod = rentPeriod;
     }
 
-    public boolean isOngoing() {
-        return isOngoing;
+    public OrderStatus getStatus() {
+        return status;
     }
 
-    public void setOngoing(boolean ongoing) {
-        isOngoing = ongoing;
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class Order {
             return false;
         }
         return id == that.id
-                && isOngoing == that.isOngoing
+                && status == that.status
                 && Objects.equals(customer, that.customer)
                 && Objects.equals(scooter, that.scooter)
                 && Objects.equals(rentPeriod, that.rentPeriod);
@@ -74,6 +77,6 @@ public class Order {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, customer, scooter, rentPeriod, isOngoing);
+        return Objects.hash(id, customer, scooter, rentPeriod, status);
     }
 }

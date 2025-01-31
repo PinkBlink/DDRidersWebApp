@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.factory.ScooterFactory;
 import org.riders.sharing.model.Scooter;
-import org.riders.sharing.model.ScooterType;
+import org.riders.sharing.model.enums.ScooterType;
 
 public class ScooterFactoryImpl implements ScooterFactory {
     private final Logger logger = LogManager.getLogger(this);
