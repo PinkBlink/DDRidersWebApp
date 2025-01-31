@@ -1,4 +1,4 @@
 package org.riders.sharing.repository.impl;
 
-public class OrderImpl {
+public class OrderRepositoryImpl {
 }
