@@ -8,7 +8,7 @@ import org.riders.sharing.factory.CustomerFactory;
 import org.riders.sharing.factory.impl.CustomerFactoryImpl;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
-import org.riders.sharing.utils.constants.CustomerSqlQueries;
+import org.riders.sharing.utils.constants.CustomerSQLQueries;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.INSERT_CUSTOMER);
+            statement = connection.prepareStatement(CustomerSQLQueries.INSERT_CUSTOMER);
 
             int id = customer.getCustomerId();
             String name = customer.getName();
@@ -62,7 +62,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             String passwordHash = customer.getPasswordHash();
 
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.UPDATE_CUSTOMER);
+            statement = connection.prepareStatement(CustomerSQLQueries.UPDATE_CUSTOMER);
             statement.setString(1, name);
             statement.setString(2, surname);
             statement.setString(3, email);
@@ -90,7 +90,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.FIND_CUSTOMER_BY_ID);
+            statement = connection.prepareStatement(CustomerSQLQueries.FIND_CUSTOMER_BY_ID);
             statement.setInt(1, customerId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -115,7 +115,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.FIND_ALL_CUSTOMERS);
+            statement = connection.prepareStatement(CustomerSQLQueries.FIND_ALL_CUSTOMERS);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Customer customer = customerFactory.createCustomerFromResultSet(resultSet);
@@ -142,7 +142,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSqlQueries.DELETE_CUSTOMER_BY_ID);
+            statement = connection.prepareStatement(CustomerSQLQueries.DELETE_CUSTOMER_BY_ID);
             statement.setInt(1, customerId);
             int result = statement.executeUpdate();
             if (result > 0) {

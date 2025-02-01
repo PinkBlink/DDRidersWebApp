@@ -7,15 +7,12 @@ import org.riders.sharing.exception.RepositoryException;
 import org.riders.sharing.factory.ScooterFactory;
 import org.riders.sharing.factory.impl.ScooterFactoryImpl;
 import org.riders.sharing.model.Scooter;
-import org.riders.sharing.model.enums.ScooterStatus;
-import org.riders.sharing.model.enums.ScooterType;
 import org.riders.sharing.repository.ScooterRepository;
-import org.riders.sharing.utils.constants.ScooterSqlQueries;
+import org.riders.sharing.utils.constants.ScooterSQLQueries;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class ScooterRepositoryImpl implements ScooterRepository {
@@ -29,7 +26,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSqlQueries.INSERT_SCOOTER);
+            statement = connection.prepareStatement(ScooterSQLQueries.INSERT_SCOOTER);
 
             int id = scooter.getId();
             Object type = scooter.getScooterType();
@@ -62,7 +59,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSqlQueries.UPDATE_SCOOTER);
+            statement = connection.prepareStatement(ScooterSQLQueries.UPDATE_SCOOTER);
 
             int scooterId = scooter.getId();
             String type = scooter.getScooterType().toString();
@@ -94,7 +91,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSqlQueries.FIND_SCOOTER_BY_ID);
+            statement = connection.prepareStatement(ScooterSQLQueries.FIND_SCOOTER_BY_ID);
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -119,7 +116,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         PreparedStatement statement = null;
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSqlQueries.FIND_ALL_SCOOTERS);
+            statement = connection.prepareStatement(ScooterSQLQueries.FIND_ALL_SCOOTERS);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Scooter scooter = scooterFactory.createScooterFromResultSet(resultSet);
@@ -142,7 +139,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         int scooterId = scooter.getId();
         try {
             connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSqlQueries.DELETE_SCOOTER);
+            statement = connection.prepareStatement(ScooterSQLQueries.DELETE_SCOOTER);
             statement.setInt(1, scooterId);
             int result = statement.executeUpdate();
             if (result > 0) {
@@ -153,6 +150,9 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         } catch (SQLException e) {
             logger.error("Error occurred while trying to delete scooter with id: " + scooterId);
             throw new RepositoryException(e.getMessage(), e);
+        } finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(statement);
         }
     }
 }

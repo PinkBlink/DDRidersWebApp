@@ -1,6 +1,6 @@
 package org.riders.sharing.utils.constants;
 
-public class ScooterSqlQueries {
+public class ScooterSQLQueries {
     public static final String INSERT_SCOOTER =
             "INSERT INTO scooters(scooter_id, scooter_type, scooter_status, battery_level)" +
                     " VALUES(?, ?, ?, ?);";

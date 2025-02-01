@@ -1,6 +1,6 @@
 package org.riders.sharing.utils.constants;
 
-public class CustomerSqlQueries {
+public class CustomerSQLQueries {
     public static final String INSERT_CUSTOMER =
             "INSERT INTO customers(customer_id,name,surname,email,password_hash) " +
                     "VALUES(?, ?, ?, ?, ?);";

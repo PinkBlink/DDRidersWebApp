@@ -1,6 +1,6 @@
 package org.riders.sharing.utils.constants;
 
-public enum CustomerSqlColumns {
+public enum CustomerSQLColumns {
     TABLE_NAME("customers"),
     CUSTOMER_ID("customer_id"),
     NAME("name"),
@@ -11,7 +11,7 @@ public enum CustomerSqlColumns {
     PASSWORD_HASH("password_hash");
     private final String name;
 
-    CustomerSqlColumns(String name) {
+    CustomerSQLColumns(String name) {
         this.name = name;
     }
 

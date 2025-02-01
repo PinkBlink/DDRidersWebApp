@@ -20,7 +20,7 @@ public class SQLUtils {
             logger.info("Database dd_riders_db has already been created;");
             try (Connection connection = DriverManager.getConnection(DD_RIDERS_URL, USER, PASSWORD)) {
 
-                if (SQLValidator.isTableCreated(connection, CustomerSqlColumns.TABLE_NAME.getName())
+                if (SQLValidator.isTableCreated(connection, CustomerSQLColumns.TABLE_NAME.getName())
                         && SQLValidator.isTableCreated(connection, ScooterSQLColumns.TABLE_NAME.getName())
                         && SQLValidator.isTableCreated(connection, OrderSQLColumns.TABLE_NAME.getName())) {
                     logger.info("Tables have already been created;");
