@@ -36,6 +36,8 @@ public class Controller {
         System.out.println(orderRepository.findAll());
         System.out.println(scooterRepository.findAll());
         System.out.println(customerRepository.findAll());
+
+
     }
 
     private static void createAndAddOrders() throws RepositoryException {

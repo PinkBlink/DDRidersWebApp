@@ -103,6 +103,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             logger.info("Couldn't find order with id: " + orderId);
             return Optional.empty();
         } catch (SQLException e) {
+            logger.error("Error occurred while trying to find order by id: " + orderId, e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             connectionPull.releaseConnection(connection);
@@ -128,6 +129,9 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (SQLException e) {
             logger.info("Error occurred while trying to find all orders;");
             throw new RepositoryException(e.getMessage(), e);
+        }finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(statement);
         }
     }
 
@@ -151,7 +155,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             logger.info("Find " + orderList.size() + " " + orderStatus + " orders");
             return orderList;
         } catch (SQLException e) {
-            logger.info("Error occurred while trying to find " + orderStatus + " orders;");
+            logger.error("Error occurred while trying to find " + orderStatus + " orders;");
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             connectionPull.releaseConnection(connection);

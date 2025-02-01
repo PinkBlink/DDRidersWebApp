@@ -15,7 +15,7 @@ import static org.riders.sharing.utils.constants.DataBaseInfo.*;
 public class SQLUtils {
     private static final Logger logger = LogManager.getLogger(SQLUtils.class);
 
-    public static void initDatabase() {
+    public static void initDatabase() { // i should rework those tasty spaghetti
         if (SQLValidator.isCreatedDB(DD_RIDERS_URL, USER, PASSWORD)) {
             logger.info("Database dd_riders_db has already been created;");
             try (Connection connection = DriverManager.getConnection(DD_RIDERS_URL, USER, PASSWORD)) {
@@ -31,6 +31,7 @@ public class SQLUtils {
                             , DD_RIDERS_URL
                             , USER
                             , PASSWORD);
+                    logger.info("Tables were successfully created");
                 }
             } catch (SQLException e) {
                 logger.error("Error occurred while trying to create tables;", e);
