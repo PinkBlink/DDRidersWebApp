@@ -1,22 +1,26 @@
 package org.riders.sharing.repository;
 
+import org.riders.sharing.exception.RepositoryException;
 import org.riders.sharing.model.Order;
+import org.riders.sharing.model.enums.OrderStatus;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends BaseRepository{
+public interface OrderRepository extends BaseRepository {
     //create
-    void saveScooterRent(Order order);
+    void saveOrder(Order order) throws RepositoryException;
 
     //update
-    void updateScooterRent(Order order);
+    void updateOrder(Order order);
 
     //read
-    Optional<Order> findScooterRentById(int id);
-    List<Order> findAll();
-    List<Order> findOngoingRents();
-    List<Order> findCompletedRents();
+    Optional<Order> findOrderById(int id) throws RepositoryException;
+
+    List<Order> findAll() throws RepositoryException;
+
+    List<Order> findOrdersByStatus(OrderStatus orderStatus) throws RepositoryException;
+
     //delete
-    void deleteScooterRent(Order order);
+    void deleteOrder(Order order) throws RepositoryException;
 }

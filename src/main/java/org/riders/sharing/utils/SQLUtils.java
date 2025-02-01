@@ -2,34 +2,52 @@ package org.riders.sharing.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.utils.constants.DataBaseInfo;
+import org.riders.sharing.utils.constants.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
+
+import static org.riders.sharing.utils.constants.DataBaseInfo.*;
 
 public class SQLUtils {
     private static final Logger logger = LogManager.getLogger(SQLUtils.class);
 
     public static void initDatabase() {
-        if (SQLValidator.isCreatedDB(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD)) {
-            logger.info("Database dd_riders_db has already been created.;");
+        if (SQLValidator.isCreatedDB(DD_RIDERS_URL, USER, PASSWORD)) {
+            logger.info("Database dd_riders_db has already been created;");
+            try (Connection connection = DriverManager.getConnection(DD_RIDERS_URL, USER, PASSWORD)) {
+
+                if (SQLValidator.isTableCreated(connection, CustomerSqlColumns.TABLE_NAME.getName())
+                        && SQLValidator.isTableCreated(connection, ScooterSQLColumns.TABLE_NAME.getName())
+                        && SQLValidator.isTableCreated(connection, OrderSQLColumns.TABLE_NAME.getName())) {
+                    logger.info("Tables have already been created;");
+
+                } else {
+                    logger.info("Database is created without tables. Attempt to create tables");
+                    sendCreateFile(PATH_TO_CREATE_TABLES_FILE
+                            , DD_RIDERS_URL
+                            , USER
+                            , PASSWORD);
+                }
+            } catch (SQLException e) {
+                logger.error("Error occurred while trying to create tables;", e);
+                throw new RuntimeException(e);
+            }
         } else {
-            sendCreateFile(DataBaseInfo.PATH_TO_CREATE_DATABASE_FILE
-                    , DataBaseInfo.POSTGRES_URL
-                    , DataBaseInfo.USER
-                    , DataBaseInfo.PASSWORD);
+            sendCreateFile(PATH_TO_CREATE_DATABASE_FILE
+                    , POSTGRES_URL
+                    , USER
+                    , PASSWORD);
 
-            sendCreateFile(DataBaseInfo.PATH_TO_CREATE_TABLES_FILE
-                    , DataBaseInfo.DD_RIDERS_URL
-                    , DataBaseInfo.USER
-                    , DataBaseInfo.PASSWORD);
+            sendCreateFile(PATH_TO_CREATE_TABLES_FILE
+                    , DD_RIDERS_URL
+                    , USER
+                    , PASSWORD);
 
+            logger.info("Database and tables are successfully created");
         }
     }
 

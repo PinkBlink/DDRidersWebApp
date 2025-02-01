@@ -16,11 +16,11 @@ public class CustomerFactoryImpl implements CustomerFactory {
 
     @Override
     public Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
-        int customerId = resultSet.getInt(CustomerSqlColumns.CUSTOMER_ID.getColumnNumber());
-        String name = resultSet.getString(CustomerSqlColumns.NAME.getColumnNumber());
-        String surname = resultSet.getString(CustomerSqlColumns.SURNAME.getColumnNumber());
-        String email = resultSet.getString(CustomerSqlColumns.EMAIL.getColumnNumber());
-        String passwordHash = resultSet.getString(CustomerSqlColumns.PASSWORD_HASH.getColumnNumber());
+        int customerId = resultSet.getInt(CustomerSqlColumns.CUSTOMER_ID.getName());
+        String name = resultSet.getString(CustomerSqlColumns.NAME.getName());
+        String surname = resultSet.getString(CustomerSqlColumns.SURNAME.getName());
+        String email = resultSet.getString(CustomerSqlColumns.EMAIL.getName());
+        String passwordHash = resultSet.getString(CustomerSqlColumns.PASSWORD_HASH.getName());
 
         return createCustomer(
                 customerId

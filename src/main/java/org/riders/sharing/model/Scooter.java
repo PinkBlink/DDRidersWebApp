@@ -67,4 +67,14 @@ public class Scooter {
     public int hashCode() {
         return Objects.hash(id, status, scooterType);
     }
+
+    @Override
+    public String toString() {
+        return "Scooter{" +
+                "id=" + id +
+                ", scooterType=" + scooterType +
+                ", status=" + status +
+                ", batteryLevel=" + batteryLevel +
+                '}';
+    }
 }

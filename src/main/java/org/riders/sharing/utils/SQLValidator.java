@@ -7,12 +7,24 @@ public class SQLValidator {
         try (Connection connection = DriverManager.getConnection(URL
                 , user
                 , password)) {
-            connection.createStatement()
-                    .executeQuery("SELECT * FROM Customers LIMIT 1;")
-                    .close();
             return true;
         } catch (SQLException e) {
             return false;
+        }
+    }
+
+    public static boolean isTableCreated(Connection connection, String tableName) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            String query = "SELECT * FROM " + tableName;
+            statement = connection.prepareStatement(query);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
         }
     }
 }

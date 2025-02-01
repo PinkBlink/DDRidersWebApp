@@ -6,7 +6,7 @@ import org.riders.sharing.model.Scooter;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScooterRepository extends BaseRepository{
+public interface ScooterRepository extends BaseRepository {
     //create
     void saveScooter(Scooter scooter) throws RepositoryException;
 
@@ -14,10 +14,10 @@ public interface ScooterRepository extends BaseRepository{
     void updateScooter(Scooter scooter);
 
     //read
-    Optional<Scooter> findScooterById(int id);
+    Optional<Scooter> findScooterById(int id) throws RepositoryException;
 
-    List<Scooter> findAll();
+    List<Scooter> findAll() throws RepositoryException;
 
     //delete
-    void deleteScooter(Scooter scooter);
+    void deleteScooter(Scooter scooter) throws RepositoryException;
 }
