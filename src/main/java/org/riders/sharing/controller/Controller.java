@@ -29,11 +29,13 @@ public class Controller {
         OrderRepository orderRepository = new OrderRepositoryImpl();
         ScooterRepository scooterRepository = new ScooterRepositoryImpl();
         CustomerRepository customerRepository = new CustomerRepositoryImpl();
-        OrderFactory orderFactory = new OrderFactoryImpl();
 
-        createAndAddCustomers();
-        createAndAddScooters();
-        createAndAddOrders();
+//        createAndAddCustomers();
+//        createAndAddScooters();
+//        createAndAddOrders();
+        System.out.println(orderRepository.findAll());
+        System.out.println(scooterRepository.findAll());
+        System.out.println(customerRepository.findAll());
     }
 
     private static void createAndAddOrders() throws RepositoryException {
