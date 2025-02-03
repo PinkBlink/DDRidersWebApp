@@ -21,18 +21,19 @@ public class ScooterFactoryImpl implements ScooterFactory {
         return scooter;
     }
 
+    @Override
+    public Scooter createScooter(int id, ScooterType scooterType, ScooterStatus scooterStatus, int batteryLevel) {
+        return new Scooter(id, scooterType, scooterStatus, batteryLevel);
+    }
+
     public Scooter createScooterFromResultSet(ResultSet resultSet) throws SQLException {
         int id = resultSet.getInt(ScooterSQLColumns.SCOOTER_ID.getName());
         ScooterType scooterType = ScooterType.valueOf(
                 resultSet.getString(ScooterSQLColumns.SCOOTER_TYPE.getName()));
-
         ScooterStatus status = ScooterStatus.valueOf(
                 resultSet.getString(ScooterSQLColumns.SCOOTER_STATUS.getName()));
         int batteryLevel = resultSet.getInt(ScooterSQLColumns.BATTERY_LEVEL.getName());
 
-        Scooter scooter = createScooter(id, scooterType);
-        scooter.setStatus(status);
-        scooter.setBatteryLevel(batteryLevel);
-        return scooter;
+        return createScooter(id, scooterType, status, batteryLevel);
     }
 }

@@ -6,6 +6,7 @@ import org.riders.sharing.connection.ConnectionPull;
 import org.riders.sharing.exception.RepositoryException;
 import org.riders.sharing.factory.OrderFactory;
 import org.riders.sharing.factory.impl.OrderFactoryImpl;
+import org.riders.sharing.model.Customer;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.model.enums.OrderStatus;
 import org.riders.sharing.repository.OrderRepository;
@@ -32,7 +33,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             int orderId = order.getOrderId();
             int customerId = order.getCustomerId();
-            int scooterId = order.getScooterId();
+            int scooterId = order.getScooter().getId();
             Timestamp startTime = Timestamp.valueOf(order.getStartTime());
             Timestamp endTime = order.getEndTime() == null
                     ? null
@@ -111,6 +112,33 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
     }
 
+
+    @Override
+    public Optional<Order> findOngoingOrderByCustomer(Customer customer) throws RepositoryException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        int customerId = customer.getCustomerId();
+        try {
+            connection = connectionPull.getConnection();
+            preparedStatement = connection.prepareStatement(OrderSQLQueries.FIND_ONGOING_ORDER_BY_CUSTOMER_ID);
+            preparedStatement.setInt(1, customerId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                logger.info("Found ongoing order for customer with id: " + customerId);
+                return Optional.of(orderFactory.createOrderFromResultSet(resultSet));
+            }
+            logger.info("Customer with id: " + customerId + " do not have any ongoing orders.");
+            return Optional.empty();
+        } catch (SQLException e) {
+            logger.info("Error occurred while trying to find ongoing order for customer with id: "
+                    + customerId, e);
+            throw new RepositoryException(e.getMessage(), e);
+        }finally {
+            connectionPull.releaseConnection(connection);
+            closeStatement(preparedStatement);
+        }
+    }
+
     @Override
     public List<Order> findAll() throws RepositoryException {
         Connection connection = null;
@@ -129,7 +157,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (SQLException e) {
             logger.info("Error occurred while trying to find all orders;");
             throw new RepositoryException(e.getMessage(), e);
-        }finally {
+        } finally {
             connectionPull.releaseConnection(connection);
             closeStatement(statement);
         }
@@ -191,7 +219,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             throws SQLException {
         int index = isUpdate ? 0 : 1;
         statement.setInt(1 + index, order.getCustomerId());
-        statement.setInt(2 + index, order.getScooterId());
+        statement.setInt(2 + index, order.getScooter().getId());
         statement.setTimestamp(3 + index, Timestamp.valueOf(order.getStartTime()));
         statement.setTimestamp(4 + index, Timestamp.valueOf(order.getEndTime()));
         statement.setObject(5 + index, order.getOrderStatus(), Types.OTHER);

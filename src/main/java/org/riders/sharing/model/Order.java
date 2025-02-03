@@ -9,26 +9,25 @@ import java.util.Objects;
 public class Order {
     private int orderId;
     private int customerId;
-
-    private int scooterId;
     private Scooter scooter;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private OrderStatus orderStatus;
 
-    public Order(int orderId, int customerId, int scooterId, LocalDateTime startTime, LocalDateTime endTime, OrderStatus orderStatus) {
+    public Order(int orderId, int customerId, Scooter scooter, LocalDateTime startTime
+            , LocalDateTime endTime, OrderStatus orderStatus) {
         this.orderId = orderId;
         this.customerId = customerId;
-        this.scooterId = scooterId;
+        this.scooter = scooter;
         this.startTime = startTime;
         this.endTime = endTime;
         this.orderStatus = orderStatus;
     }
 
-    public Order(int orderId, int customerId, int scooterId, LocalDateTime startTime) {
+    public Order(int orderId, int customerId, Scooter scooter, LocalDateTime startTime) {
         this.orderId = orderId;
         this.customerId = customerId;
-        this.scooterId = scooterId;
+        this.scooter = scooter;
         this.startTime = startTime;
         this.orderStatus = OrderStatus.ONGOING;
     }
@@ -73,12 +72,12 @@ public class Order {
         this.endTime = endTime;
     }
 
-    public int getScooterId() {
-        return scooterId;
+    public Scooter getScooterId() {
+        return scooter;
     }
 
-    public void setScooterId(int scooterId) {
-        this.scooterId = scooterId;
+    public void setScooterId(Scooter scooter) {
+        this.scooter = scooter;
     }
 
     public OrderStatus getOrderStatus() {
@@ -121,7 +120,7 @@ public class Order {
         return "Order{" +
                 "orderId=" + orderId +
                 ", customerId=" + customerId +
-                ", scooterId=" + scooterId +
+                ", scooter=" + scooter +
                 ", scooter=" + scooter +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +

@@ -133,6 +133,27 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
+    public List<Scooter> findAvailableScooters() throws RepositoryException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = connectionPull.getConnection();
+            statement = connection.prepareStatement(ScooterSQLQueries.FIND_AVAILABLE_SCOOTERS);
+            List<Scooter> scooterList = new ArrayList<>();
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Scooter scooter = scooterFactory.createScooterFromResultSet(resultSet);
+                scooterList.add(scooter);
+            }
+            logger.info("Found " + scooterList.size() + " available scooters");
+            return scooterList;
+        } catch (SQLException e) {
+            logger.error("Error occurred while trying to find available scooters", e);
+            throw new RepositoryException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void deleteScooter(Scooter scooter) throws RepositoryException {
         Connection connection = null;
         PreparedStatement statement = null;

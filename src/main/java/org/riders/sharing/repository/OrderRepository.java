@@ -1,6 +1,7 @@
 package org.riders.sharing.repository;
 
 import org.riders.sharing.exception.RepositoryException;
+import org.riders.sharing.model.Customer;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.model.enums.OrderStatus;
 
@@ -16,6 +17,8 @@ public interface OrderRepository extends BaseRepository {
 
     //read
     Optional<Order> findOrderById(int id) throws RepositoryException;
+
+    Optional<Order> findOngoingOrderByCustomer(Customer customer) throws RepositoryException;
 
     List<Order> findAll() throws RepositoryException;
 

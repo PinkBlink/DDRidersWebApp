@@ -18,6 +18,13 @@ public class Scooter {
         this.batteryLevel = 100;
     }
 
+    public Scooter(int id, ScooterType scooterType, ScooterStatus status, int batteryLevel) {
+        this.id = id;
+        this.scooterType = scooterType;
+        this.status = status;
+        this.batteryLevel = batteryLevel;
+    }
+
     public int getId() {
         return id;
     }

@@ -10,11 +10,15 @@ public class ScooterSQLQueries {
                     "scooter_status = ?, " +
                     "battery_level = ?, " +
                     "WHERE scooter_id = ?;";
-    public static final String FIND_SCOOTER_BY_ID =
-            "SELECT * FROM scooters " +
-                    "WHERE scooter_id = ?;";
     public static final String FIND_ALL_SCOOTERS =
-            "SELECT * FROM scooters;";
+            "SELECT * FROM scooters ";
+    public static final String FIND_SCOOTER_BY_ID =
+            FIND_ALL_SCOOTERS +
+                    "WHERE scooter_id = ?;";
+    public static final String FIND_AVAILABLE_SCOOTERS =
+            FIND_ALL_SCOOTERS +
+                    "WHERE scooter_status = 'AVAILABLE'";
+
     public static final String DELETE_SCOOTER =
             "DELETE FROM scooters" +
                     "WHERE scooter_id = ?;";

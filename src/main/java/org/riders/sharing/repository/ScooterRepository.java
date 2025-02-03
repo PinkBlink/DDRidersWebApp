@@ -17,6 +17,7 @@ public interface ScooterRepository extends BaseRepository {
     Optional<Scooter> findScooterById(int id) throws RepositoryException;
 
     List<Scooter> findAll() throws RepositoryException;
+    List<Scooter> findAvailableScooters() throws RepositoryException;
 
     //delete
     void deleteScooter(Scooter scooter) throws RepositoryException;

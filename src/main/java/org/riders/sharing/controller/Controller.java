@@ -21,14 +21,17 @@ import org.riders.sharing.repository.impl.OrderRepositoryImpl;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class Controller {
+    private static OrderRepository orderRepository = new OrderRepositoryImpl();
+    private static ScooterRepository scooterRepository = new ScooterRepositoryImpl();
+    private static CustomerRepository customerRepository = new CustomerRepositoryImpl();
+
     public static void main(String[] args) throws RepositoryException {
         Logger logger = LogManager.getLogger(Controller.class);
         logger.info("Dirty Dick Riders FOREVER");
-        OrderRepository orderRepository = new OrderRepositoryImpl();
-        ScooterRepository scooterRepository = new ScooterRepositoryImpl();
-        CustomerRepository customerRepository = new CustomerRepositoryImpl();
+
 
 //        createAndAddCustomers();
 //        createAndAddScooters();
@@ -36,17 +39,21 @@ public class Controller {
         System.out.println(orderRepository.findAll());
         System.out.println(scooterRepository.findAll());
         System.out.println(customerRepository.findAll());
-
-
     }
 
     private static void createAndAddOrders() throws RepositoryException {
+        Optional<Scooter> scooter1 = scooterRepository.findScooterById(1);
+        Optional<Scooter> scooter2 = scooterRepository.findScooterById(2);
+        Optional<Scooter> scooter3 = scooterRepository.findScooterById(3);
+        Optional<Scooter> scooter4 = scooterRepository.findScooterById(4);
+        Optional<Scooter> scooter5 = scooterRepository.findScooterById(5);
+
         OrderFactory orderFactory = new OrderFactoryImpl();
-        Order order1 = orderFactory.createOrder(1, 1, 1, LocalDateTime.now());
-        Order order2 = orderFactory.createOrder(2, 2, 2, LocalDateTime.now());
-        Order order3 = orderFactory.createOrder(3, 3, 3, LocalDateTime.now());
-        Order order4 = orderFactory.createOrder(4, 4, 4, LocalDateTime.now());
-        Order order5 = orderFactory.createOrder(5, 5, 5, LocalDateTime.now());
+        Order order1 = orderFactory.createOrder(1, 1, scooter1.get(), LocalDateTime.now());
+        Order order2 = orderFactory.createOrder(2, 2, scooter2.get(), LocalDateTime.now());
+        Order order3 = orderFactory.createOrder(3, 3, scooter3.get(), LocalDateTime.now());
+        Order order4 = orderFactory.createOrder(4, 4, scooter4.get(), LocalDateTime.now());
+        Order order5 = orderFactory.createOrder(5, 5, scooter5.get(), LocalDateTime.now());
 
 
         OrderRepository orderRepository = new OrderRepositoryImpl();
