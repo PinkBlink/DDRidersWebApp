@@ -9,39 +9,22 @@ import org.riders.sharing.utils.constants.DataBaseInfo;
 import java.sql.*;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ConnectionPull {
-    private static final Logger logger = LogManager.getLogger(ConnectionPull.class);
+public enum ConnectionPool {
+    INSTANCE;
+    private static final Logger logger = LogManager.getLogger(ConnectionPool.class);
     private static final ReentrantLock lock = new ReentrantLock();
-    private static ConnectionPull instance;
-    private BlockingQueue<Connection> availableConnections;
-    private Queue<Connection> busyConnections;
     private static final int DEFAULT_CAPACITY = 16;
-    private static final AtomicBoolean isCreated = new AtomicBoolean(false);
+    private Queue<Connection> availableConnections;
+    private Queue<Connection> busyConnections;
 
-    private ConnectionPull() {
+
+    ConnectionPool() {
         registerDriver();
         SQLUtils.initDatabase();
         initConnections();
     }
-
-    public static ConnectionPull getInstance() {
-        if (!isCreated.get()) {
-            lock.lock();
-            try {
-                instance = new ConnectionPull();
-                isCreated.set(true);
-            } finally {
-                lock.unlock();
-            }
-        }
-        return instance;
-    }
-
     private void registerDriver() {
         try {
             Class.forName("org.postgresql.Driver");
@@ -64,7 +47,7 @@ public class ConnectionPull {
     }
 
     private void initConnections() {
-        availableConnections = new LinkedBlockingDeque<>(DEFAULT_CAPACITY);
+        availableConnections = new ArrayDeque<>(DEFAULT_CAPACITY);
         busyConnections = new ArrayDeque<>();
         try {
             for (int i = 0; i < DEFAULT_CAPACITY; i++) {
@@ -84,34 +67,39 @@ public class ConnectionPull {
     }
 
     private Connection createConnection() throws ConnectionException {
-        Connection connection;
-        try {
-            connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
-            logger.info("Create new connection: " + connection.toString());
+            Connection connection;
+            try {
+                connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
+                logger.info("Create new connection: " + connection.toString());
 
-        } catch (SQLException e) {
-            logger.error("Can't create connection: " + e);
-            throw new ConnectionException(e.getMessage());
-        }
-        return connection;
+            } catch (SQLException e) {
+                logger.error("Can't create connection: " + e);
+                throw new ConnectionException(e.getMessage());
+            }
+            return connection;
     }
 
     public Connection getConnection() {
-        Connection connection;
+        lock.lock();
         try {
-            connection = availableConnections.take();
+            Connection connection;
+            connection = availableConnections.peek();
             busyConnections.offer(connection);
 
-        } catch (InterruptedException e) {
-            logger.error("Can't take connection: " + e);
-            throw new RuntimeException(e);
+            return connection;
+        }finally {
+            lock.unlock();
         }
-        return connection;
     }
 
     public void releaseConnection(Connection connection) {
-        busyConnections.remove(connection);
-        availableConnections.offer(connection);
+        lock.lock();
+        try {
+            busyConnections.remove(connection);
+            availableConnections.offer(connection);
+        }finally {
+            lock.unlock();
+        }
     }
 
     public void destroyPool() {
@@ -126,5 +114,6 @@ public class ConnectionPull {
             logger.error("Can't close connection");
             throw new RuntimeException(e);
         }
+        deregisterDriver();
     }
 }
