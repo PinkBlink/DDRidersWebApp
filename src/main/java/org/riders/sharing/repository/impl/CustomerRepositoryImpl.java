@@ -2,159 +2,249 @@ package org.riders.sharing.repository.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.connection.ConnectionPull;
-import org.riders.sharing.exception.RepositoryException;
-import org.riders.sharing.factory.CustomerFactory;
-import org.riders.sharing.factory.impl.CustomerFactoryImpl;
+import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.exception.ElementNotFoundException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
-import org.riders.sharing.utils.constants.CustomerSQLQueries;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class CustomerRepositoryImpl implements CustomerRepository {
+
     private final Logger logger = LogManager.getLogger(this);
-    private final CustomerFactory customerFactory = new CustomerFactoryImpl();
-    private final ConnectionPull connectionPull = ConnectionPull.getInstance();
+    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
+
 
     @Override
-    public void saveCustomer(Customer customer) throws RepositoryException {
+    public Customer save(Customer customer) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSQLQueries.INSERT_CUSTOMER);
+            Customer customerToStore = customer.toBuilder()
+                    .setCreateTime(Instant.now())
+                    .setUpdateTime(Instant.now())
+                    .build();
 
-            int id = customer.getCustomerId();
-            String name = customer.getName();
-            String surname = customer.getSurname();
-            String email = customer.getEmail();
-            String passwordHash = customer.getPasswordHash();
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    """
+                            INSERT INTO customers(id, create_time, update_time, name, surname, email, password)
+                            VALUES(?, ?, ?, ?, ?, ?, ?)
+                             """
+            );
 
-            statement.setInt(1, id);
-            statement.setString(2, name);
-            statement.setString(3, surname);
-            statement.setString(4, email);
-            statement.setString(5, passwordHash);
+            statement.setObject(1, customerToStore.getId(), Types.OTHER);
+            statement.setTimestamp(2, Timestamp.from(customerToStore.getCreateTime()));
+            statement.setTimestamp(3, Timestamp.from(customerToStore.getUpdateTime()));
+            statement.setString(4, customerToStore.getName());
+            statement.setString(5, customerToStore.getSurname());
+            statement.setString(6, customerToStore.getEmail());
+            statement.setString(6, customerToStore.getPassword());
 
-            statement.executeUpdate();
+            boolean result = statement.executeUpdate() > 0;
+            logger.info((result)
+                    ? "Customer with id " + customer.getId() + " is  successfully saved"
+                    : "Couldn't customer with id: " + customer.getId());
+
+            return customerToStore;
         } catch (SQLException e) {
             logger.error("Error occurred while trying to save customer: " + customer, e);
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public void updateCustomer(Customer customer) throws RepositoryException {
+    public Customer update(Customer customer) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            int id = customer.getCustomerId();
-            String name = customer.getName();
-            String surname = customer.getSurname();
-            String email = customer.getEmail();
-            String passwordHash = customer.getPasswordHash();
+            Customer customerToStore = customer.toBuilder()
+                    .setUpdateTime(Instant.now())
+                    .build();
 
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSQLQueries.UPDATE_CUSTOMER);
-            statement.setString(1, name);
-            statement.setString(2, surname);
-            statement.setString(3, email);
-            statement.setString(4, passwordHash);
-            statement.setInt(5, id);
 
-            int result = statement.executeUpdate();
-            if (result > 0) {
-                logger.info("Customer with id " + id + " updated successfully;");
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement("""
+                    UPDATE customers
+                    SET update_time = ?,
+                    name = ?,
+                    surname = ?,
+                    email = ?,
+                    password = ?,
+                    WHERE id = ?;""");
+
+            statement.setTimestamp(1, Timestamp.from(customerToStore.getUpdateTime()));
+            statement.setString(2, customerToStore.getName());
+            statement.setString(3, customerToStore.getSurname());
+            statement.setString(4, customerToStore.getEmail());
+            statement.setString(5, customerToStore.getPassword());
+            statement.setObject(6, customerToStore.getId(), Types.OTHER);
+
+            boolean success = statement.executeUpdate() > 0;
+            if (success) {
+                logger.info("Customer with id " + customerToStore.getId() + " updated successfully;");
             } else {
-                logger.info("Couldn't find customer with id " + id);
+                logger.info("Couldn't find customer with id " + customerToStore.getId());
             }
+
+            return customerToStore;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to update customer");
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public Optional<Customer> findCustomerById(int customerId) throws RepositoryException {
+    public Optional<Customer> findById(UUID customerId) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSQLQueries.FIND_CUSTOMER_BY_ID);
-            statement.setInt(1, customerId);
+
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM customers WHERE customer_id = ?"
+            );
+
+            statement.setObject(1, customerId, Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
+
             if (resultSet.next()) {
                 logger.info("Successfully found customer with customerId: " + customerId);
-                return Optional.of(customerFactory.createCustomerFromResultSet(resultSet));
+                return Optional.of(Customer.createCustomerFromResultSet(resultSet));
             }
+
             logger.info("Can't find customer with id: " + customerId);
+
             return Optional.empty();
+
         } catch (SQLException e) {
             logger.error("Error occurred while attempting to find customer with id: " + customerId);
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public List<Customer> findAll() throws RepositoryException {
+    public Optional<Customer> findByEmail(String email) throws ElementNotFoundException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM customers WHERE email = ?"
+            );
+
+            statement.setString(1, email);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(Customer.createCustomerFromResultSet(resultSet));
+            }
+
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new ElementNotFoundException(e.getMessage(), e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+            closeStatement(statement);
+        }
+    }
+
+    @Override
+    public List<Customer> findAll() throws ElementNotFoundException {
         List<Customer> customerList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement statement = null;
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSQLQueries.FIND_ALL_CUSTOMERS);
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM customers;"
+            );
+
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Customer customer = customerFactory.createCustomerFromResultSet(resultSet);
+                Customer customer = Customer.createCustomerFromResultSet(resultSet);
                 customerList.add(customer);
             }
+
             if (customerList.isEmpty()) {
                 logger.info("Customer list is empty;");
             } else {
                 logger.info("Successfully find " + customerList.size() + " customer(s)");
             }
+
             return customerList;
+
         } catch (SQLException e) {
             logger.error("Error occurred while attempting to find all customers.");
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public void deleteCustomer(int customerId) throws RepositoryException {
+    public boolean isUserExists(Customer customer) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(CustomerSQLQueries.DELETE_CUSTOMER_BY_ID);
-            statement.setInt(1, customerId);
-            int result = statement.executeUpdate();
-            if (result > 0) {
-                logger.info("Customer with id :" + customerId + " successfully deleted");
+            connection = ConnectionPool.INSTANCE.getConnection();
+            statement = connection.prepareStatement("SELECT * FROM customers WHERE email = ?");
+            statement.setString(1, customer.getEmail());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            throw new ElementNotFoundException(e.getMessage(), e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+            closeStatement(statement);
+        }
+    }
+
+    @Override
+    public boolean delete(UUID customerId) throws ElementNotFoundException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement("DELETE FROM customers WHERE customer_id = ?");
+            statement.setObject(1, customerId, Types.OTHER);
+            boolean result = statement.executeUpdate() > 0;
+
+            if (result) {
+                logger.info("Customer with id: " + customerId + " successfully deleted");
             } else {
                 logger.info("Can't find customer with id: " + customerId);
             }
+
+            return result;
+
         } catch (SQLException e) {
-            logger.error("Error while deleting customer with id=" + customerId, e);
-            throw new RepositoryException(e.getMessage(), e);
+            logger.error("Error while deleting customer with id= " + customerId, e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }

@@ -2,7 +2,7 @@ package org.riders.sharing.connection;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.exception.ConnectionException;
+import org.riders.sharing.exception.NoSQLConnectionException;
 import org.riders.sharing.utils.SQLUtils;
 import org.riders.sharing.utils.constants.DataBaseInfo;
 
@@ -13,9 +13,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public enum ConnectionPool {
     INSTANCE;
+
     private static final Logger logger = LogManager.getLogger(ConnectionPool.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final int DEFAULT_CAPACITY = 16;
+
     private Queue<Connection> availableConnections;
     private Queue<Connection> busyConnections;
 
@@ -54,7 +56,7 @@ public enum ConnectionPool {
                 Connection connection = createConnection();
                 availableConnections.add(connection);
             }
-        } catch (ConnectionException e) {
+        } catch (NoSQLConnectionException e) {
             logger.error(e.getMessage());
         }
         if (availableConnections.isEmpty()) {
@@ -66,7 +68,7 @@ public enum ConnectionPool {
 
     }
 
-    private Connection createConnection() throws ConnectionException {
+    private Connection createConnection() throws NoSQLConnectionException {
             Connection connection;
             try {
                 connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
@@ -74,7 +76,7 @@ public enum ConnectionPool {
 
             } catch (SQLException e) {
                 logger.error("Can't create connection: " + e);
-                throw new ConnectionException(e.getMessage());
+                throw new NoSQLConnectionException(e.getMessage());
             }
             return connection;
     }

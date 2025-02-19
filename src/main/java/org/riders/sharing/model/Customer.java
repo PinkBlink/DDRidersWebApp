@@ -1,7 +1,6 @@
 package org.riders.sharing.model;
 
-import org.riders.sharing.utils.PasswordEncrypt;
-import org.riders.sharing.utils.constants.CustomerSQLColumns;
+import org.riders.sharing.utils.PasswordEncryptor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -69,6 +68,10 @@ public class Customer extends BaseEntity {
             return this;
         }
 
+        public static Builder getNewBuilder() {
+            return new Builder().setId(UUID.randomUUID());
+        }
+
         public Builder setCreateTime(Instant createTime) {
             this.createTime = createTime;
             return this;
@@ -95,7 +98,7 @@ public class Customer extends BaseEntity {
         }
 
         public Builder setPassword(String password) {
-            this.password = PasswordEncrypt.hashPassword(password);
+            this.password = PasswordEncryptor.hashPassword(password);
             return this;
         }
 
@@ -105,13 +108,13 @@ public class Customer extends BaseEntity {
     }
 
     public static Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(CustomerSQLColumns.ID.getName()));
-        Instant createTime = resultSet.getTimestamp(CustomerSQLColumns.CREATE_TIME.getName()).toInstant();
-        Instant updateTime = resultSet.getTimestamp(CustomerSQLColumns.CREATE_TIME.getName()).toInstant();
-        String name = resultSet.getString(CustomerSQLColumns.NAME.getName());
-        String surname = resultSet.getString(CustomerSQLColumns.SURNAME.getName());
-        String email = resultSet.getString(CustomerSQLColumns.EMAIL.getName());
-        String password = resultSet.getString(CustomerSQLColumns.PASSWORD_HASH.getName());
+        UUID id = UUID.fromString(resultSet.getString(1));
+        Instant createTime = resultSet.getTimestamp(2).toInstant();
+        Instant updateTime = resultSet.getTimestamp(3).toInstant();
+        String name = resultSet.getString(4);
+        String surname = resultSet.getString(5);
+        String email = resultSet.getString(6);
+        String password = resultSet.getString(7);
 
         return new Customer.Builder()
                 .setId(id)

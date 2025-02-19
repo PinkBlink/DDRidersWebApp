@@ -2,177 +2,232 @@ package org.riders.sharing.repository.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.connection.ConnectionPull;
-import org.riders.sharing.exception.RepositoryException;
-import org.riders.sharing.factory.ScooterFactory;
-import org.riders.sharing.factory.impl.ScooterFactoryImpl;
+import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.exception.ElementNotFoundException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.repository.ScooterRepository;
-import org.riders.sharing.utils.constants.ScooterSQLQueries;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class ScooterRepositoryImpl implements ScooterRepository {
     private final Logger logger = LogManager.getLogger(this);
-    private final ConnectionPull connectionPull = ConnectionPull.getInstance();
-    private final ScooterFactory scooterFactory = new ScooterFactoryImpl();
+    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
     @Override
-    public void saveScooter(Scooter scooter) throws RepositoryException {
+    public Scooter save(Scooter scooter) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.INSERT_SCOOTER);
+            Scooter scooterToStore = scooter
+                    .toBuilder()
+                    .setCreateTime(Instant.now())
+                    .setUpdateTime(Instant.now())
+                    .build();
 
-            int id = scooter.getId();
-            Object type = scooter.getScooterType();
-            Object status = scooter.getStatus();
-            int batteryLevel = scooter.getBatteryLevel();
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    """
+                            INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
+                            VALUES(?, ?, ?, ?, ?, ?)"""
+            );
 
-            statement.setInt(1, id);
-            statement.setObject(2, type, Types.OTHER);
-            statement.setObject(3, status, Types.OTHER);
-            statement.setInt(4, batteryLevel);
+            statement.setObject(1, scooterToStore.getId(), Types.OTHER);
+            statement.setTimestamp(2, Timestamp.from(scooterToStore.getCreateTime()));
+            statement.setTimestamp(3, Timestamp.from(scooterToStore.getUpdateTime()));
+            statement.setObject(4, scooterToStore.getScooterType(), Types.OTHER);
+            statement.setObject(5, scooterToStore.getStatus(), Types.OTHER);
+            statement.setInt(6, scooterToStore.getBatteryLevel());
 
             boolean isSuccessfully = statement.executeUpdate() == 1;
+
             if (isSuccessfully) {
                 logger.info("Scooter: " + scooter + " successfully saved");
             } else {
                 logger.info("Couldn't save scooter: " + scooter);
             }
+
+            return scooterToStore;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to save scooter: " + scooter, e);
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public void updateScooter(Scooter scooter) {
+    public Scooter update(Scooter scooter) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.UPDATE_SCOOTER);
+            Scooter scooterToStore = scooter.toBuilder()
+                    .setUpdateTime(Instant.now())
+                    .build();
 
-            int scooterId = scooter.getId();
-            String type = scooter.getScooterType().toString();
-            String status = scooter.getStatus().toString();
-            int batteryLevel = scooter.getBatteryLevel();
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    """
+                            UPDATE scooters
+                            SET update_time = ?,
+                            scooter_type = ?,
+                            scooter_status = ?,
+                            battery_level = ?,
+                            WHERE scooter_id = ?"""
+            );
 
-            statement.setString(1, type);
-            statement.setString(2, status);
-            statement.setInt(3, batteryLevel);
-            statement.setInt(4, scooterId);
+            statement.setTimestamp(1, Timestamp.from(scooterToStore.getUpdateTime()));
+            statement.setObject(2, scooterToStore.getScooterType(), Types.OTHER);
+            statement.setObject(3, scooterToStore.getStatus(), Types.OTHER);
+            statement.setInt(4, scooterToStore.getBatteryLevel());
+            statement.setObject(5, scooterToStore.getId(), Types.OTHER);
 
             if (statement.executeUpdate() > 0) {
                 logger.info("Successfully update scooter: " + scooter);
             } else {
                 logger.info("Couldn't update scooter: " + scooter);
             }
+
+            return scooter;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to update scooter: " + scooter, e);
-            throw new RuntimeException(e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public Optional<Scooter> findScooterById(int id) throws RepositoryException {
+    public Optional<Scooter> findById(UUID id) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.FIND_SCOOTER_BY_ID);
-            statement.setInt(1, id);
+
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM scooters WHERE id = ?;"
+            );
+
+            statement.setObject(1, id, Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
+
             if (resultSet.next()) {
                 logger.info("Successfully found scooter with Id: " + id);
-                return Optional.of(scooterFactory.createScooterFromResultSet(resultSet));
+                return Optional.of(Scooter.createScooterFromResultSet(resultSet));
             }
+
             logger.info("Couldn't find scooter with id: " + id);
             return Optional.empty();
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to find scooter with id :" + id);
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public List<Scooter> findAll() throws RepositoryException {
+    public List<Scooter> findAll() throws ElementNotFoundException {
         List<Scooter> scooterList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement statement = null;
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.FIND_ALL_SCOOTERS);
+
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM scooters;"
+            );
             ResultSet resultSet = statement.executeQuery();
+
             while (resultSet.next()) {
-                Scooter scooter = scooterFactory.createScooterFromResultSet(resultSet);
+                Scooter scooter = Scooter.createScooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
+
+            logger.info("Find " + scooterList.size() + "scooters;");
             return scooterList;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to find all scooters;");
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }
 
     @Override
-    public List<Scooter> findAvailableScooters() throws RepositoryException {
+    public List<Scooter> findAvailableScooters() throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.FIND_AVAILABLE_SCOOTERS);
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    "SELECT * FROM scooter WHERE scooter_status = 'AVAILABLE';"
+            );
+
             List<Scooter> scooterList = new ArrayList<>();
             ResultSet resultSet = statement.executeQuery();
+
             while (resultSet.next()) {
-                Scooter scooter = scooterFactory.createScooterFromResultSet(resultSet);
+                Scooter scooter = Scooter.createScooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
+
             logger.info("Found " + scooterList.size() + " available scooters");
             return scooterList;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying to find available scooters", e);
-            throw new RepositoryException(e.getMessage(), e);
+            throw new ElementNotFoundException(e.getMessage(), e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+            closeStatement(statement);
         }
     }
 
     @Override
-    public void deleteScooter(Scooter scooter) throws RepositoryException {
+    public boolean delete(UUID id) throws ElementNotFoundException {
         Connection connection = null;
         PreparedStatement statement = null;
-        int scooterId = scooter.getId();
+
         try {
-            connection = connectionPull.getConnection();
-            statement = connection.prepareStatement(ScooterSQLQueries.DELETE_SCOOTER);
-            statement.setInt(1, scooterId);
-            int result = statement.executeUpdate();
-            if (result > 0) {
-                logger.info("Successfully delete scooter with id: " + scooterId);
+            connection = connectionPool.getConnection();
+            statement = connection.prepareStatement(
+                    """
+                            DELETE FROM scooters
+                            WHERE id = ?"""
+            );
+            statement.setObject(1, id, Types.OTHER);
+            boolean success = statement.executeUpdate() > 0;
+
+            if (success) {
+                logger.info("Successfully delete scooter with id: " + id);
             } else {
-                logger.info("Couldn't find scooter with id: " + scooterId);
+                logger.info("Couldn't find scooter with id: " + id);
             }
+
+            return success;
+
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to delete scooter with id: " + scooterId);
-            throw new RepositoryException(e.getMessage(), e);
+            logger.error("Error occurred while trying to delete scooter with id: " + id);
+            throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
-            connectionPull.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
             closeStatement(statement);
         }
     }

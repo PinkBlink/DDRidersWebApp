@@ -35,7 +35,7 @@ public class Order extends BaseEntity {
     }
 
 
-    public Scooter getScooterId() {
+    public Scooter getScooter() {
         return scooter;
     }
 
@@ -84,6 +84,10 @@ public class Order extends BaseEntity {
         public Order.Builder setId(UUID id) {
             this.id = id;
             return this;
+        }
+
+        public static Builder getNewBuilder(){
+            return new Builder().setId(UUID.randomUUID());
         }
 
         public Order.Builder setCreateTime(Instant createTime) {
@@ -140,6 +144,7 @@ public class Order extends BaseEntity {
         Instant endTime = (maybeEndTime == null)
                 ? null
                 : resultSet.getTimestamp(7).toInstant();
+
 
         Instant scooterCreateTime = resultSet.getTimestamp(10).toInstant();
         Instant scooterUpdateTime = resultSet.getTimestamp(11).toInstant();

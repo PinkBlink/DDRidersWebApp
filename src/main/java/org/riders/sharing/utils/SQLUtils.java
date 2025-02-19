@@ -2,7 +2,6 @@ package org.riders.sharing.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.utils.constants.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,18 +13,22 @@ import static org.riders.sharing.utils.constants.DataBaseInfo.*;
 
 public class SQLUtils {
     private static final Logger logger = LogManager.getLogger(SQLUtils.class);
+    private static final String CUSTOMERS_TABLE_NAME = "customers";
+    private static final String SCOOTERS_TABLE_NAME = "scooters";
+    private static final String ORDERS_TABLE_NAME = "orders";
 
     public static void initDatabase() { // i should rework those tasty spaghetti
         if (SQLValidator.isCreatedDB(DD_RIDERS_URL, USER, PASSWORD)) {
             logger.info("Database dd_riders_db has already been created;");
             try (Connection connection = DriverManager.getConnection(DD_RIDERS_URL, USER, PASSWORD)) {
 
-                if (SQLValidator.isTableCreated(connection, CustomerSQLColumns.TABLE_NAME.getName())
-                        && SQLValidator.isTableCreated(connection, ScooterSQLColumns.TABLE_NAME.getName())
-                        && SQLValidator.isTableCreated(connection, OrderSQLColumns.TABLE_NAME.getName())) {
+                if (SQLValidator.isTableCreated(connection, CUSTOMERS_TABLE_NAME)
+                        && SQLValidator.isTableCreated(connection, SCOOTERS_TABLE_NAME)
+                        && SQLValidator.isTableCreated(connection, ORDERS_TABLE_NAME)) {
                     logger.info("Tables have already been created;");
 
                 } else {
+
                     logger.info("Database is created without tables. Attempt to create tables");
                     sendCreateFile(PATH_TO_CREATE_TABLES_FILE
                             , DD_RIDERS_URL

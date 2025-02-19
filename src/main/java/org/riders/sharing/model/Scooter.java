@@ -47,7 +47,6 @@ public class Scooter extends BaseEntity {
 
     public static class Builder {
         private UUID id;
-
         private Instant createTime;
         private Instant updateTime;
         private ScooterType scooterType;
@@ -57,6 +56,10 @@ public class Scooter extends BaseEntity {
         public Scooter.Builder setId(UUID id) {
             this.id = id;
             return this;
+        }
+
+        public static Builder getNewBuilder() {
+            return new Builder().setId(UUID.randomUUID());
         }
 
         public Scooter.Builder setCreateTime(Instant createTime) {
