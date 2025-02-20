@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.ElementNotFoundException;
 import org.riders.sharing.model.Scooter;
+import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
 
 import java.sql.*;
@@ -19,7 +20,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
     @Override
-    public Scooter save(Scooter scooter) throws ElementNotFoundException {
+    public Scooter save(Scooter scooter) {
         Connection connection = null;
         PreparedStatement statement = null;
 
@@ -64,7 +65,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
-    public Scooter update(Scooter scooter) throws ElementNotFoundException {
+    public Scooter update(Scooter scooter) {
         Connection connection = null;
         PreparedStatement statement = null;
 
@@ -108,7 +109,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
-    public Optional<Scooter> findById(UUID id) throws ElementNotFoundException {
+    public Optional<Scooter> findById(UUID id) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -139,7 +140,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
-    public List<Scooter> findAll() throws ElementNotFoundException {
+    public List<Scooter> findAll() {
         List<Scooter> scooterList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement statement = null;
@@ -170,17 +171,18 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
-    public List<Scooter> findAvailableScooters() throws ElementNotFoundException {
+    public List<Scooter> findScootersByStatus(ScooterStatus scooterStatus) {
         Connection connection = null;
         PreparedStatement statement = null;
 
         try {
             connection = connectionPool.getConnection();
             statement = connection.prepareStatement(
-                    "SELECT * FROM scooter WHERE scooter_status = 'AVAILABLE';"
+                    "SELECT * FROM scooter WHERE scooter_status = ?;"
             );
 
             List<Scooter> scooterList = new ArrayList<>();
+            statement.setObject(1, scooterStatus, Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -201,7 +203,32 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     }
 
     @Override
-    public boolean delete(UUID id) throws ElementNotFoundException {
+    public boolean isExists(Scooter scooter) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = ConnectionPool.INSTANCE.getConnection();
+            statement = connection.prepareStatement("""
+                    SELECT * FROM scooters
+                    WHERE id = ?""");
+
+            statement.setObject(1, scooter.getId(), Types.OTHER);
+            ResultSet resultSet = statement.executeQuery();
+
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            logger.error("Error occurred while trying to check the existing scooter with id %s"
+                    .formatted(scooter.getId()));
+            throw new RuntimeException(e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+            closeStatement(statement);
+        }
+    }
+
+    @Override
+    public boolean delete(UUID id) {
         Connection connection = null;
         PreparedStatement statement = null;
 
@@ -224,7 +251,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             return success;
 
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to delete scooter with id: " + id);
+            logger.error("Error occurred while trying to delete scooter with id: %s".formatted(id));
             throw new ElementNotFoundException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);

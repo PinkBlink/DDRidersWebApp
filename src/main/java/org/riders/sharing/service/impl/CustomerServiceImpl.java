@@ -2,16 +2,20 @@ package org.riders.sharing.service.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.exception.RepositoryException;
-import org.riders.sharing.exception.ServiceException;
+import org.riders.sharing.exception.ElementNotFoundException;
+import org.riders.sharing.exception.UserExistsException;
+import org.riders.sharing.exception.WrongEmailOrPasswordException;
 import org.riders.sharing.model.Customer;
-import org.riders.sharing.model.Order;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.CustomerService;
+import org.riders.sharing.utils.PasswordEncryptor;
+
+import java.util.UUID;
 
 public class CustomerServiceImpl implements CustomerService {
-    private CustomerRepository customerRepository;
-    private Logger logger;
+
+    private final CustomerRepository customerRepository;
+    private final Logger logger;
 
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
@@ -20,28 +24,41 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer register(Customer customer) {
-        return null;
+        String email = customer.getEmail();
+
+        if (customerRepository.isExists(customer)) {
+            String errMessage = "Customer with email %s is already exist".formatted(email);
+            logger.error(errMessage);
+            throw new UserExistsException(errMessage);
+        }
+
+        return customerRepository.save(customer);
     }
 
     @Override
-    public Customer changePassword(Customer customer, String passwordHash) throws ServiceException {
-        try {
-            customer.setPasswordHash(passwordHash);
-            customerRepository.updateCustomer(customer);
-            logger.info("The password is successfully changed by the customer with ID: " + customer.getCustomerId());
-            return customer;
-        } catch (RepositoryException e) {
-            throw new ServiceException(e.getMessage(), e);
+    public Customer changePassword(Customer customer, String oldPassword, String newPassword) {
+        String hashedOldPassword = PasswordEncryptor.hashPassword(oldPassword);
+
+        if (customer.getPassword().equals(hashedOldPassword)) {
+            return customerRepository.update(
+                    customer.toBuilder()
+                            .setPassword(PasswordEncryptor.hashPassword(newPassword))
+                            .build()
+            );
         }
+
+        throw new WrongEmailOrPasswordException("Wrong email or password;");
     }
 
     @Override
     public Customer logIn(String email, String password) {
-        return null;
+        return customerRepository.findByEmail(email)
+                .orElseThrow(() -> new UserExistsException("Wrong email or password;"));
     }
 
-    @Override
-    public Order showActiveOrder(Customer customer) {
-        return null;
+    public Customer getById(UUID id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ElementNotFoundException("Couldn't find customer with id %s"
+                        .formatted(id)));
     }
 }

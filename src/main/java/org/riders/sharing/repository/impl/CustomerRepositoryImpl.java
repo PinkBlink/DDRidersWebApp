@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.ElementNotFoundException;
+import org.riders.sharing.exception.NoSQLConnectionException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 
@@ -21,7 +22,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 
     @Override
-    public Customer save(Customer customer) throws ElementNotFoundException {
+    public Customer save(Customer customer){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -62,7 +63,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Customer update(Customer customer) throws ElementNotFoundException {
+    public Customer update(Customer customer){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -107,7 +108,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findById(UUID customerId) throws ElementNotFoundException {
+    public Optional<Customer> findById(UUID customerId) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -131,7 +132,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         } catch (SQLException e) {
             logger.error("Error occurred while attempting to find customer with id: " + customerId);
-            throw new ElementNotFoundException(e.getMessage(), e);
+            throw new NoSQLConnectionException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -139,7 +140,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findByEmail(String email) throws ElementNotFoundException {
+    public Optional<Customer> findByEmail(String email){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -166,7 +167,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> findAll() throws ElementNotFoundException {
+    public List<Customer> findAll(){
         List<Customer> customerList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement statement = null;
@@ -201,20 +202,24 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public boolean isUserExists(Customer customer) throws ElementNotFoundException {
+    public boolean isExists(Customer customer) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = ConnectionPool.INSTANCE.getConnection();
-            statement = connection.prepareStatement("SELECT * FROM customers WHERE email = ?");
-            statement.setString(1, customer.getEmail());
+            statement = connection.prepareStatement("""
+                    SELECT * FROM customers
+                    WHERE id = ?""");
 
+            statement.setObject(1, customer.getId(), Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
 
             return resultSet.next();
 
         } catch (SQLException e) {
-            throw new ElementNotFoundException(e.getMessage(), e);
+            logger.error("Error occurred while trying to check the existing customer with id %s"
+                    .formatted(customer.getId()));
+            throw new RuntimeException(e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -222,7 +227,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public boolean delete(UUID customerId) throws ElementNotFoundException {
+    public boolean delete(UUID customerId){
         Connection connection = null;
         PreparedStatement statement = null;
         try {

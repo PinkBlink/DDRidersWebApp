@@ -1,13 +1,12 @@
 package org.riders.sharing.service;
 
-import org.riders.sharing.exception.ServiceException;
 import org.riders.sharing.model.Customer;
-import org.riders.sharing.model.Order;
 
 
-public interface CustomerService{
+public interface CustomerService extends BaseService<Customer> {
     Customer register(Customer customer);
-    Customer changePassword(Customer customer, String passwordHash) throws ServiceException;
+
+    Customer changePassword(Customer customer, String oldPassword, String newPassword);
+
     Customer logIn(String email, String password);
-    Order showActiveOrder(Customer customer);
 }

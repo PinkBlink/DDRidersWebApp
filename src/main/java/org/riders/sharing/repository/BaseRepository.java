@@ -20,6 +20,8 @@ public interface BaseRepository<T extends BaseEntity> {
 
     boolean delete(UUID id);
 
+    boolean isExists(T entity);
+
     default void closeStatement(Statement statement) {
         if (statement != null) {
             try {

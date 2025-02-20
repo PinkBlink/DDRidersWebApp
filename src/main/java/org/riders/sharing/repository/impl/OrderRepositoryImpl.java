@@ -18,7 +18,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
     @Override
-    public Order save(Order order) throws ElementNotFoundException {
+    public Order save(Order order){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -61,7 +61,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order update(Order order) throws ElementNotFoundException {
+    public Order update(Order order){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -110,7 +110,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findById(UUID orderId) throws ElementNotFoundException {
+    public Optional<Order> findById(UUID orderId){
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -147,7 +147,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
     @Override
-    public Optional<Order> findOngoingOrderByCustomer(UUID customerId) throws ElementNotFoundException {
+    public Optional<Order> findOngoingOrderByCustomer(UUID customerId){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -185,7 +185,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findCompletedOrdersByCustomer(UUID customerId) throws ElementNotFoundException {
+    public List<Order> findCompletedOrdersByCustomer(UUID customerId){
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList;
@@ -208,7 +208,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 orderList.add(order);
             }
 
-            logger.info("Find %d completed orders for customer with id= %s"
+            logger.info("Find %d completed orders for customer with id = %s"
                     .formatted(orderList.size(), customerId));
 
             return orderList;
@@ -224,7 +224,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAll() throws ElementNotFoundException {
+    public List<Order> findAll(){
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList = new ArrayList<>();
@@ -244,7 +244,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 orderList.add(order);
             }
 
-            logger.info("Find " + orderList.size() + " orders;");
+            logger.info("Find %d orders;".formatted(orderList.size()));
 
             return orderList;
 
@@ -258,7 +258,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findOrdersByStatus(OrderStatus orderStatus) throws ElementNotFoundException {
+    public List<Order> findOrdersByStatus(OrderStatus orderStatus){
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList = new ArrayList<>();
@@ -292,7 +292,33 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public boolean delete(UUID id) throws ElementNotFoundException {
+    public boolean isExists(Order order) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+
+            connection = ConnectionPool.INSTANCE.getConnection();
+            statement = connection.prepareStatement("""
+                    SELECT * FROM orders
+                    WHERE id = ?""");
+
+            statement.setObject(1, order.getId(), Types.OTHER);
+            ResultSet resultSet = statement.executeQuery();
+
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            logger.error("Error occurred while trying to check the existing order with id %s"
+                    .formatted(order.getId()));
+            throw new RuntimeException(e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+            closeStatement(statement);
+        }
+    }
+
+    @Override
+    public boolean delete(UUID id){
         Connection connection = null;
         PreparedStatement statement = null;
 
@@ -303,7 +329,8 @@ public class OrderRepositoryImpl implements OrderRepository {
                             DELETE FROM orders
                             WHERE id = ?"""
             );
-            statement.setObject(1,id,Types.OTHER);
+
+            statement.setObject(1, id, Types.OTHER);
 
             boolean success = statement.executeUpdate() > 0;
 
@@ -313,6 +340,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
             return success;
+
         } catch (SQLException e) {
             logger.error("Error occurred while trying delete order with id: %s".formatted(id));
             throw new ElementNotFoundException(e.getMessage(), e);

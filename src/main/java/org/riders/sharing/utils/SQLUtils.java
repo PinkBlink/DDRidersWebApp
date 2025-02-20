@@ -65,7 +65,7 @@ public class SQLUtils {
             String createScript = getStringCreateScriptFromFile(path);
             statement.execute(createScript);
             statement.close();
-            logger.info("Script is sent successfully;");
+            logger.info("The script is successfully sent;");
         } catch (SQLException e) {
             logger.error(e);
             throw new RuntimeException();

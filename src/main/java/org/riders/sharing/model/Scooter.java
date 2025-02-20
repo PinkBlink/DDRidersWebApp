@@ -53,7 +53,7 @@ public class Scooter extends BaseEntity {
         private ScooterStatus status;
         private int batteryLevel;
 
-        public Scooter.Builder setId(UUID id) {
+        public Builder setId(UUID id) {
             this.id = id;
             return this;
         }
