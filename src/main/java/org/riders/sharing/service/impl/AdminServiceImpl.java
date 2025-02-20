@@ -4,7 +4,6 @@ import org.riders.sharing.model.Order;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.OrderStatus;
 import org.riders.sharing.model.enums.ScooterStatus;
-import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.AdminService;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.OrderService;
@@ -27,26 +26,22 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Order realiseOrder(Order order) {
         Order updatedOrder = orderService.updateOrder(order.complete());
-        scooterService.update(order.getScooter());
+        scooterService.update(updatedOrder.getScooter());
         return updatedOrder;
     }
 
     public Order createOrder(UUID customerId, UUID scooterId) {
-        Scooter scooter = scooterService
-                .update(
-                        scooterService
-                                .getById(scooterId)
-                                .toBuilder()
-                                .setStatus(ScooterStatus.RENTED)
-                                .build()
-                );
-
-        return orderService.saveOrder(
-                Order.Builder.getNewBuilder()
-                        .setOrderStatus(OrderStatus.ONGOING)
-                        .setScooter(scooter)
-                        .setCustomerId(customerId)
-                        .setStartTime(Instant.now())
-                        .build());
+        Scooter scooter = scooterService.getById(scooterId);
+        scooter = scooterService.update(scooter
+                .toBuilder()
+                .setStatus(ScooterStatus.RENTED)
+                .build());
+        Order order = Order.Builder.getNewBuilder()
+                .setCustomerId(customerId)
+                .setScooter(scooter)
+                .setStartTime(Instant.now())
+                .setOrderStatus(OrderStatus.ONGOING)
+                .build();
+        return orderService.saveOrder(order);
     }
 }

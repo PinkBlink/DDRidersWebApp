@@ -66,15 +66,11 @@ public class Order extends BaseEntity {
     }
 
     public Order complete() {
+        Scooter updatedScooter = scooter.toBuilder().setStatus(ScooterStatus.AVAILABLE).build();
         return this.toBuilder()
                 .setOrderStatus(OrderStatus.COMPLETED)
                 .setEndTime(Instant.now())
-                .setScooter(
-                        getScooter()
-                        .toBuilder()
-                        .setStatus(ScooterStatus.AVAILABLE)
-                        .build()
-                )
+                .setScooter(updatedScooter)
                 .build();
     }
 
@@ -93,7 +89,7 @@ public class Order extends BaseEntity {
             return this;
         }
 
-        public static Builder getNewBuilder(){
+        public static Builder getNewBuilder() {
             return new Builder().setId(UUID.randomUUID());
         }
 
@@ -150,7 +146,7 @@ public class Order extends BaseEntity {
         OrderStatus orderStatus = OrderStatus.valueOf(resultSet.getString(8));
         Instant endTime = (maybeEndTime == null)
                 ? null
-                : resultSet.getTimestamp(7).toInstant();
+                : maybeEndTime.toInstant();
 
 
         Instant scooterCreateTime = resultSet.getTimestamp(10).toInstant();
