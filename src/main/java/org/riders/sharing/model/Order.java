@@ -66,9 +66,16 @@ public class Order extends BaseEntity {
     }
 
     public Order complete() {
-        this.toBuilder().setOrderStatus(OrderStatus.COMPLETED).build();
-        this.toBuilder().setEndTime(Instant.now()).build();
-        return this;
+        return this.toBuilder()
+                .setOrderStatus(OrderStatus.COMPLETED)
+                .setEndTime(Instant.now())
+                .setScooter(
+                        getScooter()
+                        .toBuilder()
+                        .setStatus(ScooterStatus.AVAILABLE)
+                        .build()
+                )
+                .build();
     }
 
     public static class Builder {
