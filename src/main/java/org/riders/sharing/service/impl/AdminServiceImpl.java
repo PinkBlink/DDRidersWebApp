@@ -32,10 +32,10 @@ public class AdminServiceImpl implements AdminService {
 
     public Order createOrder(UUID customerId, UUID scooterId) {
         Scooter scooter = scooterService.getById(scooterId);
-        scooter = scooterService.update(scooter
-                .toBuilder()
-                .setStatus(ScooterStatus.RENTED)
-                .build());
+        scooter = scooterService.update(
+                scooter.toBuilder()
+                        .setStatus(ScooterStatus.RENTED)
+                        .build());
         Order order = Order.Builder.getNewBuilder()
                 .setCustomerId(customerId)
                 .setScooter(scooter)

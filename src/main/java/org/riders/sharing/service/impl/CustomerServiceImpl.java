@@ -25,13 +25,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer register(Customer customer) {
         String email = customer.getEmail();
-
         if (customerRepository.isExists(customer)) {
             String errMessage = "Customer with email %s is already exist".formatted(email);
             logger.error(errMessage);
             throw new UserExistsException(errMessage);
         }
-
         return customerRepository.save(customer);
     }
 
