@@ -50,8 +50,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer logIn(String email, String password) {
-        return customerRepository.findByEmail(email)
+        Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new UserExistsException("Wrong email or password;"));
+        if (!customer.getPassword().equals(password)) {
+            throw new WrongEmailOrPasswordException("Wrong email or password;");
+        }
+        return customer;
     }
 
     public Customer getById(UUID id) {

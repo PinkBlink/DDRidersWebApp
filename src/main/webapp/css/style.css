@@ -12,8 +12,8 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: aliceblue;
-    background: url(/assets/home-background.jpg);
+    background-color: blue;
+    background-image: url(/sharing/assets/home-background.jpg);
     background-size: cover;
     background-position: center;
 }

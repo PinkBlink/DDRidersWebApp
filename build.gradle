@@ -17,11 +17,12 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
 }
 
 test {
     useJUnitPlatform()
 }
 war{
-    archiveFileName = 'dd-riders-sharing.war'
+    archiveFileName = 'sharing.war'
 }

@@ -1,6 +1,5 @@
 package org.riders.sharing.model;
 
-import org.riders.sharing.utils.PasswordEncryptor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,7 +67,7 @@ public class Customer extends BaseEntity {
             return this;
         }
 
-        public static Builder getNewBuilder() {
+        public static Builder getNewBuilderWithId() {
             return new Builder().setId(UUID.randomUUID());
         }
 
@@ -98,7 +97,7 @@ public class Customer extends BaseEntity {
         }
 
         public Builder setPassword(String password) {
-            this.password = PasswordEncryptor.hashPassword(password);
+            this.password = password;
             return this;
         }
 

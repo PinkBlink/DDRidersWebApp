@@ -13,20 +13,21 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public enum ConnectionPool {
     INSTANCE;
-
-    private static final Logger logger = LogManager.getLogger(ConnectionPool.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final int DEFAULT_CAPACITY = 16;
 
+    private final Logger logger;
     private Queue<Connection> availableConnections;
     private Queue<Connection> busyConnections;
 
 
     ConnectionPool() {
+        logger = LogManager.getLogger(ConnectionPool.class);
         registerDriver();
         SQLUtils.initDatabase();
         initConnections();
     }
+
     private void registerDriver() {
         try {
             Class.forName("org.postgresql.Driver");
@@ -69,16 +70,16 @@ public enum ConnectionPool {
     }
 
     private Connection createConnection() throws NoSQLConnectionException {
-            Connection connection;
-            try {
-                connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
-                logger.info("Create new connection: " + connection.toString());
+        Connection connection;
+        try {
+            connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
+            logger.info("Create new connection: " + connection.toString());
 
-            } catch (SQLException e) {
-                logger.error("Can't create connection: " + e);
-                throw new NoSQLConnectionException(e.getMessage());
-            }
-            return connection;
+        } catch (SQLException e) {
+            logger.error("Can't create connection: " + e);
+            throw new NoSQLConnectionException(e.getMessage());
+        }
+        return connection;
     }
 
     public Connection getConnection() {
@@ -89,7 +90,7 @@ public enum ConnectionPool {
             busyConnections.offer(connection);
 
             return connection;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -99,7 +100,7 @@ public enum ConnectionPool {
         try {
             busyConnections.remove(connection);
             availableConnections.offer(connection);
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

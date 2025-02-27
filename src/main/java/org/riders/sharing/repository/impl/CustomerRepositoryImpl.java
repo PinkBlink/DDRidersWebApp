@@ -45,7 +45,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             statement.setString(4, customerToStore.getName());
             statement.setString(5, customerToStore.getSurname());
             statement.setString(6, customerToStore.getEmail());
-            statement.setString(6, customerToStore.getPassword());
+            statement.setString(7, customerToStore.getPassword());
 
             boolean result = statement.executeUpdate() > 0;
             logger.info((result)
