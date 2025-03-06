@@ -16,13 +16,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CustomerRepositoryImpl implements CustomerRepository {
-
     private final Logger logger = LogManager.getLogger(this);
     private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
-
     @Override
-    public Customer save(Customer customer){
+    public Customer save(Customer customer) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -63,7 +61,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Customer update(Customer customer){
+    public Customer update(Customer customer) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -115,7 +113,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             connection = connectionPool.getConnection();
             statement = connection.prepareStatement(
-                    "SELECT * FROM customers WHERE customer_id = ?"
+                    "SELECT * FROM customers WHERE id = ?"
             );
 
             statement.setObject(1, customerId, Types.OTHER);
@@ -140,7 +138,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findByEmail(String email){
+    public Optional<Customer> findByEmail(String email) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -167,7 +165,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> findAll(){
+    public List<Customer> findAll() {
         List<Customer> customerList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement statement = null;
@@ -209,17 +207,19 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             connection = ConnectionPool.INSTANCE.getConnection();
             statement = connection.prepareStatement("""
                     SELECT * FROM customers
-                    WHERE id = ?""");
+                    WHERE email = ?""");
 
-            statement.setObject(1, customer.getId(), Types.OTHER);
+            statement.setObject(1, customer.getEmail(), Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
 
             return resultSet.next();
 
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to check the existing customer with id %s"
-                    .formatted(customer.getId()));
+
+            logger.error("Error occurred while trying to check the existing customer with email %s"
+                    .formatted(customer.getEmail()));
             throw new RuntimeException(e);
+
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -227,7 +227,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public boolean delete(UUID customerId){
+    public boolean delete(UUID customerId) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {

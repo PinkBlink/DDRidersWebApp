@@ -26,10 +26,7 @@ function handleFormSubmit(event) {
             if (response.ok) {
                 document.getElementById('error-message').style.color = 'green';
                 document.getElementById('error-message').textContent = 'Registration successful! Redirecting to login...';
-
-                setTimeout(() => {
-                    window.location.href = '/sharing/login.html';
-                }, 2000);
+                window.location.href = '/sharing/login.html';
             } else {
                 return response.json().then(data => {
                     document.getElementById('error-message').style.color = 'red';

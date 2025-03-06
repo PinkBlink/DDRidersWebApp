@@ -178,7 +178,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         try {
             connection = connectionPool.getConnection();
             statement = connection.prepareStatement(
-                    "SELECT * FROM scooter WHERE scooter_status = ?;"
+                    "SELECT * FROM scooters WHERE scooter_status = ?;"
             );
 
             List<Scooter> scooterList = new ArrayList<>();

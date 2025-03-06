@@ -35,9 +35,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer changePassword(Customer customer, String oldPassword, String newPassword) {
-        String hashedOldPassword = PasswordEncryptor.hashPassword(oldPassword);
 
-        if (customer.getPassword().equals(hashedOldPassword)) {
+        if (customer.getPassword().equals(oldPassword)) {
             return customerRepository.update(
                     customer.toBuilder()
                             .setPassword(PasswordEncryptor.hashPassword(newPassword))
@@ -51,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer logIn(String email, String password) {
         Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new UserExistsException("Wrong email or password;"));
+                .orElseThrow(() -> new WrongEmailOrPasswordException("Wrong email or password;"));
         if (!customer.getPassword().equals(password)) {
             throw new WrongEmailOrPasswordException("Wrong email or password;");
         }

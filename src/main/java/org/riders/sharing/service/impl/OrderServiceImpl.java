@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
-    public List<Order> getAllCompletedOrders(UUID id) {
+    public List<Order> getAllCustomerCompletedOrders(UUID id) {
         return orderRepository.findCompletedOrdersByCustomer(id);
     }
 

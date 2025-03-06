@@ -12,13 +12,12 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.*;
 
-
 public class OrderRepositoryImpl implements OrderRepository {
     private final Logger logger = LogManager.getLogger(this);
     private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
     @Override
-    public Order save(Order order){
+    public Order save(Order order) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -61,7 +60,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order update(Order order){
+    public Order update(Order order) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -110,7 +109,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findById(UUID orderId){
+    public Optional<Order> findById(UUID orderId) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -147,7 +146,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
     @Override
-    public Optional<Order> findOngoingOrderByCustomer(UUID customerId){
+    public Optional<Order> findOngoingOrderByCustomer(UUID customerId) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -185,7 +184,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findCompletedOrdersByCustomer(UUID customerId){
+    public List<Order> findCompletedOrdersByCustomer(UUID customerId) {
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList;
@@ -224,7 +223,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAll(){
+    public List<Order> findAll() {
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList = new ArrayList<>();
@@ -258,7 +257,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findOrdersByStatus(OrderStatus orderStatus){
+    public List<Order> findOrdersByStatus(OrderStatus orderStatus) {
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList = new ArrayList<>();
@@ -318,7 +317,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public boolean delete(UUID id){
+    public boolean delete(UUID id) {
         Connection connection = null;
         PreparedStatement statement = null;
 

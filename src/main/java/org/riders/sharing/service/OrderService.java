@@ -12,5 +12,5 @@ public interface OrderService extends BaseService<Order> {
 
     Order saveOrder(Order order);
 
-    List<Order> getAllCompletedOrders(UUID customerId);
+    List<Order> getAllCustomerCompletedOrders(UUID customerId);
 }

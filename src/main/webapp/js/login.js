@@ -2,7 +2,7 @@ function handleFormSubmit(event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value;
-    const password1 = document.getElementById('password').value;
+    const password = document.getElementById('password').value;
 
     const formData = {
         email: email,
@@ -18,7 +18,11 @@ function handleFormSubmit(event) {
     })
     .then(response => {
             if (response.ok) {
-
+            const accessToken = response.headers.get('Authorization')?.replace('Bearer ', '');
+                            if (accessToken) {
+                                localStorage.setItem('accessToken', accessToken);
+                            }
+            window.location.href = "/sharing/account.html"
             } else {
                 return response.json().then(data => {
                     document.getElementById('error-message').style.color = 'red';
@@ -26,11 +30,5 @@ function handleFormSubmit(event) {
                 });
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('error-message').style.color = 'red';
-            document.getElementById('error-message').textContent = 'Wrong email or password';
-        });
-
 }
-document.getElementById('registrationForm').addEventListener('submit', handleFormSubmit);
+document.getElementById('loginForm').addEventListener('submit', handleFormSubmit);

@@ -17,6 +17,16 @@ body{
     background-size: cover;
     background-position: center;
 }
+.account-page {
+    display: flex;
+    flex-direction: row; /* Горизонтальное расположение блоков */
+    justify-content: space-between; /* Равномерное распределение блоков */
+    align-items: flex-start; /* Выравнивание блоков по верхнему краю */
+    gap: 30px; /* Расстояние между блоками */
+    padding: 30px;
+    width: 100%;
+    max-width: 1200px; /* Максимальная ширина страницы */
+}
 .wrapper{
     width: 500px;
     background: transparent;
