@@ -2,6 +2,7 @@ package org.riders.sharing.command;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,8 +39,8 @@ public class CreateNewOrderCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
         OrderService orderService = new OrderServiceImpl(new OrderRepositoryImpl());
         ScooterService scooterService = new ScooterServiceImpl(new ScooterRepositoryImpl());
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         try {
             SecurityUtils.hasCustomerAccessOrThrow(request);
@@ -63,17 +64,18 @@ public class CreateNewOrderCommand extends Command {
                     .build();
 
             Order orderToStore = Order.Builder
-                    .getNewBuilder()
+                    .getNewBuilderWithId()
                     .setCustomerId(customerId)
-                    .setScooter(scooter)
+                    .setScooter(scooterToStore)
                     .setStartTime(Instant.now())
                     .setOrderStatus(OrderStatus.ONGOING)
                     .build();
 
             OrderDTO orderDTOToResponse = OrderDTO.parse(orderToStore);
 
-            scooterService.update(scooterToStore);
+
             orderService.saveOrder(orderToStore);
+            scooterService.update(scooterToStore);
 
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_CREATED);

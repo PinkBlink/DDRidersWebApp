@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.LoginDTO;
+import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.WrongEmailOrPasswordException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -50,7 +51,7 @@ public class LoginCommand extends Command {
             response.setHeader("Authorization", "Bearer " + accessToken);
             response.addCookie(cookie);
 
-        } catch (WrongEmailOrPasswordException e) {
+        } catch (BadRequestException | WrongEmailOrPasswordException e) {
             logger.error(e.getMessage());
             ServletUtils.handleException(response, HttpServletResponse.SC_UNAUTHORIZED, e);
         }

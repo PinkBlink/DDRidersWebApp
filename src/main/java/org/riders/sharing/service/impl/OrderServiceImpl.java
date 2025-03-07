@@ -2,6 +2,7 @@ package org.riders.sharing.service.impl;
 
 import org.riders.sharing.exception.ElementNotFoundException;
 import org.riders.sharing.model.Order;
+import org.riders.sharing.model.enums.OrderStatus;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.service.OrderService;
 
@@ -34,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<Order> getAllCustomerCompletedOrders(UUID id) {
-        return orderRepository.findCompletedOrdersByCustomer(id);
+        return orderRepository.findCustomerOrdersByStatus(id, OrderStatus.COMPLETED);
     }
 
     public Order getById(UUID id) {

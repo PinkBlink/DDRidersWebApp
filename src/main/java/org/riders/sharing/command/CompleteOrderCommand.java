@@ -1,5 +1,6 @@
 package org.riders.sharing.command;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +19,10 @@ import org.riders.sharing.service.impl.OrderServiceImpl;
 import org.riders.sharing.service.impl.ScooterServiceImpl;
 import org.riders.sharing.utils.SecurityUtils;
 import org.riders.sharing.utils.ServletUtils;
+import org.riders.sharing.utils.TokenUtils;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class CompleteOrderCommand extends Command {
     private final Logger logger = LogManager.getLogger(this.getClass());
@@ -34,6 +37,10 @@ public class CompleteOrderCommand extends Command {
         try {
             SecurityUtils.hasCustomerAccessOrThrow(request);
 
+            String accessTokenString = TokenUtils.getAuthorizationToken(request);
+            DecodedJWT decodedJWT = TokenUtils.getDecodedToken(accessTokenString);
+            UUID customerId = UUID.fromString(decodedJWT.getSubject());
+
             String requestBody = ServletUtils.getRequestBody(request);
             OrderDTO orderDTO = objectMapper.readValue(requestBody, OrderDTO.class);
 
@@ -44,7 +51,9 @@ public class CompleteOrderCommand extends Command {
             orderService.updateOrder(completedOrder);
             scooterService.update(completedOrder.getScooter());
 
+            logger.info("Complete order  " + completedOrder);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+
 
         } catch (NoAccessException e) {
             logger.error(e.getMessage());

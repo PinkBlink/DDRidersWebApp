@@ -38,7 +38,11 @@ public class OrderRepositoryImpl implements OrderRepository {
             statement.setObject(4, order.getCustomerId(), Types.OTHER);
             statement.setObject(5, order.getScooter().getId(), Types.OTHER);
             statement.setTimestamp(6, Timestamp.from(orderToStore.getStartTime()));
-            statement.setTimestamp(7, Timestamp.from(orderToStore.getEndTime()));
+
+            statement.setTimestamp(7, (orderToStore.getEndTime() == null)
+                    ? null
+                    : Timestamp.from(orderToStore.getEndTime()));
+
             statement.setObject(8, order.getOrderStatus(), Types.OTHER);
 
             boolean isSuccess = statement.executeUpdate() > 0;
@@ -119,7 +123,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                     """
                             SELECT * FROM orders
                             JOIN scooters ON scooter_id = scooters.id
-                            WHERE id = ?"""
+                            WHERE orders.id = ?"""
             );
 
             statement.setObject(1, orderId, Types.OTHER);
@@ -156,7 +160,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             preparedStatement = connection.prepareStatement(
                     """
                             SELECT * FROM orders
-                            JOIN scooters ON scooter_id = scooter.id
+                            JOIN scooters ON scooter_id = scooters.id
                             WHERE order_status = 'ONGOING'
                             AND customer_id = ?"""
             );
@@ -184,7 +188,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findCompletedOrdersByCustomer(UUID customerId) {
+    public List<Order> findCustomerOrdersByStatus(UUID customerId, OrderStatus orderStatus) {
         Connection connection = null;
         PreparedStatement statement = null;
         List<Order> orderList;
@@ -200,6 +204,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                             AND order_status = ?;"""
             );
             statement.setObject(1, customerId, Types.OTHER);
+            statement.setObject(2, orderStatus, Types.OTHER);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {

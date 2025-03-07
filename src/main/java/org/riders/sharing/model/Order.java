@@ -59,6 +59,7 @@ public class Order extends BaseEntity {
                 .setId(getId())
                 .setCreateTime(getCreateTime())
                 .setUpdateTime(getUpdateTime())
+                .setCustomerId(getCustomerId())
                 .setScooter(scooter)
                 .setStartTime(startTime)
                 .setEndTime(endTime)
@@ -89,7 +90,7 @@ public class Order extends BaseEntity {
             return this;
         }
 
-        public static Builder getNewBuilder() {
+        public static Builder getNewBuilderWithId() {
             return new Builder().setId(UUID.randomUUID());
         }
 

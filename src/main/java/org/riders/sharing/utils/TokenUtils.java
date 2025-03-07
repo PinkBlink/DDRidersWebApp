@@ -21,7 +21,7 @@ public class TokenUtils {
     public static String getNewAccessToken(Customer customer) {
         Algorithm algorithm = Algorithm.HMAC256(SIGNATURE_SECRET);
         Instant issuedAt = Instant.now();
-        Instant expiresAt = issuedAt.plusSeconds(600);
+        Instant expiresAt = issuedAt.plusSeconds(60000);
 
         return JWT.create()
                 .withSubject(customer.getId().toString())

@@ -8,9 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderRepository extends BaseRepository<Order> {
-    Optional<Order> findOngoingOrderByCustomer(UUID customerId) ;
+    Optional<Order> findOngoingOrderByCustomer(UUID customerId);
 
-    List<Order> findCompletedOrdersByCustomer(UUID customerId) ;
+    List<Order> findCustomerOrdersByStatus(UUID customerId, OrderStatus status);
 
-    List<Order> findOrdersByStatus(OrderStatus orderStatus) ;
+    List<Order> findOrdersByStatus(OrderStatus orderStatus);
 }

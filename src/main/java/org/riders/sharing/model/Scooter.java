@@ -58,7 +58,7 @@ public class Scooter extends BaseEntity {
             return this;
         }
 
-        public static Builder getNewBuilder() {
+        public static Builder getNewBuilderWithId() {
             return new Builder().setId(UUID.randomUUID());
         }
 

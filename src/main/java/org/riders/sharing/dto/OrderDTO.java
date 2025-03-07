@@ -1,11 +1,13 @@
 package org.riders.sharing.dto;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.model.enums.OrderStatus;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@JsonRootName("OrderDTO")
 public class OrderDTO {
     private UUID orderId;
     private UUID customerId;
@@ -64,6 +66,7 @@ public class OrderDTO {
 
     public static OrderDTO parse(Order order) {
         OrderDTO orderDTO = new OrderDTO();
+        orderDTO.orderId = order.getId();
         orderDTO.customerId = order.getCustomerId();
         orderDTO.scooterDTO = ScooterDTO.parse(order.getScooter());
         orderDTO.startTime = order.getStartTime();

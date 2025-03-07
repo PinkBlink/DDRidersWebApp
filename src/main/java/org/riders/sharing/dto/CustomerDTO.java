@@ -1,9 +1,11 @@
 package org.riders.sharing.dto;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import org.riders.sharing.model.Customer;
 
 import java.util.Objects;
 
+@JsonRootName("CustomerDTO")
 public class CustomerDTO {
     private String name;
     private String surname;

@@ -23,16 +23,25 @@ public class ServletUtils {
         return requestBody.toString();
     }
 
-    public static String getErrorMessageAsJson(Exception e) {
-        return "{\"error\": \"%s\"}".formatted(e.getMessage());
+    public static String getMessageAsJson(String message, String content) {
+        return "{\"%s\": \"%s\"}".formatted(message, content);
     }
 
     public static void handleException(HttpServletResponse response, int code, Exception e) throws IOException {
         response.setStatus(code);
         response.setContentType("application/json");
+        String message = defineCode(code);
+        String content = e.getMessage();
 
         try (PrintWriter printWriter = response.getWriter()) {
-            printWriter.println(ServletUtils.getErrorMessageAsJson(e));
+            printWriter.println(ServletUtils.getMessageAsJson(message, content));
         }
+    }
+
+    private static String defineCode(int code) {
+        if (code >= 400) {
+            return "error";
+        }
+        return "message";
     }
 }

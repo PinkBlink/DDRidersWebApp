@@ -81,8 +81,8 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                             SET update_time = ?,
                             scooter_type = ?,
                             scooter_status = ?,
-                            battery_level = ?,
-                            WHERE scooter_id = ?"""
+                            battery_level = ?
+                            WHERE id = ?"""
             );
 
             statement.setTimestamp(1, Timestamp.from(scooterToStore.getUpdateTime()));
