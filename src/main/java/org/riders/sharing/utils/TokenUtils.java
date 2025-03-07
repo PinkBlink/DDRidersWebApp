@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class TokenUtils {
     private static final Logger logger = LogManager.getLogger(TokenUtils.class);
-    private static final String SIGNATURE_SECRET = "dirtydickridersforever";
+    private static final String SIGNATURE_SECRET = "dirtydridersforever";
 
     public static String getNewAccessToken(Customer customer) {
         Algorithm algorithm = Algorithm.HMAC256(SIGNATURE_SECRET);
