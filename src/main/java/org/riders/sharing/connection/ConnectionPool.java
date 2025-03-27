@@ -72,7 +72,10 @@ public enum ConnectionPool {
     private Connection createConnection() throws NoSQLConnectionException {
         Connection connection;
         try {
-            connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
+            connection = DriverManager.getConnection(DataBaseInfo.DD_RIDERS_URL
+                    , DataBaseInfo.USER
+                    , DataBaseInfo.PASSWORD);
+
             logger.info("Create new connection: " + connection.toString());
 
         } catch (SQLException e) {

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="540b88c4-5a0e-4d40-bca5-edba2ecbd82d" name="Changes" comment="rebuild: re">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/riders/sharing/connection/ConnectionPool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/riders/sharing/connection/ConnectionPool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/riders/sharing/utils/SQLUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/riders/sharing/utils/SQLUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/riders/sharing/utils/constants/DataBaseInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/riders/sharing/utils/constants/DataBaseInfo.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/build.gradle">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand />
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/create-db-scripts" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;PinkBlink&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/PinkBlink/DDRidersWebApp.git&quot;,
+    &quot;accountId&quot;: &quot;257f7ab6-1d62-4d98-bf42-8bb34fbd8fd1&quot;
+  }
+}</component>
+  <component name="LogFilters">
+    <option name="FILTER_ERRORS" value="false" />
+    <option name="FILTER_WARNINGS" value="false" />
+    <option name="FILTER_INFO" value="true" />
+    <option name="FILTER_DEBUG" value="true" />
+    <option name="CUSTOM_FILTER" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2upFvbXyq0QGxF7YWTImBkFLReM" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build DDRidersWebApp.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/java/Projects/DDRidersWebApp/build.gradle.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Smart Tomcat.DDRidersWebApp.executor&quot;: &quot;Run&quot;,
+    &quot;Smart Tomcat.sharing.executor&quot;: &quot;Run&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/java/Projects/DDRidersWebApp&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;cn.yiiguxing.plugin.translate&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\java\Projects\DDRidersWebApp" />
+      <recent name="C:\java\Projects\DDRidersWebApp\src\main\java\org.riders.sharing" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Smart Tomcat.sharing">
+    <configuration name="C:/java/Projects/DDRidersWebApp/build.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/build.gradle" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="sharing" type="com.poratu.idea.plugins.tomcat">
+      <log_file alias="Tomcat Catalina Log" path="$USER_HOME$/.SmartTomcat/DDRidersWebApp/DDRidersWebApp.main/logs/catalina.*" />
+      <log_file alias="Tomcat Manager Log" path="$USER_HOME$/.SmartTomcat/DDRidersWebApp/DDRidersWebApp.main/logs/manager.*" />
+      <log_file alias="Tomcat Host Manager Log" path="$USER_HOME$/.SmartTomcat/DDRidersWebApp/DDRidersWebApp.main/logs/host-manager.*" />
+      <predefined_log_file enabled="true" id="Tomcat Localhost Log" />
+      <predefined_log_file enabled="true" id="Tomcat Access Log" />
+      <option name="catalinaBase" value="C:\Users\PinkBlink\.SmartTomcat\DDRidersWebApp\DDRidersWebApp.main" />
+      <option name="contextPath" value="/sharing" />
+      <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
+      <option name="extraClassPath" value="" />
+      <option name="tomcatInfo">
+        <TomcatInfo>
+          <option name="name" value="Apache Tomcat/10.1.39" />
+          <option name="path" value="$PROJECT_DIR$/../../apache-tomcat-10.1.39" />
+          <option name="version" value="10.1.39.0" />
+        </TomcatInfo>
+      </option>
+      <option name="vmOptions" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Gradle.C:/java/Projects/DDRidersWebApp/build.gradle" />
+      <item itemvalue="Smart Tomcat.sharing" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.C:/java/Projects/DDRidersWebApp/build.gradle" />
+        <item itemvalue="Gradle.C:/java/Projects/DDRidersWebApp/build.gradle" />
+        <item itemvalue="Gradle.C:/java/Projects/DDRidersWebApp/build.gradle" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="540b88c4-5a0e-4d40-bca5-edba2ecbd82d" name="Changes" comment="" />
+      <created>1742937840282</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742937840282</updated>
+    </task>
+    <task id="LOCAL-00001" summary="add: scripts for initialization db tables">
+      <option name="closed" value="true" />
+      <created>1743091656577</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1743091656577</updated>
+    </task>
+    <task id="LOCAL-00002" summary="add: entities and enums&#10;add: gradle setup and settings">
+      <option name="closed" value="true" />
+      <created>1743092625050</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1743092625050</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Create ConnectionPool with exceptions and utils &#10;Add: Exceptions &#10;Add: Utils for initialization db&#10;Add: ConnectionPool">
+      <option name="closed" value="true" />
+      <created>1743094514989</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1743094514989</updated>
+    </task>
+    <task id="LOCAL-00004" summary="refactor: move script for types to create_tables_script.sql">
+      <option name="closed" value="true" />
+      <created>1743098800606</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1743098800606</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="feature/create-db-scripts" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add: scripts for initialization db tables" />
+    <MESSAGE value="add: entities and enums&#10;add: gradle setup and settings" />
+    <MESSAGE value="Create ConnectionPool with exceptions and utils &#10;Add: Exceptions &#10;Add: Utils for initialization db&#10;Add: ConnectionPool" />
+    <MESSAGE value="refactor: move script for types to create_tables_script.sql" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: move script for types to create_tables_script.sql" />
+  </component>
+</project>
