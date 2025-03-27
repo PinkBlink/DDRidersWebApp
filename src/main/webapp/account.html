@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/account.js?v=1" defer></script>
+</head>
+<body>
+    <!-- Информация о пользователе -->
+    <div class="wrapper">
+        <h2>Your Account:</h2>
+        <p id="name"></p>
+        <p id="surname"></p>
+        <p id="email"></p>
+        <button id="logoutButton" class="btn">Logout</button>
+    </div>
+        <div class="wrapper">
+            <h2>Active Orders</h2>
+            <div class="order" id="order-1">
+                <p>Order #1</p>
+                <p>Status: Active</p>
+            </div>
+            <div class="order completed" id="order-2">
+                <p>Order #2</p>
+                <p>Status: Completed</p>
+            </div>
+        </div>
+
+        <!-- Доступные самокаты -->
+        <div class="wrapper">
+            <h2>Available Scooters</h2>
+            <div class="scooter" id="scooter-1">
+                <p>Scooter #1</p>
+                <p>Status: Available</p>
+            </div>
+            <div class="scooter" id="scooter-2">
+                <p>Scooter #2</p>
+                <p>Status: Available</p>
+            </div>
+        </div>
+</body>
+</html>
