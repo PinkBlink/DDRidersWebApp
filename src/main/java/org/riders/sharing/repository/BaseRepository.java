@@ -1,4 +1,4 @@
-package repository;
+package org.riders.sharing.repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.riders.sharing.model.BaseEntity;
