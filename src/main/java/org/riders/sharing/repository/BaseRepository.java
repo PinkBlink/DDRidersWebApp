@@ -14,7 +14,7 @@ public interface BaseRepository<T extends BaseEntity> {
 
     T update(T entity);
 
-    Optional<T> findById(UUID id);
+    Optional<T> find(UUID id);
 
     List<T> findAll();
 
