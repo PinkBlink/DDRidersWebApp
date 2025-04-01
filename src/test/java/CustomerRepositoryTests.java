@@ -29,29 +29,29 @@ public class CustomerRepositoryTests {
             .build();
 
     @BeforeAll
-    public static void beforeAll() throws SQLException {
+    public static void beforeAll(){
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
 
     @AfterAll
-    public static void afterAll() throws SQLException {
+    public static void afterAll(){
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
     @AfterEach
-    public void afterEach() throws SQLException {
+    public void afterEach(){
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
-
     @Test
-    public void saveShouldSetCreateAndUpdateTime() throws SQLException {
+    public void saveShouldSetCreateAndUpdateTime(){
         deleteCustomerFromDatabase(validCustomer1);
 
         Customer savedCustomer = customerRepository.save(validCustomer1);
 
-        Assertions.assertTrue(savedCustomer.getCreateTime().equals(savedCustomer.getUpdateTime()) && validCustomer1.equals(savedCustomer));
+        Assertions.assertTrue(savedCustomer.getCreateTime().equals(savedCustomer.getUpdateTime())
+                && validCustomer1.equals(savedCustomer));
     }
 
     @Test
@@ -124,7 +124,8 @@ public class CustomerRepositoryTests {
         Customer savedCustomer = customerRepository.save(validCustomer1);
 
         Customer updatedCustomer = customerRepository.update(savedCustomer);
-        String errorMessage = "Saved: %s  Updated: %s ".formatted(savedCustomer.getUpdateTime(), updatedCustomer.getUpdateTime());
+        String errorMessage = "Saved: %s  Updated: %s "
+                .formatted(savedCustomer.getUpdateTime(), updatedCustomer.getUpdateTime());
 
         Assertions.assertTrue(savedCustomer.getUpdateTime().isBefore(updatedCustomer.getUpdateTime()), errorMessage);
     }
@@ -134,9 +135,9 @@ public class CustomerRepositoryTests {
         customerRepository.save(validCustomer1);
         customerRepository.save(validCustomer2);
 
-        Customer updatedCustomerWithDuplicateEmail = validCustomer2.toBuilder().setEmail(validCustomer1.getEmail()).build();
+        Customer updatedCustomerWithSameEmail = validCustomer2.toBuilder().setEmail(validCustomer1.getEmail()).build();
 
-        Assertions.assertThrows(BadDatabaseUpdateException.class, () -> customerRepository.update(updatedCustomerWithDuplicateEmail));
+        Assertions.assertThrows(BadDatabaseUpdateException.class, () -> customerRepository.update(updatedCustomerWithSameEmail));
     }
 
     @Test
