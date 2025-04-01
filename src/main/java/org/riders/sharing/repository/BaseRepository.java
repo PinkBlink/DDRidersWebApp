@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BaseRepository<T extends BaseEntity> {
-    T save(BaseEntity entity);
+    T save(T entity);
 
     T update(T entity);
 
