@@ -29,25 +29,23 @@ public class CustomerRepositoryTests {
             .build();
 
     @BeforeAll
-    public static void beforeAll(){
+    public static void beforeAll() throws SQLException {
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
 
     @AfterAll
-    public static void afterAll(){
+    public static void afterAll() throws SQLException {
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
     @AfterEach
-    public void afterEach(){
+    public void afterEach() throws SQLException {
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
 
     @Test
     public void saveShouldSetCreateAndUpdateTime(){
-        deleteCustomerFromDatabase(validCustomer1);
-
         Customer savedCustomer = customerRepository.save(validCustomer1);
 
         Assertions.assertTrue(savedCustomer.getCreateTime().equals(savedCustomer.getUpdateTime())
@@ -174,21 +172,27 @@ public class CustomerRepositoryTests {
         Assertions.assertFalse(result);
     }
 
-    private static void deleteCustomersFromDatabase(Customer... customers) {
+    private static void deleteCustomersFromDatabase(Customer... customers) throws SQLException {
         for (Customer customer : customers) {
             deleteCustomerFromDatabase(customer);
         }
     }
 
-    private static void deleteCustomerFromDatabase(Customer customer) {
-        try (Connection connection = ConnectionPool.INSTANCE.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(
-                     "DELETE FROM customers WHERE id = ?")) {
-
+    private static void deleteCustomerFromDatabase(Customer customer) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ConnectionPool connectionPool = ConnectionPool.INSTANCE;
+        try {
+            connection = connectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(
+                    "DELETE FROM customers WHERE id = ?");
             preparedStatement.setObject(1, customer.getId(), Types.OTHER);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new BadDatabaseUpdateException("Something goes wrong.");
+            throw new BadDatabaseUpdateException("Something goes wrong.", e);
+        }finally {
+            connectionPool.releaseConnection(connection);
+            preparedStatement.close();
         }
     }
 }
