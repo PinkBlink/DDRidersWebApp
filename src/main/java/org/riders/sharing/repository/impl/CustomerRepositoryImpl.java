@@ -3,8 +3,7 @@ package org.riders.sharing.repository.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.exception.NoSQLConnectionException;
-import org.riders.sharing.exception.WrongCustomerException;
+import org.riders.sharing.exception.*;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 
@@ -70,7 +69,6 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                     VALUES (?, ?, ?, ?, ?, ?, ?);
                     """);
 
-
             preparedStatement.setObject(1, customerToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(customerToStore.getCreateTime()));
             preparedStatement.setTimestamp(3, Timestamp.from(customerToStore.getUpdateTime()));
@@ -79,21 +77,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             preparedStatement.setString(6, customerToStore.getEmail());
             preparedStatement.setString(7, customerToStore.getPassword());
 
-            boolean result = preparedStatement.executeUpdate() > 0;
+            preparedStatement.executeUpdate();
+            logger.error("Successfully saved customer: {}", customer);
 
-            if (result) {
-                logger.info("Customer {} was successfully saved", customerToStore);
-
-                return customerToStore;
-
-            } else {
-                logger.error("Couldn't save customer {}", customer);
-                throw new WrongCustomerException("Couldn't save customer %s".formatted(customer));
-            }
+            return customerToStore;
 
         } catch (SQLException e) {
-            logger.error(e);
-            throw new NoSQLConnectionException(e.getMessage());
+            logger.error("Customer with email or id is already exist customer: {}", customer, e);
+            throw new CustomerExistsException(e.getMessage());
         } finally {
             closeStatement(preparedStatement);
             connectionPool.releaseConnection(connection);
@@ -131,16 +122,16 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             boolean success = statement.executeUpdate() > 0;
 
             if (success) {
-                logger.info("Customer with id {} updated successfully;", customerToStore.getId());
+                logger.info("Customer updated successfully. Customer: {}", customerToStore.getId());
             } else {
-                logger.info("Couldn't find customer with id {}", customerToStore.getId());
+                logger.info("Couldn't find customer: {}", customerToStore.getId());
             }
 
             return customerToStore;
 
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to update customer");
-            throw new NoSQLConnectionException(e.getMessage(), e);
+            logger.error("Error occurred while trying to update customer: {}", customer);
+            throw new BadDatabaseUpdateException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -170,7 +161,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         } catch (SQLException e) {
             logger.error("Error occurred while attempting to find customer with id: {}", id);
-            throw new NoSQLConnectionException(e.getMessage(), e);
+            throw new BadDatabaseSelectException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -205,7 +196,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         } catch (SQLException e) {
             logger.error("Error occurred while attempting to find all customers.");
-            throw new NoSQLConnectionException(e.getMessage(), e);
+            throw new BadDatabaseSelectException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -230,7 +221,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         } catch (SQLException e) {
             logger.error("Error occurred while trying to check the existing customer with email {}"
                     , customer.getEmail());
-            throw new NoSQLConnectionException(e.getMessage());
+            throw new BadDatabaseSelectException(e.getMessage());
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
@@ -258,8 +249,8 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             return result;
 
         } catch (SQLException e) {
-            logger.error("Error while deleting customer with id= {}", id, e);
-            throw new NoSQLConnectionException(e.getMessage(), e);
+            logger.error("Error while deleting customer with id: {}", id, e);
+            throw new BadDatabaseUpdateException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
             closeStatement(statement);
