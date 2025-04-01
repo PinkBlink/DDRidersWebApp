@@ -69,6 +69,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                     VALUES (?, ?, ?, ?, ?, ?, ?);
                     """);
 
+
             preparedStatement.setObject(1, customerToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(customerToStore.getCreateTime()));
             preparedStatement.setTimestamp(3, Timestamp.from(customerToStore.getUpdateTime()));
@@ -78,7 +79,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             preparedStatement.setString(7, customerToStore.getPassword());
 
             preparedStatement.executeUpdate();
-            logger.error("Successfully saved customer: {}", customer);
+            logger.info("Successfully saved customer: {}", customer);
 
             return customerToStore;
 
@@ -109,7 +110,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                     name = ?,
                     surname = ?,
                     email = ?,
-                    password = ?,
+                    password = ?
                     WHERE id = ?;""");
 
             statement.setTimestamp(1, Timestamp.from(customerToStore.getUpdateTime()));
@@ -124,7 +125,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             if (success) {
                 logger.info("Customer updated successfully. Customer: {}", customerToStore.getId());
             } else {
-                logger.info("Couldn't find customer: {}", customerToStore.getId());
+                logger.warn("Couldn't find customer: {}", customerToStore.getId());
             }
 
             return customerToStore;
@@ -235,7 +236,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         try {
             connection = connectionPool.getConnection();
-            statement = connection.prepareStatement("DELETE FROM customers WHERE customer_id = ?");
+            statement = connection.prepareStatement("DELETE FROM customers WHERE id = ?");
             statement.setObject(1, id, Types.OTHER);
 
             boolean result = statement.executeUpdate() > 0;
