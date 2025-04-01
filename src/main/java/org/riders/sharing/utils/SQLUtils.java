@@ -16,14 +16,7 @@ public class SQLUtils {
     private static final Logger logger = LogManager.getLogger(SQLUtils.class);
 
     public static void initDatabase() {
-        if (isDatabaseCreated(DD_RIDERS_URL, USER, PASSWORD)) {
-            logger.info("dd_riders_db is already exists");
-            sendCreateFile(PATH_TO_CREATE_TABLES_FILE
-                    , DD_RIDERS_URL
-                    , USER
-                    , PASSWORD);
-
-        } else {
+        if (!isDatabaseCreated(DD_RIDERS_URL, USER, PASSWORD)) {
             logger.info("Attempt to send create db file");
             sendCreateFile(PATH_TO_CREATE_DATABASE_FILE
                     , POSTGRES_URL
@@ -37,6 +30,8 @@ public class SQLUtils {
                     , PASSWORD);
 
             logger.info("Database and tables are successfully created");
+        } else {
+            logger.info("dd_riders_db is already exists");
         }
     }
 
