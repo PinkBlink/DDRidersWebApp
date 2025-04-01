@@ -21,7 +21,7 @@ public class CustomerRepositoryTests {
             .setPassword("test")
             .build();
 
-    private static Customer validCustomer2 = Customer.Builder.getNewBuilderWithId()
+    private static final Customer validCustomer2 = Customer.Builder.getNewBuilderWithId()
             .setName("Valid2")
             .setSurname("surname2")
             .setEmail("email2@email.com")
