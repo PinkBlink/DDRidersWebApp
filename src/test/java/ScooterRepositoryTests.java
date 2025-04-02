@@ -60,14 +60,14 @@ public class ScooterRepositoryTests {
     public void findShouldReturnScooter() {
         scooterRepository.save(SCOOTER_1);
 
-        Scooter scooterFromDatabase = scooterRepository.find(SCOOTER_1.getId()).get();
+        Scooter scooterFromDatabase = scooterRepository.findById(SCOOTER_1.getId()).get();
 
         Assertions.assertEquals(SCOOTER_1, scooterFromDatabase);
     }
 
     @Test
     public void findShouldReturnEmptyOptional() {
-        Optional<Scooter> maybeScooter = scooterRepository.find(UUID.randomUUID());
+        Optional<Scooter> maybeScooter = scooterRepository.findById(UUID.randomUUID());
 
         Assertions.assertThrows(NoSuchElementException.class, maybeScooter::get);
     }
@@ -130,7 +130,7 @@ public class ScooterRepositoryTests {
                 .setScooterType(newScooterType)
                 .build();
         scooterRepository.update(updatedScooter);
-        Scooter scooterFromDataBase = scooterRepository.find(updatedScooter.getId()).get();
+        Scooter scooterFromDataBase = scooterRepository.findById(updatedScooter.getId()).get();
 
         Assertions.assertEquals(updatedScooter, scooterFromDataBase);
     }
@@ -147,25 +147,6 @@ public class ScooterRepositoryTests {
                 .formatted(savedScooter.getUpdateTime(), updatedScooter.getUpdateTime());
 
         Assertions.assertTrue(savedScooter.getUpdateTime().isBefore(updatedScooter.getUpdateTime()), errorMessage);
-    }
-
-
-    @Test
-    public void isExistShouldReturnFalse() {
-        Scooter scooter = Scooter.Builder.getNewBuilderWithId().build();
-
-        boolean result = scooterRepository.isExist(scooter);
-
-        Assertions.assertFalse(result);
-    }
-
-    @Test
-    public void isExistShouldReturnTrue() {
-        scooterRepository.save(SCOOTER_1);
-
-        boolean result = scooterRepository.isExist(SCOOTER_1);
-
-        Assertions.assertTrue(result);
     }
 
     @Test

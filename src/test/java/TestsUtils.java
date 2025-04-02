@@ -1,5 +1,5 @@
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.exception.BadDatabaseUpdateException;
+import org.riders.sharing.exception.DatabaseException;
 import org.riders.sharing.model.BaseEntity;
 
 import java.sql.Connection;
@@ -30,7 +30,7 @@ public class TestsUtils {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw new BadDatabaseUpdateException("Something goes wrong.", e);
+            throw new DatabaseException("Something goes wrong.", e);
         } finally {
             connectionPool.releaseConnection(connection);
             if (preparedStatement != null) {
