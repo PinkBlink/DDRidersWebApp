@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.*;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.exception.BadDatabaseUpdateException;
+import org.riders.sharing.exception.DatabaseException;
 import org.riders.sharing.exception.DuplicateIdOrEmailException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
@@ -32,7 +32,6 @@ public class CustomerRepositoryTests {
     public static void beforeAll() throws SQLException {
         deleteCustomersFromDatabase(validCustomer1, validCustomer2);
     }
-
 
     @AfterAll
     public static void afterAll() throws SQLException {
@@ -70,14 +69,14 @@ public class CustomerRepositoryTests {
     public void findShouldReturnCustomer() {
         customerRepository.save(validCustomer1);
 
-        Customer customerFromDatabase = customerRepository.find(validCustomer1.getId()).get();
+        Customer customerFromDatabase = customerRepository.findById(validCustomer1.getId()).get();
 
         Assertions.assertEquals(validCustomer1, customerFromDatabase);
     }
 
     @Test
     public void findShouldReturnEmptyOptional() {
-        Optional<Customer> maybeCustomer = customerRepository.find(UUID.randomUUID());
+        Optional<Customer> maybeCustomer = customerRepository.findById(UUID.randomUUID());
 
         Assertions.assertThrows(NoSuchElementException.class, maybeCustomer::get);
     }
@@ -118,8 +117,10 @@ public class CustomerRepositoryTests {
     }
 
     @Test
-    public void updateShouldSetUpdateTime() {
+    public void updateShouldSetUpdateTime() throws InterruptedException {
         Customer savedCustomer = customerRepository.save(validCustomer1);
+
+        Thread.sleep(10);
 
         Customer updatedCustomer = customerRepository.update(savedCustomer);
         String errorMessage = "Saved: %s  Updated: %s "
@@ -135,25 +136,8 @@ public class CustomerRepositoryTests {
 
         Customer updatedCustomerWithSameEmail = validCustomer2.toBuilder().setEmail(validCustomer1.getEmail()).build();
 
-        Assertions.assertThrows(BadDatabaseUpdateException.class, () -> customerRepository.update(updatedCustomerWithSameEmail));
-    }
-
-    @Test
-    public void isExistShouldReturnFalse() {
-        Customer customer = Customer.Builder.getNewBuilderWithId().setEmail("null").setName("null").setSurname("null").setPassword("123").build();
-
-        boolean result = customerRepository.isExist(customer);
-
-        Assertions.assertFalse(result);
-    }
-
-    @Test
-    public void isExistShouldReturnTrue() {
-        customerRepository.save(validCustomer1);
-
-        boolean result = customerRepository.isExist(validCustomer1);
-
-        Assertions.assertTrue(result);
+        Assertions.assertThrows(DatabaseException.class,
+                () -> customerRepository.update(updatedCustomerWithSameEmail));
     }
 
     @Test
@@ -189,7 +173,7 @@ public class CustomerRepositoryTests {
             preparedStatement.setObject(1, customer.getId(), Types.OTHER);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new BadDatabaseUpdateException("Something goes wrong.", e);
+            throw new DatabaseException("Something goes wrong.", e);
         } finally {
             connectionPool.releaseConnection(connection);
             if (preparedStatement != null) {
