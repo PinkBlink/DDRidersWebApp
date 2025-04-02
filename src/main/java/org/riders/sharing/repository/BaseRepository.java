@@ -14,11 +14,9 @@ public interface BaseRepository<T extends BaseEntity> {
 
     T update(T entity);
 
-    Optional<T> find(UUID id);
+    Optional<T> findById(UUID id);
 
     List<T> findAll();
-
-    boolean isExist(T entity);
 
     boolean delete(UUID id);
 
