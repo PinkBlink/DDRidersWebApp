@@ -85,7 +85,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
         } catch (SQLException e) {
             logger.error("Customer with email or id is already exist customer: {}", customer, e);
-            throw new CustomerExistsException(e.getMessage());
+            throw new DuplicateIdOrEmailException(e.getMessage());
         } finally {
             closeStatement(preparedStatement);
             connectionPool.releaseConnection(connection);

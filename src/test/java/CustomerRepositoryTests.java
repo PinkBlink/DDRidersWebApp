@@ -1,7 +1,7 @@
 import org.junit.jupiter.api.*;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.BadDatabaseUpdateException;
-import org.riders.sharing.exception.CustomerExistsException;
+import org.riders.sharing.exception.DuplicateIdOrEmailException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -45,7 +45,7 @@ public class CustomerRepositoryTests {
     }
 
     @Test
-    public void saveShouldSetCreateAndUpdateTime(){
+    public void saveShouldSetCreateAndUpdateTime() {
         Customer savedCustomer = customerRepository.save(validCustomer1);
 
         Assertions.assertTrue(savedCustomer.getCreateTime().equals(savedCustomer.getUpdateTime())
@@ -56,14 +56,14 @@ public class CustomerRepositoryTests {
     public void saveShouldThrowIfEqualsEmails() {
         customerRepository.save(validCustomer1);
 
-        Assertions.assertThrows(CustomerExistsException.class, () -> customerRepository.save(validCustomer1));
+        Assertions.assertThrows(DuplicateIdOrEmailException.class, () -> customerRepository.save(validCustomer1));
     }
 
     @Test
     public void saveShouldThrowIfEqualsIDs() {
         customerRepository.save(validCustomer1);
 
-        Assertions.assertThrows(CustomerExistsException.class, () -> customerRepository.save(validCustomer1));
+        Assertions.assertThrows(DuplicateIdOrEmailException.class, () -> customerRepository.save(validCustomer1));
     }
 
     @Test
@@ -190,9 +190,11 @@ public class CustomerRepositoryTests {
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new BadDatabaseUpdateException("Something goes wrong.", e);
-        }finally {
+        } finally {
             connectionPool.releaseConnection(connection);
-            preparedStatement.close();
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
         }
     }
 }
