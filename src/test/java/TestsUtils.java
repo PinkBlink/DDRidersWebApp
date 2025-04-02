@@ -1,7 +1,6 @@
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.BadDatabaseUpdateException;
 import org.riders.sharing.model.BaseEntity;
-import org.riders.sharing.model.Customer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
