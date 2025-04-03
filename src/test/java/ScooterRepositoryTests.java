@@ -1,5 +1,5 @@
 import org.junit.jupiter.api.*;
-import org.riders.sharing.exception.DuplicateIdException;
+import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.model.enums.ScooterType;
@@ -53,7 +53,7 @@ public class ScooterRepositoryTests {
     public void saveShouldThrowIfEqualsIds() {
         scooterRepository.save(SCOOTER_1);
 
-        Assertions.assertThrows(DuplicateIdException.class, () -> scooterRepository.save(SCOOTER_1));
+        Assertions.assertThrows(DuplicateEntryException.class, () -> scooterRepository.save(SCOOTER_1));
     }
 
     @Test

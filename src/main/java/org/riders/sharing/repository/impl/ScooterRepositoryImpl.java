@@ -1,10 +1,8 @@
 package org.riders.sharing.repository.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DatabaseException;
-import org.riders.sharing.exception.DuplicateIdException;
+import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
@@ -17,24 +15,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ScooterRepositoryImpl implements ScooterRepository {
-    private final Logger logger = LogManager.getLogger(this);
     private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
 
     @Override
     public Scooter save(Scooter scooter) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        String query = """
+                INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
+                VALUES( ?, ?, ?, ?, ?, ?);
+                """;
 
-        try {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             Scooter scooterToStore = scooter.toBuilder()
                     .setCreateTime(Instant.now())
                     .setUpdateTime(Instant.now())
                     .build();
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement("""
-                    INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
-                    VALUES( ?, ?, ?, ?, ?, ?);
-                    """);
 
             preparedStatement.setObject(1, scooterToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(scooterToStore.getCreateTime()));
@@ -44,14 +39,9 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             preparedStatement.setInt(6, scooterToStore.getBatteryLevel());
             preparedStatement.executeUpdate();
 
-            logger.info("Scooter {} has been successfully saved", scooter);
             return scooterToStore;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to save scooter: {}", scooter, e);
-            throw new DuplicateIdException(e.getMessage());
-        } finally {
-            connectionPool.releaseConnection(connection);
-            closeStatement(preparedStatement);
+            throw new DuplicateEntryException(e.getMessage());
         }
     }
 
@@ -80,14 +70,10 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             statement.setObject(3, scooterToStore.getStatus(), Types.OTHER);
             statement.setInt(4, scooterToStore.getBatteryLevel());
             statement.setObject(5, scooterToStore.getId(), Types.OTHER);
-            boolean success = statement.executeUpdate() > 0;
+            statement.executeUpdate();
 
-            logger.info(success
-                    ? "Scooter has been successfully updated: %s".formatted(scooter)
-                    : "Couldn't find scooter: %s".formatted(scooter));
             return scooterToStore;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to update scooter: {}", scooter, e);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
@@ -109,14 +95,11 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                logger.info("Successfully found scooter with Id: {}", id);
                 return Optional.of(Scooter.createScooterFromResultSet(resultSet));
             }
 
-            logger.info("Couldn't find scooter with id: {}", id);
             return Optional.empty();
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to find scooter with id :{}", id);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
@@ -142,12 +125,8 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                 scooterList.add(scooter);
             }
 
-            logger.info(scooterList.isEmpty()
-                    ? "Scooter list is empty."
-                    : "Found %d scooters.".formatted(scooterList.size()));
             return scooterList;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to find all scooters;");
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
@@ -168,14 +147,9 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                             WHERE id = ?"""
             );
             statement.setObject(1, id, Types.OTHER);
-            boolean success = statement.executeUpdate() > 0;
 
-            logger.info(success
-                    ? "Scooter with id %s has been successfully delete".formatted(id)
-                    : "Couldn't find scooter with id: %s".formatted(id));
-            return success;
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to delete scooter with id: {}", id);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
@@ -202,10 +176,8 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                 scooterList.add(scooter);
             }
 
-            logger.info("Found {} scooters with status {}", scooterList.size(), scooterStatus);
             return scooterList;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to find scooters with status {}", scooterStatus, e);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
