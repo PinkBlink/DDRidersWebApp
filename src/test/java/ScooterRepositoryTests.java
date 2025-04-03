@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.*;
+import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
@@ -10,7 +11,7 @@ import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 import java.util.*;
 
 public class ScooterRepositoryTests {
-    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl();
+    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
 
     private static final Scooter SCOOTER_1 = ScooterTestData.aScooter().build();
 
@@ -106,7 +107,7 @@ public class ScooterRepositoryTests {
         scooterRepository.save(SCOOTER_1);
 
         Scooter updatedScooter = SCOOTER_1.toBuilder()
-                .setScooterType(newScooterType)
+                .type(newScooterType)
                 .build();
         scooterRepository.update(updatedScooter);
         Scooter scooterFromDataBase = scooterRepository.findById(updatedScooter.getId()).get();

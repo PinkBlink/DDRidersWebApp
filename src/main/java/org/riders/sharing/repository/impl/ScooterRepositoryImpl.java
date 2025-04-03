@@ -15,7 +15,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ScooterRepositoryImpl implements ScooterRepository {
-    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
+    private final ConnectionPool connectionPool;
+
+    public ScooterRepositoryImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+    }
 
     @Override
     public Scooter save(Scooter scooter) {
@@ -25,15 +29,15 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                 INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
                 VALUES( ?, ?, ?, ?, ?, ?);
                 """)) {
-             final var scooterToStore = scooter.toBuilder()
-                    .setCreateTime(Instant.now())
-                    .setUpdateTime(Instant.now())
+            final var scooterToStore = scooter.toBuilder()
+                    .createTime(Instant.now())
+                    .createTime(Instant.now())
                     .build();
 
             preparedStatement.setObject(1, scooterToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(scooterToStore.getCreateTime()));
             preparedStatement.setTimestamp(3, Timestamp.from(scooterToStore.getUpdateTime()));
-            preparedStatement.setObject(4, scooterToStore.getScooterType(), Types.OTHER);
+            preparedStatement.setObject(4, scooterToStore.getType(), Types.OTHER);
             preparedStatement.setObject(5, scooterToStore.getStatus(), Types.OTHER);
             preparedStatement.setInt(6, scooterToStore.getBatteryLevel());
             preparedStatement.executeUpdate();
@@ -58,11 +62,11 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                 battery_level = ?
                 WHERE id = ?""")) {
             final var scooterToStore = scooter.toBuilder()
-                    .setUpdateTime(Instant.now())
+                    .updateTime(Instant.now())
                     .build();
 
             statement.setTimestamp(1, Timestamp.from(scooterToStore.getUpdateTime()));
-            statement.setObject(2, scooterToStore.getScooterType(), Types.OTHER);
+            statement.setObject(2, scooterToStore.getType(), Types.OTHER);
             statement.setObject(3, scooterToStore.getStatus(), Types.OTHER);
             statement.setInt(4, scooterToStore.getBatteryLevel());
             statement.setObject(5, scooterToStore.getId(), Types.OTHER);
@@ -86,7 +90,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                return Optional.of(Scooter.createScooterFromResultSet(resultSet));
+                return Optional.of(Scooter.scooterFromResultSet(resultSet));
             }
 
             return Optional.empty();
@@ -107,7 +111,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                var scooter = Scooter.createScooterFromResultSet(resultSet);
+                var scooter = Scooter.scooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
 
@@ -147,7 +151,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                final var scooter = Scooter.createScooterFromResultSet(resultSet);
+                final var scooter = Scooter.scooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
 
