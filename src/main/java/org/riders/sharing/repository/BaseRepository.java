@@ -10,17 +10,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BaseRepository<T extends BaseEntity> {
-    T save(BaseEntity entity);
+    T save(T entity);
 
     T update(T entity);
 
-    Optional<T> find(UUID id);
+    Optional<T> findById(UUID id);
 
     List<T> findAll();
 
-    boolean isExist(T entity);
-
-    T delete(UUID id);
+    boolean delete(UUID id);
 
     default void closeStatement(Statement statement) {
         if (statement != null) {
