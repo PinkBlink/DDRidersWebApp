@@ -19,14 +19,4 @@ public interface BaseRepository<T extends BaseEntity> {
     List<T> findAll();
 
     boolean delete(UUID id);
-
-    default void closeStatement(Statement statement) {
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                LogManager.getLogger(this).error("Can't close statement", e);
-            }
-        }
-    }
 }

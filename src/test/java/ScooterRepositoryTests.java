@@ -7,37 +7,27 @@ import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
 
-import java.sql.SQLException;
 import java.util.*;
 
 public class ScooterRepositoryTests {
     private final ScooterRepository scooterRepository = new ScooterRepositoryImpl();
 
-    private static final Scooter SCOOTER_1 = Scooter.Builder.getNewBuilderWithId()
-            .setScooterType(ScooterType.FOLDING)
-            .setStatus(ScooterStatus.AVAILABLE)
-            .setBatteryLevel(100)
-            .build();
+    private static final Scooter SCOOTER_1 = ScooterTestData.aScooter().build();
 
-    private static final Scooter SCOOTER_2 = Scooter.Builder.getNewBuilderWithId()
-            .setScooterType(ScooterType.LONG_RANGE)
-            .setStatus(ScooterStatus.AVAILABLE)
-            .setBatteryLevel(100)
-            .build();
+    private static final Scooter SCOOTER_2 = ScooterTestData.aScooter().build();
 
     @BeforeAll
-    public static void beforeAll() throws SQLException {
+    public static void beforeAll() {
         TestsUtils.deleteEntitiesFromDatabase(TestsUtils.SCOOTERS_TABLE, SCOOTER_1, SCOOTER_2);
     }
 
-
     @AfterAll
-    public static void afterAll() throws SQLException {
+    public static void afterAll() {
         TestsUtils.deleteEntitiesFromDatabase(TestsUtils.SCOOTERS_TABLE, SCOOTER_1, SCOOTER_2);
     }
 
     @AfterEach
-    public void afterEach() throws SQLException {
+    public void afterEach() {
         TestsUtils.deleteEntitiesFromDatabase(TestsUtils.SCOOTERS_TABLE, SCOOTER_1, SCOOTER_2);
     }
 
@@ -73,24 +63,13 @@ public class ScooterRepositoryTests {
     }
 
     @Test
-    public void findScootersByStatusShouldReturnScooterList() throws SQLException {
-        ScooterStatus status = ScooterStatus.RENTED;
+    public void findScootersByStatusShouldReturnScooterList() {
+        ScooterStatus status = ScooterStatus.AVAILABLE;
         List<Scooter> scooters = Arrays.asList(
-                Scooter.Builder.getNewBuilderWithId()
-                        .setScooterType(ScooterType.URBAN)
-                        .setStatus(status)
-                        .build()
-                ,
-                Scooter.Builder.getNewBuilderWithId()
-                        .setScooterType(ScooterType.URBAN)
-                        .setStatus(status)
-                        .build()
-                ,
-                Scooter.Builder.getNewBuilderWithId()
-                        .setScooterType(ScooterType.URBAN)
-                        .setStatus(status)
-                        .build()
-        );
+                ScooterTestData.aScooter().build()
+                , ScooterTestData.aScooter().build()
+                , ScooterTestData.aScooter().build());
+
         scooters.forEach(scooterRepository::save);
 
         List<Scooter> scootersFromDatabase = scooterRepository.findScootersByStatus(status);
@@ -103,7 +82,7 @@ public class ScooterRepositoryTests {
     }
 
     @Test
-    public void findScootersByStatusEmailShouldReturnEmptyList() {
+    public void findScootersByStatusShouldReturnEmptyList() {
         scooterRepository.save(SCOOTER_1);
 
         List<Scooter> scooters = scooterRepository.findScootersByStatus(ScooterStatus.RENTED);
@@ -136,17 +115,12 @@ public class ScooterRepositoryTests {
     }
 
     @Test
-    public void updateShouldSetUpdateTime() throws InterruptedException {
+    public void updateShouldSetUpdateTime(){
         Scooter savedScooter = scooterRepository.save(SCOOTER_1);
-
-        Thread.sleep(10);
 
         Scooter updatedScooter = scooterRepository.update(savedScooter);
 
-        String errorMessage = "Saved: %s  Updated: %s "
-                .formatted(savedScooter.getUpdateTime(), updatedScooter.getUpdateTime());
-
-        Assertions.assertTrue(savedScooter.getUpdateTime().isBefore(updatedScooter.getUpdateTime()), errorMessage);
+        Assertions.assertTrue(savedScooter.getUpdateTime().isBefore(updatedScooter.getUpdateTime()));
     }
 
     @Test

@@ -19,14 +19,13 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
     @Override
     public Scooter save(Scooter scooter) {
-        String query = """
+        final var connection = connectionPool.getConnection();
+
+        try (final var preparedStatement = connection.prepareStatement("""
                 INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
                 VALUES( ?, ?, ?, ?, ?, ?);
-                """;
-
-        try (Connection connection = connectionPool.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            Scooter scooterToStore = scooter.toBuilder()
+                """)) {
+             final var scooterToStore = scooter.toBuilder()
                     .setCreateTime(Instant.now())
                     .setUpdateTime(Instant.now())
                     .build();
@@ -42,28 +41,25 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             return scooterToStore;
         } catch (SQLException e) {
             throw new DuplicateEntryException(e.getMessage());
+        } finally {
+            connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public Scooter update(Scooter scooter) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            Scooter scooterToStore = scooter.toBuilder()
+        try (final var statement = connection.prepareStatement("""
+                UPDATE scooters
+                SET update_time = ?,
+                scooter_type = ?,
+                scooter_status = ?,
+                battery_level = ?
+                WHERE id = ?""")) {
+            final var scooterToStore = scooter.toBuilder()
                     .setUpdateTime(Instant.now())
                     .build();
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    """
-                            UPDATE scooters
-                            SET update_time = ?,
-                            scooter_type = ?,
-                            scooter_status = ?,
-                            battery_level = ?
-                            WHERE id = ?"""
-            );
 
             statement.setTimestamp(1, Timestamp.from(scooterToStore.getUpdateTime()));
             statement.setObject(2, scooterToStore.getScooterType(), Types.OTHER);
@@ -77,22 +73,17 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public Optional<Scooter> findById(UUID id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    "SELECT * FROM scooters WHERE id = ?;"
-            );
+        try (final var statement = connection.prepareStatement(
+                "SELECT * FROM scooters WHERE id = ?;")) {
             statement.setObject(1, id, Types.OTHER);
-            ResultSet resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 return Optional.of(Scooter.createScooterFromResultSet(resultSet));
@@ -103,25 +94,20 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public List<Scooter> findAll() {
-        List<Scooter> scooterList = new ArrayList<>();
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var scooterList = new ArrayList<Scooter>();
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    "SELECT * FROM scooters;"
-            );
-            ResultSet resultSet = statement.executeQuery();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT * FROM scooters;")) {
+            var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Scooter scooter = Scooter.createScooterFromResultSet(resultSet);
+                var scooter = Scooter.createScooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
 
@@ -130,22 +116,16 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public boolean delete(UUID id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    """
-                            DELETE FROM scooters
-                            WHERE id = ?"""
-            );
+        try (final var statement = connection.prepareStatement("""
+                DELETE FROM scooters
+                WHERE id = ?""")) {
             statement.setObject(1, id, Types.OTHER);
 
             return statement.executeUpdate() > 0;
@@ -153,26 +133,21 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public List<Scooter> findScootersByStatus(ScooterStatus scooterStatus) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        List<Scooter> scooterList = new ArrayList<>();
+        final var connection = connectionPool.getConnection();
+        final var scooterList = new ArrayList<Scooter>();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    "SELECT * FROM scooters WHERE scooter_status = ?;"
-            );
+        try (final var statement = connection.prepareStatement(
+                "SELECT * FROM scooters WHERE scooter_status = ?;")) {
             statement.setObject(1, scooterStatus, Types.OTHER);
-            ResultSet resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Scooter scooter = Scooter.createScooterFromResultSet(resultSet);
+                final var scooter = Scooter.createScooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
 
@@ -181,7 +156,6 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 }
