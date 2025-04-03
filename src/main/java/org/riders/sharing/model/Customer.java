@@ -44,13 +44,13 @@ public class Customer extends BaseEntity {
 
     public Customer.Builder toBuilder() {
         return new Builder()
-                .setId(getId())
-                .setCreateTime(getCreateTime())
-                .setUpdateTime(getUpdateTime())
-                .setName(name)
-                .setSurname(surname)
-                .setEmail(email)
-                .setPassword(password);
+                .id(getId())
+                .createTime(getCreateTime())
+                .updateTime(getUpdateTime())
+                .name(name)
+                .surname(surname)
+                .email(email)
+                .password(password);
     }
 
     public static class Builder {
@@ -62,41 +62,42 @@ public class Customer extends BaseEntity {
         private String email;
         private String password;
 
-        public Builder setId(UUID id) {
+        public static Builder customer() {
+            return new Builder().id(UUID.randomUUID());
+        }
+
+
+        public Builder id(UUID id) {
             this.id = id;
             return this;
         }
 
-        public static Builder getNewBuilderWithId() {
-            return new Builder().setId(UUID.randomUUID());
-        }
-
-        public Builder setCreateTime(Instant createTime) {
+        public Builder createTime(Instant createTime) {
             this.createTime = createTime;
             return this;
         }
 
-        public Builder setUpdateTime(Instant updateTime) {
+        public Builder updateTime(Instant updateTime) {
             this.updateTime = updateTime;
             return this;
         }
 
-        public Builder setName(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder setSurname(String surname) {
+        public Builder surname(String surname) {
             this.surname = surname;
             return this;
         }
 
-        public Builder setEmail(String email) {
+        public Builder email(String email) {
             this.email = email;
             return this;
         }
 
-        public Builder setPassword(String password) {
+        public Builder password(String password) {
             this.password = password;
             return this;
         }
@@ -106,7 +107,7 @@ public class Customer extends BaseEntity {
         }
     }
 
-    public static Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
+    public static Customer customerFromResultSet(ResultSet resultSet) throws SQLException {
         UUID id = UUID.fromString(resultSet.getString(1));
         Instant createTime = resultSet.getTimestamp(2).toInstant();
         Instant updateTime = resultSet.getTimestamp(3).toInstant();
@@ -116,13 +117,13 @@ public class Customer extends BaseEntity {
         String password = resultSet.getString(7);
 
         return new Customer.Builder()
-                .setId(id)
-                .setCreateTime(createTime)
-                .setUpdateTime(updateTime)
-                .setName(name)
-                .setSurname(surname)
-                .setEmail(email)
-                .setPassword(password)
+                .id(id)
+                .createTime(createTime)
+                .updateTime(updateTime)
+                .name(name)
+                .surname(surname)
+                .email(email)
+                .password(password)
                 .build();
     }
 
@@ -131,9 +132,11 @@ public class Customer extends BaseEntity {
         if (this == o) {
             return true;
         }
+
         if (!(o instanceof Customer customer)) {
             return false;
         }
+
         return getId().equals(customer.getId())
                 && password.equals(customer.password)
                 && Objects.equals(name, customer.name)

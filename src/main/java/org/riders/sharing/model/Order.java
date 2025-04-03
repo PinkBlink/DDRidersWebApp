@@ -16,7 +16,7 @@ public class Order extends BaseEntity {
     private final Scooter scooter;
     private final Instant startTime;
     private final Instant endTime;
-    private final OrderStatus orderStatus;
+    private final OrderStatus status;
 
     public Order(Order.Builder builder) {
         setId(builder.id);
@@ -26,8 +26,7 @@ public class Order extends BaseEntity {
         scooter = builder.scooter;
         startTime = builder.startTime;
         endTime = builder.endTime;
-        orderStatus = builder.orderStatus;
-
+        status = builder.status;
     }
 
     public UUID getCustomerId() {
@@ -49,29 +48,30 @@ public class Order extends BaseEntity {
         return endTime;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
+    public OrderStatus getStatus() {
+        return status;
     }
 
 
     public Order.Builder toBuilder() {
         return new Builder()
-                .setId(getId())
-                .setCreateTime(getCreateTime())
-                .setUpdateTime(getUpdateTime())
-                .setCustomerId(getCustomerId())
-                .setScooter(scooter)
-                .setStartTime(startTime)
-                .setEndTime(endTime)
-                .setOrderStatus(orderStatus);
+                .id(getId())
+                .createTime(getCreateTime())
+                .updateTime(getUpdateTime())
+                .customerId(getCustomerId())
+                .scooter(scooter)
+                .startTime(startTime)
+                .endTime(endTime)
+                .status(status);
     }
 
     public Order complete() {
-        Scooter updatedScooter = scooter.toBuilder().setStatus(ScooterStatus.AVAILABLE).build();
+        Scooter updatedScooter = scooter.toBuilder().status(ScooterStatus.AVAILABLE).build();
+
         return this.toBuilder()
-                .setOrderStatus(OrderStatus.COMPLETED)
-                .setEndTime(Instant.now())
-                .setScooter(updatedScooter)
+                .status(OrderStatus.COMPLETED)
+                .endTime(Instant.now())
+                .scooter(updatedScooter)
                 .build();
     }
 
@@ -83,50 +83,50 @@ public class Order extends BaseEntity {
         private Scooter scooter;
         private Instant startTime;
         private Instant endTime;
-        private OrderStatus orderStatus;
+        private OrderStatus status;
 
-        public Order.Builder setId(UUID id) {
+        public Order.Builder id(UUID id) {
             this.id = id;
             return this;
         }
 
-        public static Builder getNewBuilderWithId() {
-            return new Builder().setId(UUID.randomUUID());
+        public static Builder order() {
+            return new Builder().id(UUID.randomUUID());
         }
 
-        public Order.Builder setCreateTime(Instant createTime) {
+        public Order.Builder createTime(Instant createTime) {
             this.createTime = createTime;
             return this;
         }
 
-        public Order.Builder setUpdateTime(Instant updateTime) {
+        public Order.Builder updateTime(Instant updateTime) {
             this.updateTime = updateTime;
             return this;
         }
 
 
-        public Order.Builder setCustomerId(UUID customerId) {
+        public Order.Builder customerId(UUID customerId) {
             this.customerId = customerId;
             return this;
         }
 
-        public Order.Builder setScooter(Scooter scooter) {
+        public Order.Builder scooter(Scooter scooter) {
             this.scooter = scooter;
             return this;
         }
 
-        public Order.Builder setStartTime(Instant startTime) {
+        public Order.Builder startTime(Instant startTime) {
             this.startTime = startTime;
             return this;
         }
 
-        public Order.Builder setEndTime(Instant endTime) {
+        public Order.Builder endTime(Instant endTime) {
             this.endTime = endTime;
             return this;
         }
 
-        public Order.Builder setOrderStatus(OrderStatus orderStatus) {
-            this.orderStatus = orderStatus;
+        public Order.Builder status(OrderStatus orderStatus) {
+            this.status = orderStatus;
             return this;
         }
 
@@ -135,8 +135,7 @@ public class Order extends BaseEntity {
         }
     }
 
-    public static Order createOrderFromResultSet(ResultSet resultSet) throws SQLException {
-
+    public static Order orderFromResultSet(ResultSet resultSet) throws SQLException {
         UUID orderId = UUID.fromString(resultSet.getString(1));
         Instant orderCreateTime = resultSet.getTimestamp(2).toInstant();
         Instant orderUpdateTime = resultSet.getTimestamp(3).toInstant();
@@ -157,23 +156,23 @@ public class Order extends BaseEntity {
         int batteryLevel = resultSet.getInt(14);
 
         Scooter scooter = new Scooter.Builder()
-                .setId(scooterId)
-                .setCreateTime(scooterCreateTime)
-                .setUpdateTime(scooterUpdateTime)
-                .setScooterType(scooterType)
-                .setStatus(scooterStatus)
-                .setBatteryLevel(batteryLevel)
+                .id(scooterId)
+                .createTime(scooterCreateTime)
+                .updateTime(scooterUpdateTime)
+                .type(scooterType)
+                .status(scooterStatus)
+                .batteryLevel(batteryLevel)
                 .build();
 
         return new Order.Builder()
-                .setId(orderId)
-                .setCreateTime(orderCreateTime)
-                .setUpdateTime(orderUpdateTime)
-                .setCustomerId(customerId)
-                .setScooter(scooter)
-                .setStartTime(startTime)
-                .setEndTime(endTime)
-                .setOrderStatus(orderStatus)
+                .id(orderId)
+                .createTime(orderCreateTime)
+                .updateTime(orderUpdateTime)
+                .customerId(customerId)
+                .scooter(scooter)
+                .startTime(startTime)
+                .endTime(endTime)
+                .status(orderStatus)
                 .build();
 
     }
@@ -183,20 +182,22 @@ public class Order extends BaseEntity {
         if (this == o) {
             return true;
         }
+
         if (!(o instanceof Order order)) {
             return false;
         }
+
         return getId().equals(order.getId())
                 && customerId == order.customerId
                 && Objects.equals(scooter, order.scooter)
                 && Objects.equals(startTime, order.startTime)
                 && Objects.equals(endTime, order.endTime)
-                && orderStatus == order.orderStatus;
+                && status == order.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), customerId, scooter, startTime, endTime, orderStatus);
+        return Objects.hash(getId(), customerId, scooter, startTime, endTime, status);
     }
 
     @Override
@@ -207,7 +208,7 @@ public class Order extends BaseEntity {
                 ", scooter=" + scooter +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
-                ", orderStatus=" + orderStatus +
+                ", orderStatus=" + status +
                 '}';
     }
 }
