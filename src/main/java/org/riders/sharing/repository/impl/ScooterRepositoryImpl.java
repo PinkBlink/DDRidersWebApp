@@ -7,7 +7,10 @@ import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +29,12 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var preparedStatement = connection.prepareStatement("""
-                INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
-                VALUES( ?, ?, ?, ?, ?, ?);
-                """)) {
+            INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
+            VALUES( ?, ?, ?, ?, ?, ?);""")) {
             final var scooterToStore = scooter.toBuilder()
-                    .createTime(Instant.now())
-                    .createTime(Instant.now())
-                    .build();
+                .createTime(Instant.now())
+                .updateTime(Instant.now())
+                .build();
 
             preparedStatement.setObject(1, scooterToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(scooterToStore.getCreateTime()));
@@ -55,15 +57,15 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var statement = connection.prepareStatement("""
-                UPDATE scooters
-                SET update_time = ?,
-                scooter_type = ?,
-                scooter_status = ?,
-                battery_level = ?
-                WHERE id = ?""")) {
+            UPDATE scooters
+            SET update_time = ?,
+            scooter_type = ?,
+            scooter_status = ?,
+            battery_level = ?
+            WHERE id = ?""")) {
             final var scooterToStore = scooter.toBuilder()
-                    .updateTime(Instant.now())
-                    .build();
+                .updateTime(Instant.now())
+                .build();
 
             statement.setTimestamp(1, Timestamp.from(scooterToStore.getUpdateTime()));
             statement.setObject(2, scooterToStore.getType(), Types.OTHER);
@@ -84,8 +86,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
     public Optional<Scooter> findById(UUID id) {
         final var connection = connectionPool.getConnection();
 
-        try (final var statement = connection.prepareStatement(
-                "SELECT * FROM scooters WHERE id = ?;")) {
+        try (final var statement = connection.prepareStatement("SELECT * FROM scooters WHERE id = ?;")) {
             statement.setObject(1, id, Types.OTHER);
             final var resultSet = statement.executeQuery();
 
@@ -107,11 +108,11 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var connection = connectionPool.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM scooters;")) {
-            var resultSet = statement.executeQuery();
+            "SELECT * FROM scooters;")) {
+            final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                var scooter = Scooter.scooterFromResultSet(resultSet);
+                final var scooter = Scooter.scooterFromResultSet(resultSet);
                 scooterList.add(scooter);
             }
 
@@ -128,8 +129,9 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var statement = connection.prepareStatement("""
-                DELETE FROM scooters
-                WHERE id = ?""")) {
+            DELETE FROM scooters
+            WHERE id = ?""")) {
+
             statement.setObject(1, id, Types.OTHER);
 
             return statement.executeUpdate() > 0;
@@ -146,7 +148,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var scooterList = new ArrayList<Scooter>();
 
         try (final var statement = connection.prepareStatement(
-                "SELECT * FROM scooters WHERE scooter_status = ?;")) {
+            "SELECT * FROM scooters WHERE scooter_status = ?;")) {
             statement.setObject(1, scooterStatus, Types.OTHER);
             final var resultSet = statement.executeQuery();
 

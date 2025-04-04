@@ -1,16 +1,22 @@
-import org.junit.jupiter.api.BeforeAll;
-import org.riders.sharing.connection.ConnectionPool;
+import org.junit.jupiter.api.BeforeEach;
+import org.riders.sharing.utils.constants.DatabaseInfo;
+
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public abstract class BaseTest {
-    private static ConnectionPool connectionPoolForTests;
+    @BeforeEach
+    public void cleanTables() {
+        try (final var connection = DriverManager.getConnection(TestsConstants.TEST_DB_URL,
+            DatabaseInfo.USER, DatabaseInfo.PASSWORD)) {
 
-    @BeforeAll
-    public static void initDB() {
-        ConnectionPool.INSTANCE.setDatabaseURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "", "");
-        connectionPoolForTests = ConnectionPool.INSTANCE;
-    }
+            try (final var statement = connection.prepareStatement(
+                "TRUNCATE TABLE orders, scooters, customers")) {
+                statement.executeUpdate();
+            }
 
-    public static void main(String[] args) {
-        connectionPoolForTests.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
