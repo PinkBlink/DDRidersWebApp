@@ -3,10 +3,12 @@ package org.riders.sharing.connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.exception.NoSQLConnectionException;
-import org.riders.sharing.utils.SQLUtils;
-import org.riders.sharing.utils.constants.DataBaseInfo;
+import org.riders.sharing.utils.SqlUtils;
+import org.riders.sharing.utils.constants.DatabaseInfo;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -15,13 +17,15 @@ public enum ConnectionPool {
     private static final int DEFAULT_CAPACITY = 16;
 
     private final Logger logger;
+    private DatabaseInitParams databaseInitParams;
     private Queue<Connection> availableConnections;
     private Queue<Connection> busyConnections;
 
     ConnectionPool() {
         logger = LogManager.getLogger(ConnectionPool.class);
+        databaseInitParams = DatabaseInfo.DD_RIDERS_DATABASE_INIT_PARAMS;
         registerDriver();
-        SQLUtils.initDatabase();
+        SqlUtils.initDatabase(databaseInitParams);
         initConnections();
     }
 
@@ -34,29 +38,25 @@ public enum ConnectionPool {
     }
 
     private void deregisterDriver() {
-        DriverManager.getDrivers()
-                .asIterator()
-                .forEachRemaining(driver -> {
-                    try {
-                        DriverManager.deregisterDriver(driver);
-                    } catch (SQLException e) {
-                        logger.error("Can't deregister driver\n" + e);
-                        throw new NoSQLConnectionException(e.getMessage());
-                    }
-                });
+        DriverManager.getDrivers().asIterator().forEachRemaining(driver -> {
+            try {
+                DriverManager.deregisterDriver(driver);
+            } catch (SQLException e) {
+                logger.error("Can't deregister driver {}", e.getMessage());
+                throw new NoSQLConnectionException(e.getMessage());
+            }
+        });
     }
 
     private void initConnections() {
-        initConnections(DataBaseInfo.DD_RIDERS_URL, DataBaseInfo.USER, DataBaseInfo.PASSWORD);
-    }
-
-    private void initConnections(String url, String user, String password) {
         availableConnections = new ArrayDeque<>(DEFAULT_CAPACITY);
         busyConnections = new ArrayDeque<>();
 
         try {
             for (int i = 0; i < DEFAULT_CAPACITY; i++) {
-                Connection connection = createConnection(url, user, password);
+                final var connection = createConnection(databaseInitParams.customDBUrl(),
+                    databaseInitParams.user(), databaseInitParams.password());
+
                 availableConnections.add(connection);
             }
         } catch (NoSQLConnectionException e) {
@@ -67,30 +67,31 @@ public enum ConnectionPool {
             logger.error("Available connections amount is zero;");
             throw new RuntimeException("No connections to database");
         } else {
-            logger.info("Connections successfully created: " + availableConnections.size());
+            logger.info("Connections successfully created: {}", availableConnections.size());
         }
     }
 
-    private Connection createConnection(String url, String user, String password) throws NoSQLConnectionException {
-        Connection connection;
-
+    private Connection createConnection(String url, String user, String password)
+        throws NoSQLConnectionException {
         try {
-            connection = DriverManager.getConnection(url, user, password);
-            logger.info("Create new connection: " + connection.toString());
+            final var connection = DriverManager.getConnection(url, user, password);
+            logger.info("Create new connection: {}", connection.toString());
+            return connection;
         } catch (SQLException e) {
-            logger.error("Can't create connection: " + e);
-            throw new NoSQLConnectionException(e.getMessage());
+            logger.error("Can't create connection: {}", e.getMessage());
+            throw new NoSQLConnectionException(e.getMessage(), e);
         }
-        return connection;
     }
 
-    public void setDatabaseURL(String url, String user, String password) {
-        initConnections(url, user, password);
+    public ConnectionPool setDatabaseInitParams(DatabaseInitParams databaseInitParams) {
+        this.databaseInitParams = databaseInitParams;
+        SqlUtils.initDatabase(databaseInitParams);
+        initConnections();
+        return INSTANCE;
     }
 
     public synchronized Connection getConnection() {
-        Connection connection;
-        connection = availableConnections.peek();
+        final var connection = availableConnections.peek();
         busyConnections.offer(connection);
 
         return connection;
@@ -103,16 +104,16 @@ public enum ConnectionPool {
 
     public void destroyPool() {
         try {
-            for (Connection connection : availableConnections) {
+            for (final var connection : availableConnections) {
                 connection.close();
             }
 
-            for (Connection connection : busyConnections) {
+            for (final var connection : busyConnections) {
                 connection.close();
             }
         } catch (SQLException e) {
             logger.error("Can't close connection");
-            throw new RuntimeException(e);
+            throw new NoSQLConnectionException("Can't close connection", e);
         }
         deregisterDriver();
     }
