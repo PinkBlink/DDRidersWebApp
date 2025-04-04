@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.BeforeEach;
+import org.riders.sharing.exception.NoSQLConnectionException;
 import org.riders.sharing.utils.constants.DatabaseInfo;
 
 import java.sql.DriverManager;
@@ -16,7 +17,7 @@ public abstract class BaseTest {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new NoSQLConnectionException(e.getMessage(), e);
         }
     }
 }
