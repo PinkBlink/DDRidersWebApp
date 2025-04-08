@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DuplicateEntryException;
-import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 
@@ -12,13 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CustomerRepositoryTest extends BaseTest {
-    private final Customer customer = CustomerTestData.aCustomer().build();
+public class CustomerRepositoryTest extends BaseTest implements CustomerTestData {
 
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
 
     @Test
     public void savesCustomerToDb() {
+        final var customer = aCustomer().build();
+
         final var savedCustomer = customerRepository.save(customer);
 
         final var customerFromDb = customerRepository.findById(savedCustomer.getId()).get();
@@ -29,6 +29,8 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void saveThrowsDuplicateExceptionIfEmailExists() {
+        final var customer = aCustomer().build();
+
         customerRepository.save(customer);
 
         assertThrows(DuplicateEntryException.class, () -> customerRepository.save(customer));
@@ -36,6 +38,8 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void saveThrowsDuplicateEntryIfIdExists() {
+        final var customer = aCustomer().build();
+
         customerRepository.save(customer);
 
         assertThrows(DuplicateEntryException.class, () -> customerRepository.save(customer));
@@ -43,6 +47,7 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void findByIdReturnsCustomer() {
+        final var customer = aCustomer().build();
         customerRepository.save(customer);
 
         final var customerFromDb = customerRepository.findById(customer.getId()).get();
@@ -52,6 +57,7 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void findByEmailReturnsCustomer() {
+        final var customer = aCustomer().build();
         customerRepository.save(customer);
 
         final var customerFromDb = customerRepository.findByEmail(customer.getEmail()).get();
@@ -62,9 +68,9 @@ public class CustomerRepositoryTest extends BaseTest {
     @Test
     public void findAllReturnsFullyList() {
         final var customerList = List.of(
-            CustomerTestData.aCustomer()
+            aCustomer()
                 .email("1").build(),
-            CustomerTestData.aCustomer()
+            aCustomer()
                 .email("2").build()
         );
         customerList.forEach(customerRepository::save);
@@ -76,12 +82,13 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void updatesCustomerInDb() {
+        final var customer = aCustomer().build();
         customerRepository.save(customer);
         final var newName = "newName";
+
         final var updatedCustomer = customer.toBuilder()
             .updateTime(null)
             .name(newName).build();
-
         customerRepository.update(updatedCustomer);
         final var customerFromDB = customerRepository.findById(updatedCustomer.getId()).get();
 
@@ -91,6 +98,7 @@ public class CustomerRepositoryTest extends BaseTest {
 
     @Test
     public void deletesCustomerFromDb() {
+        final var customer = aCustomer().build();
         customerRepository.save(customer);
 
         final var result = customerRepository.delete(customer.getId());
