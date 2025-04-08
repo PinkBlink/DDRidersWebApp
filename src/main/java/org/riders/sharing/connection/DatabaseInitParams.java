@@ -15,7 +15,7 @@ public record DatabaseInitParams(String postgresDBUrl, String customDBUrl,
             Map<String, String> config = yaml.load(input);
 
             return new DatabaseInitParams(
-                config.get("postgres_url"),
+                config.get("postgres_db_url"),
                 config.get("dd_riders_db_url"),
                 config.get("path_to_create_db_script"),
                 config.get("path_to_create_tables_script"),
