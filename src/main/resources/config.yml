@@ -1,0 +1,6 @@
+postgres_db_url: jdbc:postgresql://localhost:5432/postgres
+dd_riders_db_url: jdbc:postgresql://localhost:5432/dd_riders_db
+user: postgres
+password: pinkblink
+path_to_create_db_script: sql/create_db_script.sql
+path_to_create_tables_script: sql/create_tables_script.sql
