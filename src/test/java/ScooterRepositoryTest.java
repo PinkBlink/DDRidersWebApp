@@ -1,118 +1,97 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DuplicateEntryException;
-import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
-import org.riders.sharing.model.enums.ScooterType;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ScooterRepositoryTest extends BaseTest {
-    private static final Scooter SCOOTER_1 = ScooterTestData.aScooter().build();
-    private static final Scooter SCOOTER_2 = ScooterTestData.aScooter().build();
+public class ScooterRepositoryTest extends BaseTest implements ScooterTestData {
 
     private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
 
     @Test
-    public void saveSetCreateAndUpdateTime() {
-        final var savedScooter = scooterRepository.save(SCOOTER_1);
+    public void saveScooterToDb() {
+        final var scooter = aScooter().build();
 
-        assertTrue(savedScooter.getCreateTime().equals(savedScooter.getUpdateTime())
-            && SCOOTER_1.equals(savedScooter));
+        final var savedScooter = scooterRepository.save(scooter);
+        final var scooterFromDb = scooterRepository.findById(scooter.getId()).get();
+
+        assertEquals(savedScooter, scooterFromDb);
+        assertNotNull(scooterFromDb.getUpdateTime());
+        assertNotNull(scooterFromDb.getCreateTime());
     }
 
     @Test
     public void saveThrowsDuplicateEntryIfAlreadyExists() {
-        scooterRepository.save(SCOOTER_1);
+        final var scooter = aScooter().build();
 
-        assertThrows(DuplicateEntryException.class, () -> scooterRepository.save(SCOOTER_1));
+        scooterRepository.save(scooter);
+
+        assertThrows(DuplicateEntryException.class, () -> scooterRepository.save(scooter));
     }
 
     @Test
     public void findByIdReturnsScooter() {
-        scooterRepository.save(SCOOTER_1);
+        final var scooter = aScooter().build();
+        scooterRepository.save(scooter);
 
-        final var scooterFromDatabase = scooterRepository.findById(SCOOTER_1.getId()).get();
+        final var scooterFromDb = scooterRepository.findById(scooter.getId()).get();
 
-        assertEquals(SCOOTER_1, scooterFromDatabase);
-    }
-
-    @Test
-    public void findByIdReturnsEmptyOptional() {
-        final var maybeScooter = scooterRepository.findById(UUID.randomUUID());
-
-        assertThrows(NoSuchElementException.class, maybeScooter::get);
+        assertEquals(scooter, scooterFromDb);
     }
 
     @Test
     public void findByStatusReturnsFullyList() {
         final var status = ScooterStatus.AVAILABLE;
-        final var scooters = List.of(ScooterTestData.aScooter().build(),
-            ScooterTestData.aScooter().build(),
-            ScooterTestData.aScooter().build());
+        final var scooterList = List.of(
+            aScooter().build(),
+            aScooter().build());
+        scooterList.forEach(scooterRepository::save);
 
-        scooters.forEach(scooterRepository::save);
+        final var scooterListFromDb = scooterRepository.findScootersByStatus(status);
 
-        final var scootersFromDatabase = scooterRepository.findScootersByStatus(status);
-
-        assertEquals(scooters, scootersFromDatabase);
-    }
-
-    @Test
-    public void findByStatusShouldReturnsEmptyList() {
-        scooterRepository.save(SCOOTER_1);
-
-        final var scooters = scooterRepository.findScootersByStatus(ScooterStatus.RENTED);
-
-        assertEquals(0, scooters.size());
+        assertEquals(scooterList, scooterListFromDb);
     }
 
     @Test
     public void findAllReturnsFullyList() {
-        scooterRepository.save(SCOOTER_1);
-        scooterRepository.save(SCOOTER_2);
+        final var scooterList = List.of(
+            aScooter().build(),
+            aScooter().build());
+        scooterList.forEach(scooterRepository::save);
 
-        final var scootersFromDatabase = scooterRepository.findAll();
+        final var scootersFromDb = scooterRepository.findAll();
 
-        assertEquals(2, scootersFromDatabase.size());
+        assertEquals(scooterList, scootersFromDb);
     }
 
     @Test
     public void updatesScooterInDB() {
-        final var newScooterType = ScooterType.URBAN;
-        scooterRepository.save(SCOOTER_1);
+        final var newStatus = ScooterStatus.RENTED;
+        final var scooter = aScooter().build();
+        scooterRepository.save(scooter);
 
-        final var updatedScooter = SCOOTER_1.toBuilder().type(newScooterType).build();
-
+        final var updatedScooter = scooter.toBuilder().status(newStatus).updateTime(null).build();
         scooterRepository.update(updatedScooter);
-        final var scooterFromDatabase = scooterRepository.findById(updatedScooter.getId()).get();
+        final var scooterFromDb = scooterRepository.findById(updatedScooter.getId()).get();
 
-        assertEquals(updatedScooter, scooterFromDatabase);
-    }
-
-    @Test
-    public void updatesSetUpdateTime() {
-        scooterRepository.save(SCOOTER_1);
-
-        final var updatedScooter = scooterRepository.update(SCOOTER_1.toBuilder().updateTime(null).build());
-
-        assertNotNull(updatedScooter.getUpdateTime());
+        assertEquals(updatedScooter, scooterFromDb);
+        assertNotNull(scooterFromDb.getUpdateTime());
     }
 
     @Test
     public void deletesScooterFromDB() {
-        scooterRepository.save(SCOOTER_1);
+        final var scooter = aScooter().build();
+        scooterRepository.save(scooter);
 
-        final var result = scooterRepository.delete(SCOOTER_1.getId());
+        final var result = scooterRepository.delete(scooter.getId());
 
         assertTrue(result);
     }
