@@ -18,8 +18,8 @@ public class ScooterRepositoryTest extends BaseTest implements ScooterTestData {
     @Test
     public void saveScooterToDb() {
         final var scooter = aScooter().build();
-        final var savedScooter = scooterRepository.save(scooter);
 
+        final var savedScooter = scooterRepository.save(scooter);
         final var scooterFromDb = scooterRepository.findById(scooter.getId()).get();
 
         assertEquals(savedScooter, scooterFromDb);
@@ -66,9 +66,9 @@ public class ScooterRepositoryTest extends BaseTest implements ScooterTestData {
             aScooter().build());
         scooterList.forEach(scooterRepository::save);
 
-        final var scootersFromDatabase = scooterRepository.findAll();
+        final var scootersFromDb = scooterRepository.findAll();
 
-        assertEquals(scooterList, scootersFromDatabase);
+        assertEquals(scooterList, scootersFromDb);
     }
 
     @Test
