@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScooterRepositoryTest extends BaseTest {
     private static final Scooter SCOOTER_1 = ScooterTestData.aScooter().build();
-
     private static final Scooter SCOOTER_2 = ScooterTestData.aScooter().build();
-    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
-    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(connectionPool);
+
+    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
 
     @Test
     public void saveSetCreateAndUpdateTime() {
         final var savedScooter = scooterRepository.save(SCOOTER_1);
 
-        assertTrue(savedScooter.getCreateTime().equals(savedScooter.getUpdateTime()) && SCOOTER_1.equals(savedScooter));
+        assertTrue(savedScooter.getCreateTime().equals(savedScooter.getUpdateTime())
+            && SCOOTER_1.equals(savedScooter));
     }
 
     @Test

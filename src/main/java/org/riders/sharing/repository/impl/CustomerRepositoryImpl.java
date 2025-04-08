@@ -1,13 +1,14 @@
 package org.riders.sharing.repository.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.exception.*;
+import org.riders.sharing.exception.DatabaseException;
+import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,54 +16,46 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CustomerRepositoryImpl implements CustomerRepository {
-    private final Logger logger = LogManager.getLogger(this);
-    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
+    private final ConnectionPool connectionPool;
+
+    public CustomerRepositoryImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+    }
 
     @Override
     public Optional<Customer> findByEmail(String email) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement("""
-                    SELECT * FROM customers
-                    WHERE email = ?""");
-
+        try (final var preparedStatement = connection.prepareStatement("""
+            SELECT * FROM customers
+            WHERE email = ?""")) {
             preparedStatement.setString(1, email);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            final var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                logger.info("Customer with email {} was successfully found.", email);
-                return Optional.of(Customer.createCustomerFromResultSet(resultSet));
-            } else {
-                logger.warn("Couldn't find customer with email {}", email);
-                return Optional.empty();
+                return Optional.of(Customer.customerFromResultSet(resultSet));
             }
+
+            return Optional.empty();
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to findById customer by email {}", email, e);
             throw new DatabaseException(e.getMessage());
         } finally {
-            closeStatement(preparedStatement);
             connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public Customer save(Customer customer) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            Customer customerToStore = customer.toBuilder()
-                    .setCreateTime(Instant.now())
-                    .setUpdateTime(Instant.now())
-                    .build();
-            connection = connectionPool.getConnection();
-            preparedStatement = connection.prepareStatement("""
-                    INSERT INTO customers(id, create_time, update_time, name, surname, email, password)
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
-                    """);
+        try (final var preparedStatement = connection.prepareStatement("""
+            INSERT INTO customers(id, create_time, update_time, name, surname, email, password)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+            """)) {
+            final var customerToStore = customer.toBuilder()
+                .createTime(Instant.now())
+                .updateTime(Instant.now())
+                .build();
 
             preparedStatement.setObject(1, customerToStore.getId(), Types.OTHER);
             preparedStatement.setTimestamp(2, Timestamp.from(customerToStore.getCreateTime()));
@@ -73,135 +66,102 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             preparedStatement.setString(7, customerToStore.getPassword());
             preparedStatement.executeUpdate();
 
-            logger.info("Successfully saved customer: {}", customer);
             return customerToStore;
         } catch (SQLException e) {
-            logger.error("Customer with this email or ID already exists: {}", customer, e);
-            throw new DuplicateIdOrEmailException(e.getMessage());
+            throw new DuplicateEntryException(e.getMessage());
         } finally {
-            closeStatement(preparedStatement);
             connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public Customer update(Customer customer) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
+        try (final var preparedStatement = connection.prepareStatement("""
+            UPDATE customers
+            SET update_time = ?,
+            name = ?,
+            surname = ?,
+            email = ?,
+            password = ?
+            WHERE id = ?;""")) {
             Customer customerToStore = customer.toBuilder()
-                    .setUpdateTime(Instant.now()).
-                    build();
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement("""
-                    UPDATE customers
-                    SET update_time = ?,
-                    name = ?,
-                    surname = ?,
-                    email = ?,
-                    password = ?
-                    WHERE id = ?;""");
+                .updateTime(Instant.now())
+                .build();
 
-            statement.setTimestamp(1, Timestamp.from(customerToStore.getUpdateTime()));
-            statement.setString(2, customerToStore.getName());
-            statement.setString(3, customerToStore.getSurname());
-            statement.setString(4, customerToStore.getEmail());
-            statement.setString(5, customerToStore.getPassword());
-            statement.setObject(6, customerToStore.getId(), Types.OTHER);
+            preparedStatement.setTimestamp(1, Timestamp.from(customerToStore.getUpdateTime()));
+            preparedStatement.setString(2, customerToStore.getName());
+            preparedStatement.setString(3, customerToStore.getSurname());
+            preparedStatement.setString(4, customerToStore.getEmail());
+            preparedStatement.setString(5, customerToStore.getPassword());
+            preparedStatement.setObject(6, customerToStore.getId(), Types.OTHER);
+            preparedStatement.executeUpdate();
 
-            logger.info(statement.executeUpdate() > 0
-                    ? "Customer " + customer + " has been successfully updated"
-                    : "Couldn't find customer " + customer);
             return customerToStore;
         } catch (SQLException e) {
-            logger.error("Error occurred while trying to update customer: {}", customer);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public Optional<Customer> findById(UUID id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement("SELECT * FROM customers WHERE id = ?");
-            statement.setObject(1, id, Types.OTHER);
-            ResultSet resultSet = statement.executeQuery();
+        try (final var preparedStatement = connection.prepareStatement(
+            "SELECT * FROM customers WHERE id = ?")) {
+            preparedStatement.setObject(1, id, Types.OTHER);
+            final var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                logger.info("Successfully found customer with customerId: {}", id);
-                return Optional.of(Customer.createCustomerFromResultSet(resultSet));
+                return Optional.of(Customer.customerFromResultSet(resultSet));
             }
 
-            logger.warn("Couldn't find customer with id: {}", id);
             return Optional.empty();
         } catch (SQLException e) {
-            logger.error("Error occurred while attempting to find customer with id: {}", id);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public List<Customer> findAll() {
-        List<Customer> customerList = new ArrayList<>();
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var customerList = new ArrayList<Customer>();
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement(
-                    "SELECT * FROM customers;"
-            );
-            ResultSet resultSet = statement.executeQuery();
+        try (final var preparedStatement = connection.prepareStatement(
+            "SELECT * FROM customers;")) {
+            final var resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                Customer customer = Customer.createCustomerFromResultSet(resultSet);
+                Customer customer = Customer.customerFromResultSet(resultSet);
                 customerList.add(customer);
             }
 
-            logger.info(customerList.isEmpty()
-                    ? "Customer list is empty "
-                    : "Successfully found customer(s)" + customerList.size());
             return customerList;
         } catch (SQLException e) {
-            logger.error("Error occurred while attempting to find all customers.");
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 
     @Override
     public boolean delete(UUID id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        final var connection = connectionPool.getConnection();
 
-        try {
-            connection = connectionPool.getConnection();
-            statement = connection.prepareStatement("DELETE FROM customers WHERE id = ?");
-            statement.setObject(1, id, Types.OTHER);
-            boolean result = statement.executeUpdate() > 0;
+        try (final var preparedStatement = connection.prepareStatement(
+            "DELETE FROM customers WHERE id = ?")) {
+            preparedStatement.setObject(1, id, Types.OTHER);
 
-            logger.info(statement.executeUpdate() > 0
-                    ? "Customer with id: %s as successfully deleted".formatted(id)
-                    : "Couldn't find customer with id: %s".formatted(id));
-            return result;
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.error("Error while deleting customer with id: {}", id, e);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             connectionPool.releaseConnection(connection);
-            closeStatement(statement);
         }
     }
 }
