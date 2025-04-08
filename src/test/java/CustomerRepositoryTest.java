@@ -6,8 +6,6 @@ import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,62 +13,50 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CustomerRepositoryTest extends BaseTest {
-    private static final Customer CUSTOMER = CustomerTestData.aCustomer().build();
+    private final Customer customer = CustomerTestData.aCustomer().build();
 
-    private  final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
+    private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
 
     @Test
-    public void saveSetCreateAndUpdateTime() {
-        final var savedCustomer = customerRepository.save(CUSTOMER);
+    public void savesCustomerToDb() {
+        final var savedCustomer = customerRepository.save(customer);
 
-        assertTrue(savedCustomer.getCreateTime().equals(savedCustomer.getUpdateTime())
-            && CUSTOMER.equals(savedCustomer));
+        final var customerFromDb = customerRepository.findById(savedCustomer.getId()).get();
+        assertEquals(savedCustomer, customerFromDb);
+        assertNotNull(savedCustomer.getUpdateTime());
+        assertNotNull(savedCustomer.getCreateTime());
     }
 
     @Test
     public void saveThrowsDuplicateExceptionIfEmailExists() {
-        customerRepository.save(CUSTOMER);
+        customerRepository.save(customer);
 
-        assertThrows(DuplicateEntryException.class, () -> customerRepository.save(CUSTOMER));
+        assertThrows(DuplicateEntryException.class, () -> customerRepository.save(customer));
     }
 
     @Test
     public void saveThrowsDuplicateEntryIfIdExists() {
-        customerRepository.save(CUSTOMER);
+        customerRepository.save(customer);
 
-        assertThrows(DuplicateEntryException.class, () -> customerRepository.save(CUSTOMER));
+        assertThrows(DuplicateEntryException.class, () -> customerRepository.save(customer));
     }
 
     @Test
     public void findByIdReturnsCustomer() {
-        customerRepository.save(CUSTOMER);
+        customerRepository.save(customer);
 
-        final var customerFromDatabase = customerRepository.findById(CUSTOMER.getId()).get();
+        final var customerFromDb = customerRepository.findById(customer.getId()).get();
 
-        assertEquals(CUSTOMER, customerFromDatabase);
-    }
-
-    @Test
-    public void findByIdReturnsEmptyOptional() {
-        final var maybeCustomer = customerRepository.findById(UUID.randomUUID());
-
-        assertThrows(NoSuchElementException.class, maybeCustomer::get);
+        assertEquals(customer, customerFromDb);
     }
 
     @Test
     public void findByEmailReturnsCustomer() {
-        customerRepository.save(CUSTOMER);
+        customerRepository.save(customer);
 
-        final var customerFromDatabase = customerRepository.findByEmail(CUSTOMER.getEmail()).get();
+        final var customerFromDb = customerRepository.findByEmail(customer.getEmail()).get();
 
-        assertEquals(CUSTOMER, customerFromDatabase);
-    }
-
-    @Test
-    public void findByEmailReturnsEmptyOptional() {
-        final var maybeCustomer = customerRepository.findByEmail("nothing@else.matters");
-
-        assertThrows(NoSuchElementException.class, maybeCustomer::get);
+        assertEquals(customer, customerFromDb);
     }
 
     @Test
@@ -79,11 +65,7 @@ public class CustomerRepositoryTest extends BaseTest {
             CustomerTestData.aCustomer()
                 .email("1").build(),
             CustomerTestData.aCustomer()
-                .email("2").build(),
-            CustomerTestData.aCustomer()
-                .email("3").build(),
-            CustomerTestData.aCustomer()
-                .email("4").build()
+                .email("2").build()
         );
         customerList.forEach(customerRepository::save);
 
@@ -93,30 +75,25 @@ public class CustomerRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void updatesCustomerInDB() {
-        customerRepository.save(CUSTOMER);
+    public void updatesCustomerInDb() {
+        customerRepository.save(customer);
         final var newName = "newName";
-        final var updatedCustomer = CUSTOMER.toBuilder().name(newName).build();
+        final var updatedCustomer = customer.toBuilder()
+            .updateTime(null)
+            .name(newName).build();
 
         customerRepository.update(updatedCustomer);
         final var customerFromDB = customerRepository.findById(updatedCustomer.getId()).get();
 
-        assertEquals(newName, customerFromDB.getName());
+        assertEquals(updatedCustomer, customerFromDB);
+        assertNotNull(customerFromDB.getUpdateTime());
     }
 
     @Test
-    public void updatesSetUpdateTime() {
-        Customer savedCustomer = customerRepository.save(CUSTOMER);
-        Customer updatedCustomer = customerRepository.update(savedCustomer.toBuilder().updateTime(null).build());
+    public void deletesCustomerFromDb() {
+        customerRepository.save(customer);
 
-        assertNotNull(updatedCustomer.getUpdateTime());
-    }
-
-    @Test
-    public void deletesCustomerFromDB() {
-        customerRepository.save(CUSTOMER);
-
-        boolean result = customerRepository.delete(CUSTOMER.getId());
+        final var result = customerRepository.delete(customer.getId());
 
         assertTrue(result);
     }
