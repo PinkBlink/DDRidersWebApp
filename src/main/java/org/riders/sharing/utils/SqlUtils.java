@@ -57,7 +57,7 @@ public class SqlUtils {
     }
 
     private static InputStream getInputStreamFromFile(String path) {
-            final var inputStream = SqlUtils.class.getClassLoader().getResourceAsStream(path);
+        final var inputStream = SqlUtils.class.getClassLoader().getResourceAsStream(path);
 
         if (inputStream == null) {
             logger.error("File doesn't exist. Path: {}", path);
