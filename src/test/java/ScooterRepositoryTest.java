@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Test;
+import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
@@ -6,7 +7,7 @@ import org.riders.sharing.model.enums.ScooterType;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -19,8 +20,8 @@ public class ScooterRepositoryTest extends BaseTest {
     private static final Scooter SCOOTER_1 = ScooterTestData.aScooter().build();
 
     private static final Scooter SCOOTER_2 = ScooterTestData.aScooter().build();
-
-    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(TestsConstants.TEST_CONNECTION_POOL);
+    private final ConnectionPool connectionPool = ConnectionPool.INSTANCE;
+    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(connectionPool);
 
     @Test
     public void saveSetCreateAndUpdateTime() {
@@ -55,7 +56,9 @@ public class ScooterRepositoryTest extends BaseTest {
     @Test
     public void findByStatusReturnsFullyList() {
         final var status = ScooterStatus.AVAILABLE;
-        final var scooters = Arrays.asList(ScooterTestData.aScooter().build(), ScooterTestData.aScooter().build(), ScooterTestData.aScooter().build());
+        final var scooters = List.of(ScooterTestData.aScooter().build(),
+            ScooterTestData.aScooter().build(),
+            ScooterTestData.aScooter().build());
 
         scooters.forEach(scooterRepository::save);
 

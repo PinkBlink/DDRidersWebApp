@@ -18,6 +18,7 @@ dependencies {
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
+    implementation('org.yaml:snakeyaml:2.0')
     implementation 'com.auth0:java-jwt:4.4.0'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.3'
 }

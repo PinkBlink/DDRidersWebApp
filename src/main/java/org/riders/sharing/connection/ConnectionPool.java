@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.exception.NoSQLConnectionException;
 import org.riders.sharing.utils.SqlUtils;
-import org.riders.sharing.utils.constants.DatabaseInfo;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +22,7 @@ public enum ConnectionPool {
 
     ConnectionPool() {
         logger = LogManager.getLogger(ConnectionPool.class);
-        databaseInitParams = DatabaseInfo.DD_RIDERS_DATABASE_INIT_PARAMS;
+        databaseInitParams = DatabaseInitParams.getFromConfig();
         registerDriver();
         SqlUtils.initDatabase(databaseInitParams);
         initConnections();
@@ -83,11 +82,11 @@ public enum ConnectionPool {
         }
     }
 
-    public ConnectionPool setDatabaseInitParams(DatabaseInitParams databaseInitParams) {
+    public void setDatabaseInitParams(DatabaseInitParams databaseInitParams) {
+        logger.info("Attempt to setting up new connections to: {}", databaseInitParams.customDBUrl());
         this.databaseInitParams = databaseInitParams;
         SqlUtils.initDatabase(databaseInitParams);
         initConnections();
-        return INSTANCE;
     }
 
     public synchronized Connection getConnection() {
@@ -116,5 +115,9 @@ public enum ConnectionPool {
             throw new NoSQLConnectionException("Can't close connection", e);
         }
         deregisterDriver();
+    }
+
+    public static void main(String[] args) {
+        ConnectionPool connectionPool = ConnectionPool.INSTANCE;
     }
 }

@@ -22,16 +22,14 @@ public class SqlUtils {
             sendCreateFile(databaseInitParams.pathToCreateDBScript(),
                 databaseInitParams.postgresDBUrl(),
                 databaseInitParams.user(),
-                databaseInitParams.password(),
-                databaseInitParams.contextClass());
+                databaseInitParams.password());
 
             logger.info("Attempt to send create tables file: {}",
                 databaseInitParams.pathToCreateTablesScript());
             sendCreateFile(databaseInitParams.pathToCreateTablesScript(),
                 databaseInitParams.customDBUrl(),
                 databaseInitParams.user(),
-                databaseInitParams.password(),
-                databaseInitParams.contextClass());
+                databaseInitParams.password());
 
             logger.info("Database and tables are successfully created");
         } else {
@@ -39,12 +37,11 @@ public class SqlUtils {
         }
     }
 
-    private static void sendCreateFile(String path, String url, String user, String password,
-                                       Class<?> contextClass) {
+    private static void sendCreateFile(String path, String url, String user, String password) {
         try (final var connection = DriverManager.getConnection(url, user, password)) {
             logger.info("Created connection with {}", url);
 
-            final var inputStream = getInputStreamFromFile(path, contextClass);
+            final var inputStream = getInputStreamFromFile(path);
             final var statement = connection.createStatement();
             final var createScript = getStringFromInputStream(inputStream);
 
@@ -59,8 +56,8 @@ public class SqlUtils {
         }
     }
 
-    private static InputStream getInputStreamFromFile(String path, Class<?> contextClass) {
-        final var inputStream = contextClass.getClassLoader().getResourceAsStream(path);
+    private static InputStream getInputStreamFromFile(String path) {
+            final var inputStream = SqlUtils.class.getClassLoader().getResourceAsStream(path);
 
         if (inputStream == null) {
             logger.error("File doesn't exist. Path: {}", path);
