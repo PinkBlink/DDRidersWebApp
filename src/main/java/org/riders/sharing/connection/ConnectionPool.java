@@ -82,13 +82,6 @@ public enum ConnectionPool {
         }
     }
 
-    public void setDatabaseInitParams(DatabaseInitParams databaseInitParams) {
-        logger.info("Attempt to setting up new connections to: {}", databaseInitParams.customDBUrl());
-        this.databaseInitParams = databaseInitParams;
-        SqlUtils.initDatabase(databaseInitParams);
-        initConnections();
-    }
-
     public synchronized Connection getConnection() {
         final var connection = availableConnections.peek();
         busyConnections.offer(connection);
@@ -115,9 +108,5 @@ public enum ConnectionPool {
             throw new NoSQLConnectionException("Can't close connection", e);
         }
         deregisterDriver();
-    }
-
-    public static void main(String[] args) {
-        ConnectionPool connectionPool = ConnectionPool.INSTANCE;
     }
 }
