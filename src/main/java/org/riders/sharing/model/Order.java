@@ -148,7 +148,6 @@ public class Order extends BaseEntity {
                 ? null
                 : maybeEndTime.toInstant();
 
-
         Instant scooterCreateTime = resultSet.getTimestamp(10).toInstant();
         Instant scooterUpdateTime = resultSet.getTimestamp(11).toInstant();
         ScooterType scooterType = ScooterType.valueOf(resultSet.getString(12));
@@ -174,7 +173,6 @@ public class Order extends BaseEntity {
                 .endTime(endTime)
                 .status(orderStatus)
                 .build();
-
     }
 
     @Override
