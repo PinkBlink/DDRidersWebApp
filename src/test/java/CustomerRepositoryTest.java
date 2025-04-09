@@ -28,7 +28,7 @@ public class CustomerRepositoryTest extends BaseTest implements CustomerTestData
     }
 
     @Test
-    public void saveThrowsDuplicateExceptionIfEmailExists() {
+    public void saveThrowsDuplicateEntryIfEmailExists() {
         final var customer = aCustomer().build();
 
         customerRepository.save(customer);
