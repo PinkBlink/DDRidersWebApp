@@ -47,6 +47,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 : Timestamp.from(orderToStore.getEndTime()));
 
             preparedStatement.setObject(8, order.getStatus(), Types.OTHER);
+            preparedStatement.executeUpdate();
 
             return orderToStore;
         } catch (SQLException e) {
@@ -83,6 +84,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             preparedStatement.setObject(6, orderToStore.getStatus(), Types.OTHER);
             preparedStatement.setObject(7, orderToStore.getId(), Types.OTHER);
+            preparedStatement.executeUpdate();
 
             return orderToStore;
         } catch (SQLException e) {
@@ -126,7 +128,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             final var resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                Order order = Order.orderFromResultSet(resultSet);
+                final var order = Order.orderFromResultSet(resultSet);
                 orderList.add(order);
             }
 
