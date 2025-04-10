@@ -5,7 +5,6 @@ import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 public interface OrderTestData extends CustomerTestData, ScooterTestData {
     default Order.Builder anOrder() {
