@@ -6,6 +6,6 @@ public interface CustomerTestData {
             .name("name")
             .surname("surname")
             .email("email@email.com")
-            .password("pass");
+            .password("123");
     }
 }
