@@ -2,8 +2,12 @@ import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.enums.OrderStatus;
+import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.OrderRepository;
+import org.riders.sharing.repository.ScooterRepository;
+import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.repository.impl.OrderRepositoryImpl;
+import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 
 import java.util.List;
 
@@ -12,12 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OrderRepositoryTest extends BaseTest implements OrderTestData {
+public class OrderRepositoryTest extends BaseTest implements OrderTestData, ScooterTestData, CustomerTestData {
     private final OrderRepository orderRepository = new OrderRepositoryImpl(ConnectionPool.INSTANCE);
+    private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
+    private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
 
     @Test
     public void saveOrderToDb() {
-        final var order = anOrder().build();
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var order = anOrder().customerId(customer.getId()).scooter(scooter).build();
 
         final var savedOrder = orderRepository.save(order);
         final var orderFromDb = orderRepository.findById(order.getId()).get();
@@ -29,7 +37,9 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
 
     @Test
     public void saveThrowsDuplicateEntryIfAlreadyExists() {
-        final var order = anOrder().build();
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var order = anOrder().customerId(customer.getId()).scooter(scooter).build();
 
         orderRepository.save(order);
 
@@ -38,7 +48,9 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
 
     @Test
     public void findByIdReturnsOrder() {
-        final var order = anOrder().build();
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var order = anOrder().customerId(customer.getId()).scooter(scooter).build();
         orderRepository.save(order);
 
         final var orderFromDb = orderRepository.findById(order.getId()).get();
@@ -48,10 +60,12 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
 
     @Test
     public void findByStatusReturnsFullyList() {
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
         final var status = OrderStatus.ONGOING;
         final var orderList = List.of(
-            anOrder().build(),
-            anOrder().build());
+            anOrder().customerId(customer.getId()).scooter(scooter).build(),
+            anOrder().customerId(customer.getId()).scooter(scooter).build());
         orderList.forEach(orderRepository::save);
 
         final var orderListFromDb = orderRepository.findOrdersByStatus(status);
@@ -60,10 +74,27 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
     }
 
     @Test
+    public void findCustomerOrdersReturnsFullyList() {
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var completedOrderList = List.of(
+            anOrder().customerId(customer.getId()).status(OrderStatus.COMPLETED).scooter(scooter).build(),
+            anOrder().customerId(customer.getId()).status(OrderStatus.COMPLETED).scooter(scooter).build());
+        completedOrderList.forEach(orderRepository::save);
+
+        final var orderListFromDb = orderRepository.findCustomerOrdersByStatus(customer.getId(), OrderStatus.COMPLETED);
+
+        assertEquals(completedOrderList, orderListFromDb);
+    }
+
+
+    @Test
     public void findAllReturnsFullyList() {
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
         final var orderList = List.of(
-            anOrder().build(),
-            anOrder().build());
+            anOrder().customerId(customer.getId()).scooter(scooter).build(),
+            anOrder().customerId(customer.getId()).scooter(scooter).build());
         orderList.forEach(orderRepository::save);
 
         final var orderListFromDb = orderRepository.findAll();
@@ -73,7 +104,9 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
 
     @Test
     public void updatesOrderInDb() {
-        final var order = anOrder().build();
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var order = anOrder().customerId(customer.getId()).scooter(scooter).build();
         orderRepository.save(order);
 
         final var updatedOrder = order.toBuilder().status(OrderStatus.COMPLETED).updateTime(null).build();
@@ -86,7 +119,9 @@ public class OrderRepositoryTest extends BaseTest implements OrderTestData {
 
     @Test
     public void deletesOrderFromDB() {
-        final var order = anOrder().build();
+        final var scooter = scooterRepository.save(aScooter().build());
+        final var customer = customerRepository.save(aCustomer().build());
+        final var order = anOrder().customerId(customer.getId()).scooter(scooter).build();
         orderRepository.save(order);
 
         final var result = orderRepository.delete(order.getId());
