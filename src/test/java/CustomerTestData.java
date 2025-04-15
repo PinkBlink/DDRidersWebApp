@@ -8,6 +8,5 @@ public interface CustomerTestData {
             .name("name")
             .surname("surname")
             .email(UUID.randomUUID().toString())
-            .password("pass");
     }
 }
