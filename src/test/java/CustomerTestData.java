@@ -1,11 +1,12 @@
 import org.riders.sharing.model.Customer;
 
+import java.util.UUID;
+
 public interface CustomerTestData {
     default Customer.Builder aCustomer() {
         return Customer.Builder.customer()
             .name("name")
             .surname("surname")
-            .email("email@email.com")
-            .password("123");
+            .email(UUID.randomUUID().toString())
     }
 }

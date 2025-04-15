@@ -6,8 +6,8 @@ import org.riders.sharing.model.enums.ScooterType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -55,24 +55,24 @@ public class Order extends BaseEntity {
 
     public Order.Builder toBuilder() {
         return new Builder()
-                .id(getId())
-                .createTime(getCreateTime())
-                .updateTime(getUpdateTime())
-                .customerId(getCustomerId())
-                .scooter(scooter)
-                .startTime(startTime)
-                .endTime(endTime)
-                .status(status);
+            .id(getId())
+            .createTime(getCreateTime())
+            .updateTime(getUpdateTime())
+            .customerId(getCustomerId())
+            .scooter(scooter)
+            .startTime(startTime)
+            .endTime(endTime)
+            .status(status);
     }
 
     public Order complete() {
-        Scooter updatedScooter = scooter.toBuilder().status(ScooterStatus.AVAILABLE).build();
+        final var updatedScooter = scooter.toBuilder().status(ScooterStatus.AVAILABLE).build();
 
         return this.toBuilder()
-                .status(OrderStatus.COMPLETED)
-                .endTime(Instant.now())
-                .scooter(updatedScooter)
-                .build();
+            .status(OrderStatus.COMPLETED)
+            .endTime(Instant.now())
+            .scooter(updatedScooter)
+            .build();
     }
 
     public static class Builder {
@@ -136,43 +136,43 @@ public class Order extends BaseEntity {
     }
 
     public static Order orderFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID orderId = UUID.fromString(resultSet.getString(1));
-        Instant orderCreateTime = resultSet.getTimestamp(2).toInstant();
-        Instant orderUpdateTime = resultSet.getTimestamp(3).toInstant();
-        UUID customerId = UUID.fromString(resultSet.getString(4));
-        UUID scooterId = UUID.fromString(resultSet.getString(5));
-        Instant startTime = resultSet.getTimestamp(6).toInstant();
-        Timestamp maybeEndTime = resultSet.getTimestamp(7);
-        OrderStatus orderStatus = OrderStatus.valueOf(resultSet.getString(8));
-        Instant endTime = (maybeEndTime == null)
-                ? null
-                : maybeEndTime.toInstant();
+        final var orderId = UUID.fromString(resultSet.getString(1));
+        final var orderCreateTime = resultSet.getTimestamp(2).toInstant();
+        final var orderUpdateTime = resultSet.getTimestamp(3).toInstant();
+        final var customerId = UUID.fromString(resultSet.getString(4));
+        final var scooterId = UUID.fromString(resultSet.getString(5));
+        final var startTime = resultSet.getTimestamp(6).toInstant();
+        final var maybeEndTime = resultSet.getTimestamp(7);
+        final var orderStatus = OrderStatus.valueOf(resultSet.getString(8));
+        final var endTime = (maybeEndTime == null)
+            ? null
+            : maybeEndTime.toInstant();
 
-        Instant scooterCreateTime = resultSet.getTimestamp(10).toInstant();
-        Instant scooterUpdateTime = resultSet.getTimestamp(11).toInstant();
-        ScooterType scooterType = ScooterType.valueOf(resultSet.getString(12));
-        ScooterStatus scooterStatus = ScooterStatus.valueOf(resultSet.getString(13));
-        int batteryLevel = resultSet.getInt(14);
+        final var scooterCreateTime = resultSet.getTimestamp(10).toInstant();
+        final var scooterUpdateTime = resultSet.getTimestamp(11).toInstant();
+        final var scooterType = ScooterType.valueOf(resultSet.getString(12));
+        final var scooterStatus = ScooterStatus.valueOf(resultSet.getString(13));
+        final var batteryLevel = resultSet.getInt(14);
 
-        Scooter scooter = new Scooter.Builder()
-                .id(scooterId)
-                .createTime(scooterCreateTime)
-                .updateTime(scooterUpdateTime)
-                .type(scooterType)
-                .status(scooterStatus)
-                .batteryLevel(batteryLevel)
-                .build();
+        final var scooter = new Scooter.Builder()
+            .id(scooterId)
+            .createTime(scooterCreateTime)
+            .updateTime(scooterUpdateTime)
+            .type(scooterType)
+            .status(scooterStatus)
+            .batteryLevel(batteryLevel)
+            .build();
 
         return new Order.Builder()
-                .id(orderId)
-                .createTime(orderCreateTime)
-                .updateTime(orderUpdateTime)
-                .customerId(customerId)
-                .scooter(scooter)
-                .startTime(startTime)
-                .endTime(endTime)
-                .status(orderStatus)
-                .build();
+            .id(orderId)
+            .createTime(orderCreateTime)
+            .updateTime(orderUpdateTime)
+            .customerId(customerId)
+            .scooter(scooter)
+            .startTime(startTime)
+            .endTime(endTime)
+            .status(orderStatus)
+            .build();
     }
 
     @Override
@@ -186,27 +186,32 @@ public class Order extends BaseEntity {
         }
 
         return getId().equals(order.getId())
-                && customerId == order.customerId
-                && Objects.equals(scooter, order.scooter)
-                && Objects.equals(startTime, order.startTime)
-                && Objects.equals(endTime, order.endTime)
-                && status == order.status;
+            && customerId.equals(order.customerId)
+            && Objects.equals(scooter.getId(), order.scooter.getId())
+            && Objects.equals(startTime.truncatedTo(ChronoUnit.MILLIS), order.startTime.truncatedTo(ChronoUnit.MILLIS))
+            && Objects.equals((endTime != null)
+                                    ? endTime.truncatedTo(ChronoUnit.MILLIS)
+                                    : null,
+                                (order.endTime != null)
+                                    ? order.endTime.truncatedTo(ChronoUnit.MILLIS)
+                                    : null)
+            && status == order.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), customerId, scooter, startTime, endTime, status);
+        return Objects.hash(getId(), customerId, scooter.getId(), startTime, endTime, status);
     }
 
     @Override
     public String toString() {
         return "Order{" +
-                "orderId=" + getId() +
-                ", customerId=" + customerId +
-                ", scooter=" + scooter +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", orderStatus=" + status +
-                '}';
+            "orderId=" + getId() +
+            ", customerId=" + customerId +
+            ", scooterId=" + scooter.getId() +
+            ", startTime=" + startTime +
+            ", endTime=" + endTime +
+            ", orderStatus=" + status +
+            '}';
     }
 }
