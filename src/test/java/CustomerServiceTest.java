@@ -1,13 +1,10 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.InvalidCredentialsException;
-import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
