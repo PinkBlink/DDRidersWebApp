@@ -52,4 +52,31 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
 
         verify(response).setStatus(expectedResponse);
     }
+
+    @Test
+    public void loginSetsStatus400IfBadRequest() throws IOException {
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
+        final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
+        final var requestReader = new BufferedReader(
+            new StringReader("""
+                """));
+
+        when(request.getReader()).thenReturn(requestReader);
+        loginCommand.execute(request, response);
+
+        verify(response).setStatus(expectedResponse);
+    }
+
+    @Test
+    public void loginSetsStatus500OnIOException() throws IOException {
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
+        final var expectedStatus = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+
+        when(request.getReader()).thenThrow(new IOException("IOException check"));
+        loginCommand.execute(request, response);
+
+        verify(response).setStatus(expectedStatus);
+    }
 }

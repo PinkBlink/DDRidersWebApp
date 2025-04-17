@@ -30,9 +30,15 @@ public class LoginCommand extends Command {
             customerService.login(loginDto.getEmail(), loginDto.getPassword());
 
             response.setStatus(HttpServletResponse.SC_OK);
-        } catch (IOException | InvalidRequestException | InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (InvalidRequestException e) {
+            logger.error(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }
