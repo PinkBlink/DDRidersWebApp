@@ -38,11 +38,9 @@ public class RegistrationCommand extends Command {
         } catch (IOException e) {
             logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-
         } catch (DuplicateEntryException e) {
             logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_CONFLICT);
-
         } catch (InvalidCredentialsException e) {
             logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
