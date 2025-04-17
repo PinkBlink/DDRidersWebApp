@@ -21,9 +21,7 @@ public class LoginCommand extends Command {
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
-            final var customerService = new CustomerServiceImpl(
-                new CustomerRepositoryImpl(ConnectionPool.INSTANCE)
-            );
+            final var customerService = new CustomerServiceImpl(new CustomerRepositoryImpl(ConnectionPool.INSTANCE));
             final var requestBody = ServletUtils.getRequestBody(request);
             final var loginDto = new ObjectMapper().readValue(requestBody, LoginDTO.class);
 
