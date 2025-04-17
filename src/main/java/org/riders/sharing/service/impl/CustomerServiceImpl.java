@@ -23,9 +23,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         final var customer = customerRepository.findByEmail(email).orElseThrow(() -> {
-                logger.error("Bad attempt to login: {}", email);
-                return new InvalidCredentialsException("Wrong email or password!");
-            });
+            logger.error("Bad attempt to login: {}", email);
+            return new InvalidCredentialsException("Wrong email or password!");
+        });
 
         if (!customer.getPassword().equals(password)) {
             logger.error("Wrong email or password!");
@@ -34,5 +34,16 @@ public class CustomerServiceImpl implements CustomerService {
 
         logger.info("Customer {} login successfully", customer.getEmail());
         return customer;
+    }
+
+    @Override
+    public Customer register(Customer customer) {
+        if (customer.getPassword() == null || customer.getEmail() == null) {
+            throw new InvalidCredentialsException("Email or Password is null!");
+        }
+
+        final var savedCustomer = customerRepository.save(customer);
+        logger.info("Customer {} was successfully saved", customer.getId());
+        return savedCustomer;
     }
 }

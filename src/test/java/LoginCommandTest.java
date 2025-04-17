@@ -15,7 +15,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final LoginCommand loginCommand = new LoginCommand();
 
     @Test
-    public void loginSetsResponseStatus200() throws IOException {
+    public void loginSetsStatus200() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
         final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
