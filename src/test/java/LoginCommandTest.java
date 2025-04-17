@@ -1,7 +1,6 @@
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;

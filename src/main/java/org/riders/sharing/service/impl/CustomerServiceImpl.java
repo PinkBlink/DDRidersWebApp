@@ -3,7 +3,6 @@ package org.riders.sharing.service.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.exception.InvalidCredentialsException;
-import org.riders.sharing.exception.InvalidRequestException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.CustomerService;
