@@ -10,22 +10,32 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    log4jVersion= '2.20.0'
+    jacksonVersion = '2.18.3'
+    jakartaServletVersion = '6.0.0'
+}
+
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
-    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    compileOnly("jakarta.servlet:jakarta.servlet-api:$jakartaServletVersion")
+
+    implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    implementation "org.apache.logging.log4j:log4j-api:$log4jVersion"
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
-    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
     implementation('org.yaml:snakeyaml:2.0')
     implementation 'com.auth0:java-jwt:4.4.0'
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.3'
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+
+    testImplementation("jakarta.servlet:jakarta.servlet-api:$jakartaServletVersion")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
 }
-war{
+war {
     archiveFileName = 'sharing.war'
 }
