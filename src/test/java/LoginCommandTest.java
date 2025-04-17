@@ -18,8 +18,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     public void loginSetsResponseStatus200() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var customerRepo = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
-        final var customer = customerRepo.save(aCustomer().build());
+        final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
         final var expectedResponse = HttpServletResponse.SC_OK;
         final var requestReader = new BufferedReader(
             new StringReader("""
@@ -27,7 +26,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
                    "email" : "%s",
                    "password" : "%s"
                 }
-                """.formatted(customer.getEmail(), customer.getPassword())));
+                """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword())));
 
         when(request.getReader()).thenReturn(requestReader);
         loginCommand.execute(request, response);
