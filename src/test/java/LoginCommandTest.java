@@ -54,7 +54,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     }
 
     @Test
-    public void loginSetsStatus400IfBadRequest() throws IOException {
+    public void loginSetsStatus400IfEmptyRequest() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
         final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
