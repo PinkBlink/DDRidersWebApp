@@ -10,46 +10,48 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import static org.mockito.Mockito.*;
+
 public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final LoginCommand loginCommand = new LoginCommand();
 
     @Test
     public void loginSetsResponseStatus200() throws IOException {
-        final var request = Mockito.mock(HttpServletRequest.class);
-        final var response = Mockito.mock(HttpServletResponse.class);
-        final var expectedResponse = HttpServletResponse.SC_OK;
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
         final var customerRepo = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
         final var customer = customerRepo.save(aCustomer().build());
+        final var expectedResponse = HttpServletResponse.SC_OK;
+        final var requestReader = new BufferedReader(
+            new StringReader("""
+                {
+                   "email" : "%s",
+                   "password" : "%s"
+                }
+                """.formatted(customer.getEmail(), customer.getPassword())));
 
-        Mockito.when(request.getReader()).thenReturn(
-            new BufferedReader(
-                new StringReader("""
-                    {
-                       "email" : "%s",
-                       "password" : "%s"
-                    }
-                    """.formatted(customer.getEmail(), customer.getPassword()))));
+        when(request.getReader()).thenReturn(requestReader);
         loginCommand.execute(request, response);
 
-        Mockito.verify(response).setStatus(expectedResponse);
+        verify(response).setStatus(expectedResponse);
     }
 
     @Test
     public void loginSetsStatus401IfInvalidCredo() throws IOException {
-        final var request = Mockito.mock(HttpServletRequest.class);
-        final var response = Mockito.mock(HttpServletResponse.class);
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
         final var expectedResponse = HttpServletResponse.SC_UNAUTHORIZED;
+        final var requestReader = new BufferedReader(
+            new StringReader("""
+                {
+                   "email" : "wrong",
+                   "password" : "wrong"
+                }
+                """));
 
-        Mockito.when(request.getReader()).thenReturn(
-            new BufferedReader(
-                new StringReader("""
-                    {
-                       "email" : "wrong",
-                       "password" : "wrong"
-                    }
-                    """)));
+        when(request.getReader()).thenReturn(requestReader);
         loginCommand.execute(request, response);
 
-        Mockito.verify(response).setStatus(expectedResponse);
+        verify(response).setStatus(expectedResponse);
     }
 }
