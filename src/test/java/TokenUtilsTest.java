@@ -1,14 +1,21 @@
 import com.auth0.jwt.JWT;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.exception.BadTokenException;
-import org.riders.sharing.utils.TokenUtils;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.riders.sharing.utils.TokenUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.riders.sharing.utils.TokenUtils.ALGORITHM;
+import static org.riders.sharing.utils.TokenUtils.decodeToken;
+import static org.riders.sharing.utils.TokenUtils.generateNewAccessToken;
+import static org.riders.sharing.utils.TokenUtils.generateNewRefreshToken;
+import static org.riders.sharing.utils.TokenUtils.isActiveToken;
+
 
 public class TokenUtilsTest implements CustomerTestData {
     @Test
@@ -28,9 +35,9 @@ public class TokenUtilsTest implements CustomerTestData {
         final var emptyToken = "";
 
         assertThrows(BadTokenException.class,
-            () -> TokenUtils.decodeToken(nullToken));
+            () -> decodeToken(nullToken));
         assertThrows(BadTokenException.class,
-            () -> TokenUtils.decodeToken(emptyToken));
+            () -> decodeToken(emptyToken));
     }
 
     @Test
@@ -59,8 +66,8 @@ public class TokenUtilsTest implements CustomerTestData {
         final var accessToken = generateNewAccessToken(customer);
         final var refreshToken = generateNewRefreshToken(customer);
 
-        assertTrue(TokenUtils.isActiveToken(accessToken));
-        assertTrue(TokenUtils.isActiveToken(refreshToken));
+        assertTrue(isActiveToken(accessToken));
+        assertTrue(isActiveToken(refreshToken));
     }
 
     @Test
