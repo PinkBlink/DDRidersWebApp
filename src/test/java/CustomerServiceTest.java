@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.exception.InvalidCredentialsException;
+import org.riders.sharing.dto.LoginDTO;
+import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
@@ -14,29 +15,30 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
     private final CustomerService customerService = new CustomerServiceImpl(customerRepository);
 
     @Test
-    public void logInThrowsInvalidCredentialsIfWrongPass() {
+    public void loginThrowsUnauthorizedIfWrongPass() {
         final var customer = customerRepository.save(aCustomer().build());
 
-        final var wrongPass = "000";
+        final var loginDto = new LoginDTO(customer.getEmail(), "wrong_pass");
 
-        assertThrows(InvalidCredentialsException.class, () -> customerService.login(customer.getEmail(), wrongPass));
+        assertThrows(UnauthorizedException.class, () -> customerService.login(loginDto));
     }
 
     @Test
-    public void loginThrowsInvalidCredentialsIfWrongEmail() {
+    public void loginThrowsUnauthorizedIfWrongEmail() {
         final var customer = customerRepository.save(aCustomer().build());
 
-        final var wrongEmail = customer.getEmail().toUpperCase();
+        final var loginDto = new LoginDTO("wrong@email", customer.getPassword());
 
-        assertThrows(InvalidCredentialsException.class,
-            () -> customerService.login(wrongEmail, customer.getPassword()));
+        assertThrows(UnauthorizedException.class,
+            () -> customerService.login(loginDto));
     }
 
     @Test
     public void loginReturnsCustomer() {
         final var customer = customerRepository.save(aCustomer().build());
+        final var loginDto = new LoginDTO(customer.getEmail(), customer.getPassword());
 
-        final var loggedCustomer = customerService.login(customer.getEmail(), customer.getPassword());
+        final var loggedCustomer = customerService.login(loginDto);
 
         assertEquals(customer, loggedCustomer);
     }
