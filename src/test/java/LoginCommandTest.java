@@ -1,7 +1,5 @@
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.riders.sharing.command.LoginCommand;
@@ -15,7 +13,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final LoginCommand loginCommand = new LoginCommand(
@@ -109,6 +111,6 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         final var decoded = TokenUtils.decodeToken(token);
         final var idFromToken = UUID.fromString(decoded.getSubject());
 
-        Assertions.assertEquals(savedCustomer.getId(), idFromToken);
+        assertEquals(savedCustomer.getId(), idFromToken);
     }
 }
