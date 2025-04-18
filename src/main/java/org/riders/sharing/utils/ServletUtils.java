@@ -1,7 +1,7 @@
 package org.riders.sharing.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.riders.sharing.exception.InvalidRequestException;
+import org.riders.sharing.exception.BadRequestException;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ public class ServletUtils {
         }
 
         if (requestBodyBuilder.isEmpty()) {
-            throw new InvalidRequestException("Attempt to get the body from empty request.");
+            throw new BadRequestException("Attempt to get the body from empty request.");
         }
 
         return requestBodyBuilder.toString();

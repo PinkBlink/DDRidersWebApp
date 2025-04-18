@@ -1,9 +1,11 @@
 package org.riders.sharing.service;
 
+import org.riders.sharing.dto.LoginDTO;
+import org.riders.sharing.dto.RegistrationDTO;
 import org.riders.sharing.model.Customer;
 
 public interface CustomerService {
-    Customer login(String email, String password);
+    Customer login(LoginDTO loginDTO);
 
-    Customer register(Customer customer);
+    Customer register(RegistrationDTO registrationDTO);
 }
