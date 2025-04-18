@@ -1,6 +1,7 @@
 package org.riders.sharing.command;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
@@ -10,6 +11,7 @@ import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ServletUtils;
+import org.riders.sharing.utils.TokenUtils;
 
 public class LoginCommand extends Command {
     private final static Logger logger = LogManager.getLogger(LoginCommand.class);
@@ -25,10 +27,14 @@ public class LoginCommand extends Command {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
             final var loginDto = new ObjectMapper().readValue(requestBody, LoginDTO.class);
-
-            customerService.login(loginDto);
+            final var customer = customerService.login(loginDto);
+            final var accessToken = TokenUtils.generateNewAccessToken(customer);
+            final var cookieWithRefreshToken = TokenUtils.getCookieWithRefreshToken(customer);
 
             response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            response.setHeader("Authorization", "Bearer " + accessToken);
+            response.addCookie(cookieWithRefreshToken);
         } catch (UnauthorizedException e) {
             logger.error("Login failed due to unauthorized access: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
