@@ -1,14 +1,19 @@
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
+import org.riders.sharing.utils.TokenUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -81,5 +86,29 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         loginCommand.execute(request, response);
 
         verify(response).setStatus(expectedResponse);
+    }
+
+    @Test
+    public void loginRespondsWithAccessToken() throws IOException {
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
+        final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
+        final var jsonAsReader = new StringReader("""
+            {
+               "email" : "%s",
+               "password" : "%s"
+            }
+            """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword()));
+        final var requestReader = new BufferedReader(jsonAsReader);
+
+        when(request.getReader()).thenReturn(requestReader);
+        ArgumentCaptor<String> authorizationHeaderCaptor = ArgumentCaptor.forClass(String.class);
+        loginCommand.execute(request, response);
+        verify(response).setHeader(eq("Authorization"), authorizationHeaderCaptor.capture());
+        final var token = TokenUtils.extractToken(authorizationHeaderCaptor.getValue());
+        final var decoded = TokenUtils.decodeToken(token);
+        final var idFromToken = UUID.fromString(decoded.getSubject());
+
+        Assertions.assertEquals(savedCustomer.getId(), idFromToken);
     }
 }

@@ -66,4 +66,8 @@ public class TokenUtils {
             return false;
         }
     }
+
+    public static String extractToken(String string){
+        return string.replace("Bearer","").trim();
+    }
 }
