@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.dto.LoginDTO;
+import org.riders.sharing.dto.LoginDto;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.service.CustomerService;
@@ -24,8 +24,8 @@ public class LoginCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var loginDto = new ObjectMapper().readValue(requestBody, LoginDTO.class);
-            
+            final var loginDto = new ObjectMapper().readValue(requestBody, LoginDto.class);
+
             customerService.login(loginDto);
 
             response.setStatus(HttpServletResponse.SC_OK);

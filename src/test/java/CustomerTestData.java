@@ -1,4 +1,5 @@
 import org.riders.sharing.model.Customer;
+import org.riders.sharing.utils.PasswordEncryptor;
 
 import java.util.UUID;
 
@@ -8,6 +9,6 @@ public interface CustomerTestData {
             .name("name")
             .surname("surname")
             .email(UUID.randomUUID().toString())
-            .password("password");
+            .password(PasswordEncryptor.encryptPassword("password"));
     }
 }

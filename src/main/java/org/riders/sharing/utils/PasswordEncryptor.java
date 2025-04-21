@@ -11,7 +11,7 @@ public class PasswordEncryptor {
 
     private static byte[] computeSHA256(String password) {
         try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            final var messageDigest = MessageDigest.getInstance("SHA-256");
             return messageDigest.digest(password.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -19,9 +19,9 @@ public class PasswordEncryptor {
     }
 
     private static String toHexString(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
+        final var hexString = new StringBuilder(2 * hash.length);
+        for (final var byteHash : hash) {
+            final var hex = Integer.toHexString(0xff & byteHash);
             if (hex.length() == 1) {
                 hexString.append('0');
             }

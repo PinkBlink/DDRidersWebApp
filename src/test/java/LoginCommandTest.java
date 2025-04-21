@@ -3,6 +3,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
 import org.riders.sharing.utils.PasswordEncryptor;
@@ -16,28 +17,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class LoginCommandTest extends BaseTest implements CustomerTestData {
-    private final LoginCommand loginCommand = new LoginCommand(
-        new CustomerServiceImpl(new CustomerRepositoryImpl(ConnectionPool.INSTANCE))
-    );
+    private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
+    private final LoginCommand loginCommand = new LoginCommand(new CustomerServiceImpl(customerRepository));
 
     @Test
     public void loginRespondsWith200() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var customer = aCustomer().build();
-        final var encryptedPassword = PasswordEncryptor.encryptPassword(customer.getPassword());
-        new CustomerRepositoryImpl(ConnectionPool.INSTANCE)
-            .save(
-                customer.toBuilder()
-                    .password(encryptedPassword)
-                    .build()
-            );
+        final var password = "pass";
+        final var hashedPassword = PasswordEncryptor.encryptPassword(password);
+        final var customer = customerRepository.save(aCustomer().password(hashedPassword).build());
         final var loginJsonAsReader = new StringReader("""
             {
                "email" : "%s",
                "password" : "%s"
             }
-            """.formatted(customer.getEmail(), customer.getPassword()));
+            """.formatted(customer.getEmail(), password));
         final var requestReader = new BufferedReader(loginJsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_OK;
 

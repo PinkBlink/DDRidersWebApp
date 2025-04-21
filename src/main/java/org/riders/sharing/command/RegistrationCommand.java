@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.dto.RegistrationDTO;
+import org.riders.sharing.dto.RegistrationDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.service.CustomerService;
@@ -24,9 +24,9 @@ public class RegistrationCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var registrationDTO = new ObjectMapper().readValue(requestBody, RegistrationDTO.class);
+            final var registrationDto = new ObjectMapper().readValue(requestBody, RegistrationDto.class);
 
-            customerService.register(registrationDTO);
+            customerService.register(registrationDto);
 
             response.setStatus(HttpServletResponse.SC_CREATED);
         } catch (DuplicateEntryException e) {

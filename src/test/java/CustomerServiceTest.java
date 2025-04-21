@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.dto.LoginDTO;
+import org.riders.sharing.dto.LoginDto;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -19,7 +19,7 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
     public void loginThrowsUnauthorizedIfWrongPass() {
         final var customer = customerRepository.save(aCustomer().build());
 
-        final var loginDto = new LoginDTO(customer.getEmail(), "wrong_pass");
+        final var loginDto = new LoginDto(customer.getEmail(), "wrong_pass");
 
         assertThrows(UnauthorizedException.class, () -> customerService.login(loginDto));
     }
@@ -28,7 +28,7 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
     public void loginThrowsUnauthorizedIfWrongEmail() {
         final var customer = customerRepository.save(aCustomer().build());
 
-        final var loginDto = new LoginDTO("wrong@email", customer.getPassword());
+        final var loginDto = new LoginDto("wrong@email", customer.getPassword());
 
         assertThrows(UnauthorizedException.class,
             () -> customerService.login(loginDto));
@@ -41,7 +41,7 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
             customer.toBuilder()
                 .password(PasswordEncryptor.encryptPassword(customer.getPassword()))
                 .build());
-        final var loginDto = new LoginDTO(customer.getEmail(), customer.getPassword());
+        final var loginDto = new LoginDto(customer.getEmail(), customer.getPassword());
 
         final var loggedCustomer = customerService.login(loginDto);
 
