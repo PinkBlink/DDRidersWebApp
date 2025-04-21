@@ -42,8 +42,8 @@ public class TokenUtils {
     }
 
     public static DecodedJWT decodeToken(String token) {
-        ValidationUtils.checkThat(Objects.nonNull(token) && !token.isBlank()
-            , () -> new BadTokenException("Token is empty or null"));
+        ValidationUtils.checkThat(Objects.nonNull(token) && !token.isBlank(),
+            () -> new BadTokenException("Token is empty or null"));
         return JWT.require(ALGORITHM).build().verify(token);
     }
 
@@ -67,7 +67,7 @@ public class TokenUtils {
         }
     }
 
-    public static String extractToken(String string){
-        return string.replace("Bearer","").trim();
+    public static String extractToken(String string) {
+        return string.replace("Bearer", "").trim();
     }
 }

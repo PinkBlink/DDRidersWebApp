@@ -73,9 +73,9 @@ public class TokenUtilsTest implements CustomerTestData {
     @Test
     public void isActiveReturnsFalse() {
         final var customer = aCustomer().build();
-        Instant issuedAt = Instant.now().minusSeconds(3600);
-        Instant expiredAt = issuedAt.plusSeconds(10);
-        String expiredToken = JWT.create()
+        final var issuedAt = Instant.now().minusSeconds(3600);
+        final var expiredAt = issuedAt.plusSeconds(10);
+        final var expiredToken = JWT.create()
             .withSubject(customer.getId().toString())
             .withClaim("email", customer.getEmail())
             .withIssuedAt(issuedAt)
