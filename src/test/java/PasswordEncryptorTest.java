@@ -4,7 +4,7 @@ import org.riders.sharing.utils.PasswordEncryptor;
 
 public class PasswordEncryptorTest {
     @Test
-    public void encryptPassword(){
+    public void encryptPasswordReturnsSameIfSameInput(){
         final var password = "secret pass";
 
         final var encryptedPassword1 = PasswordEncryptor.encryptPassword(password);
