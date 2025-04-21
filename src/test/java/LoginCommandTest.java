@@ -5,12 +5,15 @@ import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
+import org.riders.sharing.utils.PasswordEncryptor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final LoginCommand loginCommand = new LoginCommand(
@@ -21,14 +24,21 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     public void loginRespondsWith200() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
-        final var jsonAsReader = new StringReader("""
+        final var customer = aCustomer().build();
+        final var encryptedPassword = PasswordEncryptor.encryptPassword(customer.getPassword());
+        new CustomerRepositoryImpl(ConnectionPool.INSTANCE)
+            .save(
+                customer.toBuilder()
+                    .password(encryptedPassword)
+                    .build()
+            );
+        final var loginJsonAsReader = new StringReader("""
             {
                "email" : "%s",
                "password" : "%s"
             }
-            """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword()));
-        final var requestReader = new BufferedReader(jsonAsReader);
+            """.formatted(customer.getEmail(), customer.getPassword()));
+        final var requestReader = new BufferedReader(loginJsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_OK;
 
         when(request.getReader()).thenReturn(requestReader);

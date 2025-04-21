@@ -25,7 +25,7 @@ public class LoginCommand extends Command {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
             final var loginDto = new ObjectMapper().readValue(requestBody, LoginDTO.class);
-
+            
             customerService.login(loginDto);
 
             response.setStatus(HttpServletResponse.SC_OK);

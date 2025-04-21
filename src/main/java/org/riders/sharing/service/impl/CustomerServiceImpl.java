@@ -9,6 +9,7 @@ import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.CustomerService;
+import org.riders.sharing.utils.PasswordEncryptor;
 import org.riders.sharing.utils.ValidationUtils;
 
 import java.util.Objects;
@@ -36,7 +37,9 @@ public class CustomerServiceImpl implements CustomerService {
             return new UnauthorizedException("Wrong email or password!");
         });
 
-        if (!customer.getPassword().equals(password)) {
+        final var encryptedPassword = PasswordEncryptor.encryptPassword(password);
+
+        if (!customer.getPassword().equals(encryptedPassword)) {
             logger.error("Bad attempt to login: {}", email);
             throw new UnauthorizedException("Wrong email or password!");
         }
@@ -58,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(registrationDTO.name())
                 .surname(registrationDTO.surname())
                 .email(registrationDTO.email())
-                .password(registrationDTO.password())
+                .password(PasswordEncryptor.encryptPassword(registrationDTO.password()))
                 .build()
         );
 

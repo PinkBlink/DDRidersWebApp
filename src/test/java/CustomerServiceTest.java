@@ -6,6 +6,7 @@ import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
+import org.riders.sharing.utils.PasswordEncryptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,12 +36,15 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
 
     @Test
     public void loginReturnsCustomer() {
-        final var customer = customerRepository.save(aCustomer().build());
+        final var customer = aCustomer().build();
+        final var savedCustomer = customerRepository.save(
+            customer.toBuilder()
+                .password(PasswordEncryptor.encryptPassword(customer.getPassword()))
+                .build());
         final var loginDto = new LoginDTO(customer.getEmail(), customer.getPassword());
 
         final var loggedCustomer = customerService.login(loginDto);
 
-        assertEquals(customer, loggedCustomer);
+        assertEquals(savedCustomer, loggedCustomer);
     }
-
 }
