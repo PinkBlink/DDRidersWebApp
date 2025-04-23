@@ -1,12 +1,12 @@
 import org.junit.jupiter.api.BeforeEach;
-import org.riders.sharing.connection.DatabaseInitParams;
 import org.riders.sharing.exception.NoSQLConnectionException;
+import org.riders.sharing.utils.ApplicationConfig;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public abstract class BaseTest {
-    private final DatabaseInitParams databaseInitParams = DatabaseInitParams.getFromConfig();
+    private final ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
 
     @BeforeEach
     public void clanTables() {
@@ -17,8 +17,11 @@ public abstract class BaseTest {
 
     private void deleteFromTable(String table) {
 
-        try (final var connection = DriverManager.getConnection(databaseInitParams.customDBUrl(),
-            databaseInitParams.user(), databaseInitParams.password())) {
+        try (final var connection = DriverManager.getConnection(
+            applicationConfig.getDdRidersDbUrl(),
+            applicationConfig.getUser(),
+            applicationConfig.getPassword())
+        ) {
             try (final var statement = connection.prepareStatement(
                 "DELETE FROM %s".formatted(table))) {
                 statement.executeUpdate();

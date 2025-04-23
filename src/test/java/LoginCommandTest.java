@@ -1,28 +1,35 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.dto.TokenDto;
+import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
-import org.riders.sharing.utils.TokenUtils;
+import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.utils.authentication.AuthTokenDecoder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class LoginCommandTest extends BaseTest implements CustomerTestData {
+    private final ApplicationConfig appConfig = ApplicationConfig.getInstance();
+    private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
     private final LoginCommand loginCommand = new LoginCommand(
-        new CustomerServiceImpl(new CustomerRepositoryImpl(ConnectionPool.INSTANCE))
+        new CustomerServiceImpl(customerRepository)
     );
+    private final AuthTokenDecoder authTokenDecoder = new AuthTokenDecoder(appConfig.getAlgorithm());
 
     @Test
     public void loginRespondsWith200() throws IOException {
@@ -84,17 +91,17 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         final var response = mock(HttpServletResponse.class);
         final var expectedResponse = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-        when(request.getReader()).thenThrow(new IOException("General Exception check"));
+        when(request.getReader()).thenThrow(new IOException("IOException check"));
         loginCommand.execute(request, response);
 
         verify(response).setStatus(expectedResponse);
     }
 
     @Test
-    public void loginRespondsWithAccessToken() throws IOException {
+    public void loginRespondsWithTokens() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
+        final var savedCustomer = customerRepository.save(aCustomer().build());
         final var jsonAsReader = new StringReader("""
             {
                "email" : "%s",
@@ -102,15 +109,19 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
             }
             """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword()));
         final var requestReader = new BufferedReader(jsonAsReader);
+        final var stringWriter = new StringWriter();
+        final var responseWriter = new PrintWriter(stringWriter);
 
         when(request.getReader()).thenReturn(requestReader);
-        ArgumentCaptor<String> authorizationHeaderCaptor = ArgumentCaptor.forClass(String.class);
+        when(response.getWriter()).thenReturn(responseWriter);
         loginCommand.execute(request, response);
-        verify(response).setHeader(eq("Authorization"), authorizationHeaderCaptor.capture());
-        final var token = TokenUtils.extractToken(authorizationHeaderCaptor.getValue());
-        final var decoded = TokenUtils.decodeToken(token);
-        final var idFromToken = UUID.fromString(decoded.getSubject());
+        final var tokens = new ObjectMapper().readValue(stringWriter.toString(), TokenDto.class);
+        final var decodedAccessToken = authTokenDecoder.decode(tokens.accessToken());
+        final var idFromAccessToken = UUID.fromString(decodedAccessToken.getSubject());
+        final var decodedRefreshToken = authTokenDecoder.decode(tokens.refreshToken());
+        final var idFromRefreshToken = UUID.fromString(decodedRefreshToken.getSubject());
 
-        assertEquals(savedCustomer.getId(), idFromToken);
+        assertEquals(savedCustomer.getId(), idFromRefreshToken);
+        assertEquals(savedCustomer.getId(), idFromAccessToken);
     }
 }
