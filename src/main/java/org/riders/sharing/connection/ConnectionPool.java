@@ -3,6 +3,7 @@ package org.riders.sharing.connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.exception.NoSQLConnectionException;
+import org.riders.sharing.utils.ApplicationConfig;
 import org.riders.sharing.utils.SqlUtils;
 
 import java.sql.Connection;
@@ -16,15 +17,15 @@ public enum ConnectionPool {
     private static final int DEFAULT_CAPACITY = 16;
 
     private final Logger logger;
-    private DatabaseInitParams databaseInitParams;
+    private final ApplicationConfig applicationConfig;
     private Queue<Connection> availableConnections;
     private Queue<Connection> busyConnections;
 
     ConnectionPool() {
         logger = LogManager.getLogger(ConnectionPool.class);
-        databaseInitParams = DatabaseInitParams.getFromConfig();
+        applicationConfig = ApplicationConfig.getInstance();
         registerDriver();
-        SqlUtils.initDatabase(databaseInitParams);
+        SqlUtils.initDatabase(applicationConfig);
         initConnections();
     }
 
@@ -53,8 +54,11 @@ public enum ConnectionPool {
 
         try {
             for (int i = 0; i < DEFAULT_CAPACITY; i++) {
-                final var connection = createConnection(databaseInitParams.customDBUrl(),
-                    databaseInitParams.user(), databaseInitParams.password());
+                final var connection = createConnection(
+                    applicationConfig.getDdRidersDbUrl(),
+                    applicationConfig.getUser(),
+                    applicationConfig.getPassword()
+                );
 
                 availableConnections.add(connection);
             }

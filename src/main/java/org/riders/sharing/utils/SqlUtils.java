@@ -2,7 +2,6 @@ package org.riders.sharing.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.connection.DatabaseInitParams;
 import org.riders.sharing.exception.SQLFileNotFoundException;
 import org.riders.sharing.exception.NoSQLConnectionException;
 
@@ -15,25 +14,27 @@ import java.sql.SQLException;
 public class SqlUtils {
     private static final Logger logger = LogManager.getLogger(SqlUtils.class);
 
-    public static void initDatabase(DatabaseInitParams databaseInitParams) {
-        if (!isDatabaseCreated(databaseInitParams.customDBUrl(), databaseInitParams.user(),
-            databaseInitParams.password())) {
-            logger.info("Attempt to send create db file {}", databaseInitParams.customDBUrl());
-            sendCreateFile(databaseInitParams.pathToCreateDBScript(),
-                databaseInitParams.postgresDBUrl(),
-                databaseInitParams.user(),
-                databaseInitParams.password());
+    public static void initDatabase(ApplicationConfig applicationConfig) {
+        if (!isDatabaseCreated(applicationConfig.getDdRidersDbUrl(),
+            applicationConfig.getUser(),
+            applicationConfig.getPassword())) {
+
+            logger.info("Attempt to send create db file {}", applicationConfig.getDdRidersDbUrl());
+            sendCreateFile(applicationConfig.getPathToCreateDbScript(),
+                applicationConfig.getPostgresDbUrl(),
+                applicationConfig.getUser(),
+                applicationConfig.getPassword());
 
             logger.info("Attempt to send create tables file: {}",
-                databaseInitParams.pathToCreateTablesScript());
-            sendCreateFile(databaseInitParams.pathToCreateTablesScript(),
-                databaseInitParams.customDBUrl(),
-                databaseInitParams.user(),
-                databaseInitParams.password());
+                applicationConfig.getPathToCreateTablesScript());
+            sendCreateFile(applicationConfig.getPathToCreateTablesScript(),
+                applicationConfig.getDdRidersDbUrl(),
+                applicationConfig.getUser(),
+                applicationConfig.getPassword());
 
             logger.info("Database and tables are successfully created");
         } else {
-            logger.info("{} is already exists", databaseInitParams.customDBUrl());
+            logger.info("{} is already exists", applicationConfig.getDdRidersDbUrl());
         }
     }
 

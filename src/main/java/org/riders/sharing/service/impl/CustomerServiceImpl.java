@@ -9,7 +9,6 @@ import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.utils.PasswordEncryptor;
 import org.riders.sharing.utils.ValidationUtils;
 
 import java.util.Objects;
@@ -29,17 +28,15 @@ public class CustomerServiceImpl implements CustomerService {
         final var email = loginDto.email();
         final var password = loginDto.password();
 
-        ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password),
-            () -> new BadRequestException("Email or Password is null."));
+        ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
+            , () -> new BadRequestException("Email or Password is null."));
 
         final var customer = customerRepository.findByEmail(email).orElseThrow(() -> {
             logger.error("Bad attempt to login: {}", email);
             return new UnauthorizedException("Wrong email or password!");
         });
 
-        final var encryptedPassword = PasswordEncryptor.encryptPassword(password);
-
-        if (!customer.getPassword().equals(encryptedPassword)) {
+        if (!customer.getPassword().equals(password)) {
             logger.error("Bad attempt to login: {}", email);
             throw new UnauthorizedException("Wrong email or password!");
         }
@@ -61,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(registrationDto.name())
                 .surname(registrationDto.surname())
                 .email(registrationDto.email())
-                .password(PasswordEncryptor.encryptPassword(registrationDto.password()))
+                .password(registrationDto.password())
                 .build()
         );
 
