@@ -9,6 +9,7 @@ import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
 import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.utils.PasswordEncryptor;
 import org.riders.sharing.utils.authentication.AuthTokenDecoder;
 
 import java.io.BufferedReader;
@@ -30,18 +31,20 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         new CustomerServiceImpl(customerRepository)
     );
     private final AuthTokenDecoder authTokenDecoder = new AuthTokenDecoder(appConfig.getAlgorithm());
+    private final String password = "password";
+    private final String hashedPassword = PasswordEncryptor.encryptPassword(password);
 
     @Test
     public void loginRespondsWith200() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var savedCustomer = new CustomerRepositoryImpl(ConnectionPool.INSTANCE).save(aCustomer().build());
+        final var savedCustomer = customerRepository.save(aCustomer().password(hashedPassword).build());
         final var jsonAsReader = new StringReader("""
             {
                "email" : "%s",
                "password" : "%s"
             }
-            """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword()));
+            """.formatted(savedCustomer.getEmail(), password));
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_OK;
 
@@ -101,13 +104,14 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     public void loginRespondsWithTokens() throws IOException {
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
-        final var savedCustomer = customerRepository.save(aCustomer().build());
+        final var customer = aCustomer().password(hashedPassword).build();
+        final var savedCustomer = customerRepository.save(customer);
         final var jsonAsReader = new StringReader("""
             {
                "email" : "%s",
                "password" : "%s"
             }
-            """.formatted(savedCustomer.getEmail(), savedCustomer.getPassword()));
+            """.formatted(savedCustomer.getEmail(), password));
         final var requestReader = new BufferedReader(jsonAsReader);
         final var stringWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stringWriter);

@@ -14,6 +14,7 @@ import org.riders.sharing.utils.ValidationUtils;
 import java.util.Objects;
 
 import static org.riders.sharing.model.Customer.Builder.customer;
+import static org.riders.sharing.utils.PasswordEncryptor.encryptPassword;
 
 public class CustomerServiceImpl implements CustomerService {
     private static final Logger logger = LogManager.getLogger(CustomerServiceImpl.class);
@@ -36,7 +37,9 @@ public class CustomerServiceImpl implements CustomerService {
             return new UnauthorizedException("Wrong email or password!");
         });
 
-        if (!customer.getPassword().equals(password)) {
+        final var hashedPassword = encryptPassword(password);
+
+        if (!customer.getPassword().equals(hashedPassword)) {
             logger.error("Bad attempt to login: {}", email);
             throw new UnauthorizedException("Wrong email or password!");
         }
@@ -53,12 +56,13 @@ public class CustomerServiceImpl implements CustomerService {
         ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
             , () -> new BadRequestException("Email or Password is null."));
 
+        final var hashedPassword = encryptPassword(password);
         final var savedCustomer = customerRepository.save(
             customer()
                 .name(registrationDto.name())
                 .surname(registrationDto.surname())
                 .email(registrationDto.email())
-                .password(registrationDto.password())
+                .password(hashedPassword)
                 .build()
         );
 
