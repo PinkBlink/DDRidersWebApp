@@ -1,0 +1,61 @@
+import org.junit.jupiter.api.Test;
+import org.riders.sharing.exception.InvalidTokenException;
+import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.utils.authentication.AuthTokenDecoder;
+import org.riders.sharing.utils.authentication.AuthTokenGenerator;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class AuthTokenTest implements CustomerTestData {
+    private final ApplicationConfig appConfig = ApplicationConfig.getInstance();
+    private final AuthTokenGenerator authTokenGenerator = new AuthTokenGenerator(
+        appConfig.getAccessTokenTtl(),
+        appConfig.getRefreshTokenTtl(),
+        appConfig.getAlgorithm()
+    );
+    private final AuthTokenDecoder authTokenDecoder = new AuthTokenDecoder(appConfig.getAlgorithm());
+
+    @Test
+    public void generateReturnsToken() {
+        final var customer = aCustomer().build();
+
+        final var accessToken = authTokenGenerator.generateNewAccessToken(customer);
+        final var refreshToken = authTokenGenerator.generateNewRefreshToken(customer);
+
+        assertNotNull(accessToken);
+        assertNotNull(refreshToken);
+    }
+
+    @Test
+    public void decodesTokenThrowsBadTokenIfNullOrEmpty() {
+        final var emptyToken = "";
+
+        assertThrows(InvalidTokenException.class,
+            () -> authTokenDecoder.decode(null));
+        assertThrows(InvalidTokenException.class,
+            () -> authTokenDecoder.decode(emptyToken));
+    }
+
+    @Test
+    public void decodesToken() {
+        final var customer = aCustomer().build();
+        final var expectedId = customer.getId();
+        final var expectedEmail = customer.getEmail();
+        final var accessToken = authTokenGenerator.generateNewAccessToken(customer);
+        final var refreshToken = authTokenGenerator.generateNewRefreshToken(customer);
+
+        final var decodedAccess = authTokenDecoder.decode(accessToken);
+        final var decodedRefresh = authTokenDecoder.decode(refreshToken);
+        final var idFromAccess = UUID.fromString(decodedAccess.getSubject());
+        final var idFromRefresh = UUID.fromString(decodedRefresh.getSubject());
+        final var emailFromAccess = decodedAccess.getClaim("email").asString();
+
+        assertEquals(expectedId, idFromAccess);
+        assertEquals(expectedEmail, emailFromAccess);
+        assertEquals(expectedId, idFromRefresh);
+    }
+}

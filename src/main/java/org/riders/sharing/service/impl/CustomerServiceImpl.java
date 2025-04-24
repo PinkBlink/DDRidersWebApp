@@ -2,8 +2,8 @@ package org.riders.sharing.service.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.dto.LoginDTO;
-import org.riders.sharing.dto.RegistrationDTO;
+import org.riders.sharing.dto.LoginDto;
+import org.riders.sharing.dto.RegistrationDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.model.Customer;
@@ -24,9 +24,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer login(LoginDTO loginDTO) {
-        final var email = loginDTO.email();
-        final var password = loginDTO.password();
+    public Customer login(LoginDto loginDto) {
+        final var email = loginDto.email();
+        final var password = loginDto.password();
 
         ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
             , () -> new BadRequestException("Email or Password is null."));
@@ -46,19 +46,19 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer register(RegistrationDTO registrationDTO) {
-        final var email = registrationDTO.email();
-        final var password = registrationDTO.password();
+    public Customer register(RegistrationDto registrationDto) {
+        final var email = registrationDto.email();
+        final var password = registrationDto.password();
 
         ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
             , () -> new BadRequestException("Email or Password is null."));
 
         final var savedCustomer = customerRepository.save(
             customer()
-                .name(registrationDTO.name())
-                .surname(registrationDTO.surname())
-                .email(registrationDTO.email())
-                .password(registrationDTO.password())
+                .name(registrationDto.name())
+                .surname(registrationDto.surname())
+                .email(registrationDto.email())
+                .password(registrationDto.password())
                 .build()
         );
 
