@@ -5,13 +5,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.ChangePasswordDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.UnauthorizedException;
-import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.service.impl.CustomerServiceImpl;
 import org.riders.sharing.utils.ServletUtils;
 
 public class ChangePasswordCommand extends Command {
