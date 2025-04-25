@@ -92,8 +92,8 @@ public class CustomerServiceImpl implements CustomerService {
             logger.info("Successfully changed password for customer with id {}", customerFromDb.getId());
             return customerToStore;
         }
-        logger.error("Bad attempt to change password: {}", changePasswordDto.customerId());
-        throw new UnauthorizedException("Attempt to change password without permission!");
+        logger.error("Old password does not match: {}", changePasswordDto.customerId());
+        throw new UnauthorizedException("Old password does not match!");
 
     }
 
