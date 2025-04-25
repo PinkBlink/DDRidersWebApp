@@ -68,10 +68,10 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var updatedCustomer = customerService.getById(customer.getId());
         final var customerDtoFromResponse = objectMapper.readValue(stringWriter.toString(), CustomerDto.class);
         assertEquals(expectedNewPasswordHash, updatedCustomer.getPassword());
-        assertEquals(customer.getId(), customerDtoFromResponse.id());
-        assertEquals(customer.getName(), customerDtoFromResponse.name());
-        assertEquals(customer.getSurname(), customerDtoFromResponse.surname());
-        assertEquals(customer.getEmail(), customerDtoFromResponse.email());
+        assertEquals(updatedCustomer.getId(), customerDtoFromResponse.id());
+        assertEquals(updatedCustomer.getName(), customerDtoFromResponse.name());
+        assertEquals(updatedCustomer.getSurname(), customerDtoFromResponse.surname());
+        assertEquals(updatedCustomer.getEmail(), customerDtoFromResponse.email());
     }
 
     @Test
