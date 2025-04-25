@@ -19,7 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.UUID;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_ACCEPTED;
+import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
@@ -35,7 +35,7 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void changePasswordRespondsWith202AndCustomer() throws IOException {
+    public void changePasswordRespondsWith201AndCustomer() throws IOException {
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
         final var oldPassword = "password";
@@ -57,7 +57,7 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var requestReader = new BufferedReader(jsonAsReader);
         final var stringWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stringWriter);
-        final var expectedRespStatus = SC_ACCEPTED;
+        final var expectedRespStatus = SC_CREATED;
         final var expectedNewPasswordHash = PasswordEncryptor.encryptPassword(newPassword);
 
         when(request.getReader()).thenReturn(requestReader);

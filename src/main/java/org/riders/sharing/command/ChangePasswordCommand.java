@@ -34,7 +34,7 @@ public class ChangePasswordCommand extends Command {
             final var customerDtoToResponse = CustomerDto.fromCustomer(updatedCustomer);
             final var jsonCustomerDto = objectMapper.writeValueAsString(customerDtoToResponse);
 
-            response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            response.setStatus(HttpServletResponse.SC_CREATED);
             response.setContentType(JSON_CONTENT_TYPE);
 
             try (final var writer = response.getWriter()) {
