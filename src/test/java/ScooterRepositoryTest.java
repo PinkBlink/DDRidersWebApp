@@ -94,4 +94,63 @@ public class ScooterRepositoryTest extends BaseTest implements ScooterTestData {
 
         assertTrue(result);
     }
+
+    @Test
+    public void findAvailableScootersReturnsFullyList() {
+        final var scooterList = List.of(
+            aScooter().batteryLevel(100).build(),
+            aScooter().batteryLevel(98).build(),
+            aScooter().batteryLevel(86).build(),
+            aScooter().batteryLevel(72).build(),
+            aScooter().batteryLevel(71).build(),
+            aScooter().batteryLevel(60).build()
+        );
+        scooterList.forEach(scooterRepository::save);
+        final var expectedList = scooterList.subList(2, 4);
+        final var limit = 2;
+        final var offset = 2;
+
+        final var scootersFromDb = scooterRepository.findAvailableScootersForResponse(limit, offset);
+
+        assertEquals(expectedList, scootersFromDb);
+    }
+
+    @Test
+    public void findAvailableScootersReturnsFullyList2() {
+        final var scooterList = List.of(
+            aScooter().batteryLevel(100).build(),
+            aScooter().batteryLevel(98).build(),
+            aScooter().batteryLevel(86).build(),
+            aScooter().batteryLevel(86).status(ScooterStatus.RENTED).build(),
+            aScooter().batteryLevel(72).build(),
+            aScooter().batteryLevel(71).build(),
+            aScooter().batteryLevel(60).build()
+        );
+        scooterList.forEach(scooterRepository::save);
+        final var expectedList = scooterList.subList(4, 7);
+        final var limit = 3;
+        final var offset = 3;
+
+        final var scootersFromDb = scooterRepository.findAvailableScootersForResponse(limit, offset);
+        assertEquals(expectedList, scootersFromDb);
+    }
+
+    @Test
+    public void getAvailableAmountReturnsAmount() {
+        final var scooterList = List.of(
+            aScooter().batteryLevel(100).build(),
+            aScooter().batteryLevel(98).build(),
+            aScooter().batteryLevel(86).build(),
+            aScooter().batteryLevel(72).build(),
+            aScooter().batteryLevel(71).build(),
+            aScooter().batteryLevel(60).build(),
+            aScooter().batteryLevel(60).status(ScooterStatus.RENTED).build()
+        );
+        scooterList.forEach(scooterRepository::save);
+        final var expectedAmount = scooterList.size() - 1;
+
+        final var amountFromDb = scooterRepository.getAvailableScootersAmount();
+
+        assertEquals(expectedAmount, amountFromDb);
+    }
 }

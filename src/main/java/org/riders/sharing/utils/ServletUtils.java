@@ -15,7 +15,7 @@ public class ServletUtils {
             requestBodyBuilder.append(line);
         }
 
-        if (requestBodyBuilder.isEmpty()) {
+        if (requestBodyBuilder.toString().isBlank()) {
             throw new BadRequestException("Attempt to get the body from empty request.");
         }
 
