@@ -39,10 +39,9 @@ public class LoginCommand extends Command {
             final var accessToken = tokenGenerator.generateNewAccessToken(customer);
             final var refreshToken = tokenGenerator.generateNewRefreshToken(customer);
             final var tokensDto = new TokenDto(accessToken, refreshToken);
-            final var contentType = "application/json";
 
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(contentType);
+            response.setContentType(JSON_CONTENT_TYPE);
 
             try (final var writer = response.getWriter()) {
                 final var objectMapper = new ObjectMapper();
