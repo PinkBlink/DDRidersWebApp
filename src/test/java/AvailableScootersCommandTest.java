@@ -66,7 +66,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         scooterList.subList(6, 8).forEach(scooter -> expectedScooterDtoList.add(ScooterDto.fromScooter(scooter)));
         final var expectedTotalElements = scooterList.size();
         final var expectedTotalPages = 3;
-        final var expectedPageResponse = new PageResponseDto<ScooterDto>(expectedScooterDtoList, page, pageSize,
+        final var expectedPageResponse = new PageResponseDto<>(expectedScooterDtoList, page, pageSize,
             expectedTotalElements, expectedTotalPages);
 
 
