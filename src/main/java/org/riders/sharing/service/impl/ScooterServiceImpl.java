@@ -17,6 +17,7 @@ public class ScooterServiceImpl implements ScooterService {
     private static final int DEFAULT_PAGE = 1;
     private static final int MAX_PAGE_SIZE = 1000;
     private static final Logger logger = LogManager.getLogger(ScooterServiceImpl.class);
+
     private final ScooterRepository scooterRepository;
 
     public ScooterServiceImpl(ScooterRepository scooterRepository) {
