@@ -42,10 +42,4 @@ public class ScooterServiceTest extends BaseTest implements ScooterTestData {
 
         Assertions.assertEquals(expectedPageResponse, pageResponseFromDb);
     }
-
-    @Test
-    public void getAvailableScootersThrowsNoElementIfEmpty() {
-        Assertions.assertThrows(NoElementException.class, () ->
-            scooterService.getAvailableScooters(new PageRequestDto(2, 2)));
-    }
 }

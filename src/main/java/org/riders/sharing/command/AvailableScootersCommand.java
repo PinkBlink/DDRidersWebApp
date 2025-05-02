@@ -32,9 +32,6 @@ public class AvailableScootersCommand extends Command {
             try (final var writer = response.getWriter()) {
                 writer.write(pageResponseAsJson);
             }
-        } catch (NoElementException e) {
-            logger.error("Failed due to no available scooters: {}", e.getMessage(), e);
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } catch (BadRequestException e) {
             logger.error("Failed due to bad request: {}", e.getMessage(), e);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

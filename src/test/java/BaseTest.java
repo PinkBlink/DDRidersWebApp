@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.riders.sharing.exception.NoSQLConnectionException;
 import org.riders.sharing.utils.ApplicationConfig;
@@ -9,7 +10,16 @@ public abstract class BaseTest {
     private final ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
 
     @BeforeEach
-    public void clanTables() {
+    public void cleanBefore() {
+        cleanTables();
+    }
+
+    @AfterEach
+    public void cleanAfter(){
+        cleanTables();
+    }
+
+    private void cleanTables(){
         deleteFromTable("orders");
         deleteFromTable("scooters");
         deleteFromTable("customers");

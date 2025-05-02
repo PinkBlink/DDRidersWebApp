@@ -46,7 +46,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(e.getMessage());
+            throw new DuplicateEntryException("Scooter is already exists", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -76,7 +76,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Couldn't update scooter", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -96,7 +96,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find scooter %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -118,7 +118,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find all scooters", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -136,7 +136,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to delete scooter", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -159,7 +159,9 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find scooters by status %s".formatted(scooterStatus), e
+            );
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -188,7 +190,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find scooters for response", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -207,7 +209,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             return resultSet.getInt(1);
 
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to calculate available scooters", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }

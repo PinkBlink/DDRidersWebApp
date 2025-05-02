@@ -5,13 +5,17 @@ import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
-import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.service.ScooterService;
 
-import java.util.ArrayList;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+
 
 public class ScooterServiceImpl implements ScooterService {
+    private static final int DEFAULT_PAGE = 1;
+    private static final int MAX_PAGE_SIZE = 1000;
     private static final Logger logger = LogManager.getLogger(ScooterServiceImpl.class);
     private final ScooterRepository scooterRepository;
 
@@ -21,20 +25,32 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Override
     public PageResponseDto<ScooterDto> getAvailableScooters(PageRequestDto requestDto) {
-        final var scooterDtoList = new ArrayList<ScooterDto>();
-        final var page = requestDto.page();
-        final var pageSize = requestDto.size();
+
+        final var page = max(requestDto.page(), DEFAULT_PAGE);
+        int pageSize = min(
+            max(requestDto.size(), 1),
+            MAX_PAGE_SIZE
+        );
         final var offset = (page - 1) * pageSize;
         final var totalElements = scooterRepository.getAvailableScootersAmount();
-        final var totalPages = (int) Math.ceil((double) totalElements / pageSize);
-        final var availableScooterList = scooterRepository.findAvailableScootersForResponse(pageSize, offset);
+        final var totalPages = calculateTotalPages(totalElements, pageSize);
+        final var scooterDtoList = scooterRepository
+            .findAvailableScootersForResponse(pageSize, offset)
+            .stream()
+            .map(ScooterDto::fromScooter)
+            .toList();
 
-        if (availableScooterList.isEmpty()) {
-            logger.error("Couldn't find available scooters");
-            throw new NoElementException("Couldn't find available scooters");
-        }
+        return new PageResponseDto<>(
+            scooterDtoList,
+            page,
+            pageSize,
+            totalElements,
+            totalPages
+        );
+    }
 
-        availableScooterList.forEach(scooter -> scooterDtoList.add(ScooterDto.fromScooter(scooter)));
-        return new PageResponseDto<>(scooterDtoList, page, pageSize, totalElements, totalPages);
+    private int calculateTotalPages(long totalElements, int pageSize) {
+        if (pageSize <= 0) throw new BadRequestException("Value pageSize must be > 0;");
+        return (int) ((totalElements + pageSize - 1) / pageSize);
     }
 }
