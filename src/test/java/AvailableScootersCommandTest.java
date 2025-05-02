@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -37,73 +36,98 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
 
     @Test
     public void availableRespondsWith200AndScooters() throws IOException {
+        //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
-        final var page = 3;
-        final var pageSize = 3;
+
+        final var page = 2;
+        final var pageSize = 2;
+
         final var scooterList = List.of(
             aScooter().batteryLevel(100).build(),
             aScooter().batteryLevel(98).build(),
             aScooter().batteryLevel(86).build(),
-            aScooter().batteryLevel(72).build(),
-            aScooter().batteryLevel(71).build(),
-            aScooter().batteryLevel(60).build(),
-            aScooter().batteryLevel(60).build(),
-            aScooter().batteryLevel(60).build()
+            aScooter().batteryLevel(72).build()
         );
         scooterList.forEach(scooterRepository::save);
+
         final var jsonAsReader = new StringReader("""
             {
             "page" : "%s",
             "size" : "%s"
-            }""".formatted(page, pageSize));
+            }""".formatted(page, pageSize)
+        );
+
         final var requestReader = new BufferedReader(jsonAsReader);
         final var stringWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stringWriter);
-        final var expectedResponseStatus = SC_OK;
-        final var expectedScooterDtoList = new ArrayList<ScooterDto>();
-        scooterList.subList(6, 8).forEach(scooter -> expectedScooterDtoList.add(ScooterDto.fromScooter(scooter)));
+
+        final var expectedScooterDtoList = scooterList
+            .subList(2, 4)
+            .stream()
+            .map(ScooterDto::fromScooter)
+            .toList();
+
         final var expectedTotalElements = scooterList.size();
-        final var expectedTotalPages = 3;
-        final var expectedPageResponse = new PageResponseDto<>(expectedScooterDtoList, page, pageSize,
-            expectedTotalElements, expectedTotalPages);
+        final var expectedTotalPages = 2;
+        final var expectedPageResponse = new PageResponseDto<>(
+            expectedScooterDtoList,
+            page,
+            pageSize,
+            expectedTotalElements,
+            expectedTotalPages
+        );
 
+        final var expectedResponseStatus = SC_OK;
 
+        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
+
         availableScootersCommand.execute(request, response);
 
+        //then
         verify(response).setStatus(expectedResponseStatus);
-        PageResponseDto<ScooterDto> actualPageResponse = objectMapper.readValue(stringWriter.toString(),
-            new TypeReference<>() {
-            });
+
+        final var actualPageResponse = objectMapper.readValue(
+            stringWriter.toString(),
+            new TypeReference<PageResponseDto<ScooterDto>>() {
+            }
+        );
+
         assertEquals(expectedPageResponse, actualPageResponse);
     }
 
     @Test
     public void availableScootersRespondsWith400() throws IOException {
-        final var jsonAsReader = new StringReader("");
-        final var requestReader = new BufferedReader(jsonAsReader);
+        //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
+
+        final var jsonAsReader = new StringReader("");
+        final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponseStatus = SC_BAD_REQUEST;
 
+        //when
         when(request.getReader()).thenReturn(requestReader);
         availableScootersCommand.execute(request, response);
 
+        //then
         verify(response).setStatus(expectedResponseStatus);
     }
 
     @Test
     public void availableRespondsWith500() throws IOException {
+        //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
-
+        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
         availableScootersCommand.execute(request, response);
 
+        //then
         verify(response).setStatus(expectedResponseStatus);
     }
 }

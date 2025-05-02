@@ -14,9 +14,10 @@ import static java.lang.Math.max;
 
 
 public class ScooterServiceImpl implements ScooterService {
+    private static final Logger logger = LogManager.getLogger(ScooterServiceImpl.class);
+
     private static final int DEFAULT_PAGE = 1;
     private static final int MAX_PAGE_SIZE = 1000;
-    private static final Logger logger = LogManager.getLogger(ScooterServiceImpl.class);
 
     private final ScooterRepository scooterRepository;
 
@@ -26,21 +27,20 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Override
     public PageResponseDto<ScooterDto> getAvailableScooters(PageRequestDto requestDto) {
-
-        final var page = max(requestDto.page(), DEFAULT_PAGE);
-        int pageSize = min(
-            max(requestDto.size(), 1),
-            MAX_PAGE_SIZE
-        );
-        final var offset = (page - 1) * pageSize;
+        final var page = definePage(requestDto);
+        final var pageSize = definePageSize(requestDto);
+        final var offset = defineOffset(page, pageSize);
         final var totalElements = scooterRepository.getAvailableScootersAmount();
         final var totalPages = calculateTotalPages(totalElements, pageSize);
+
         final var scooterDtoList = scooterRepository
             .findAvailableScootersForResponse(pageSize, offset)
             .stream()
             .map(ScooterDto::fromScooter)
             .toList();
+
         logger.info("Find {} available scooters", scooterDtoList.size());
+
         return new PageResponseDto<>(
             scooterDtoList,
             page,
@@ -51,7 +51,24 @@ public class ScooterServiceImpl implements ScooterService {
     }
 
     private int calculateTotalPages(long totalElements, int pageSize) {
-        if (pageSize <= 0) throw new BadRequestException("Value pageSize must be > 0;");
+        if (pageSize <= 0) {
+            throw new BadRequestException("Value pageSize must be > 0;");
+        }
         return (int) ((totalElements + pageSize - 1) / pageSize);
+    }
+
+    private int definePage(PageRequestDto requestDto) {
+        return max(requestDto.page(), DEFAULT_PAGE);
+    }
+
+    private int definePageSize(PageRequestDto requestDto) {
+        return min(
+            max(requestDto.size(), 1),
+            MAX_PAGE_SIZE
+        );
+    }
+
+    private int defineOffset(int page, int pageSize){
+        return (page - 1) * pageSize;
     }
 }

@@ -9,7 +9,6 @@ import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 import org.riders.sharing.service.ScooterService;
 import org.riders.sharing.service.impl.ScooterServiceImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ScooterServiceTest extends BaseTest implements ScooterTestData {
@@ -18,27 +17,35 @@ public class ScooterServiceTest extends BaseTest implements ScooterTestData {
 
     @Test
     public void getAvailableReturnsScooters() {
+        //given
         final var scooterList = List.of(
             aScooter().batteryLevel(100).build(),
             aScooter().batteryLevel(98).build(),
             aScooter().batteryLevel(86).build(),
-            aScooter().batteryLevel(72).build(),
-            aScooter().batteryLevel(71).build(),
-            aScooter().batteryLevel(60).build()
+            aScooter().batteryLevel(72).build()
         );
         scooterList.forEach(scooterRepository::save);
+
         final var page = 2;
-        final var pageSize = 3;
+        final var pageSize = 2;
         final var totalElements = scooterList.size();
         final var totalPages = totalElements / pageSize;
-        final var expectedList = new ArrayList<ScooterDto>();
-        scooterList.subList(3, scooterList.size())
-            .forEach(scooter -> expectedList.add(ScooterDto.fromScooter(scooter)));
-        final var expectedPageResponse = new PageResponseDto<>(expectedList, page, pageSize,
-            totalElements, totalPages);
+        final var expectedList = scooterList.subList(2, totalElements)
+            .stream()
+            .map(ScooterDto::fromScooter)
+            .toList();
 
+        final var expectedPageResponse = new PageResponseDto<>(
+            expectedList,
+            page,
+            pageSize,
+            totalElements,
+            totalPages);
+
+        //when
         final var pageResponseFromDb = scooterService.getAvailableScooters(new PageRequestDto(page, pageSize));
 
+        //then
         Assertions.assertEquals(expectedPageResponse, pageResponseFromDb);
     }
 }

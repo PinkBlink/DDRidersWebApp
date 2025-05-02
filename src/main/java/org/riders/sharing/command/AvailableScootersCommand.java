@@ -26,6 +26,7 @@ public class AvailableScootersCommand extends Command {
             final var pageRequestDto = objectMapper.readValue(requestBody, PageRequestDto.class);
             final var pageResponseDto = scooterService.getAvailableScooters(pageRequestDto);
             final var pageResponseAsJson = objectMapper.writeValueAsString(pageResponseDto);
+
             response.setStatus(HttpServletResponse.SC_OK);
 
             try (final var writer = response.getWriter()) {
