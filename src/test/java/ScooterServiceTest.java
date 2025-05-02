@@ -4,7 +4,6 @@ import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
-import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;
 import org.riders.sharing.service.ScooterService;

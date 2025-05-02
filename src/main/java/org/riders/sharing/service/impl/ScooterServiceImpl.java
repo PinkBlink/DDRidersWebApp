@@ -39,7 +39,7 @@ public class ScooterServiceImpl implements ScooterService {
             .stream()
             .map(ScooterDto::fromScooter)
             .toList();
-
+        logger.info("Find {} available scooters", scooterDtoList.size());
         return new PageResponseDto<>(
             scooterDtoList,
             page,
