@@ -46,7 +46,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(e.getMessage());
+            throw new DuplicateEntryException("Scooter is already exists", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -76,7 +76,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Couldn't update scooter", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -96,7 +96,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find scooter %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -118,7 +118,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find all scooters", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -136,7 +136,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to delete scooter", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -159,7 +159,57 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find scooters by status %s".formatted(scooterStatus), e
+            );
+        } finally {
+            connectionPool.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public List<Scooter> findAvailableScootersForResponse(int limit, int offset) {
+        final var connection = connectionPool.getConnection();
+        final var scooterList = new ArrayList<Scooter>();
+
+        try (final var statement = connection.prepareStatement("""
+            SELECT * FROM scooters
+            WHERE scooter_status = 'AVAILABLE'
+            ORDER BY battery_level DESC
+            LIMIT ?
+            OFFSET ?;
+            """)) {
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                final var scooter = Scooter.scooterFromResultSet(resultSet);
+                scooterList.add(scooter);
+            }
+
+            return scooterList;
+        } catch (SQLException e) {
+            throw new DatabaseException("Error occurred when trying to find scooters for response", e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public int getAvailableScootersAmount() {
+        final var connection = connectionPool.getConnection();
+
+        try (final var statement = connection.prepareStatement("""
+                SELECT COUNT(*) FROM scooters
+                WHERE scooter_status = 'AVAILABLE'
+            """)) {
+            final var resultSet = statement.executeQuery();
+            resultSet.next();
+            return resultSet.getInt(1);
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Error occurred when trying to calculate available scooters", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }

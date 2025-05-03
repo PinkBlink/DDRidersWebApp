@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface ScooterRepository extends BaseRepository<Scooter> {
     List<Scooter> findScootersByStatus(ScooterStatus scooterStatus);
+
+    List<Scooter> findAvailableScootersForResponse(int limit, int offset);
+
+    int getAvailableScootersAmount();
 }

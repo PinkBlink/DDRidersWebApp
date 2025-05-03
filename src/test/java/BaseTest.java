@@ -9,7 +9,11 @@ public abstract class BaseTest {
     private final ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
 
     @BeforeEach
-    public void clanTables() {
+    public void cleanBefore() {
+        cleanTables();
+    }
+
+    private void cleanTables(){
         deleteFromTable("orders");
         deleteFromTable("scooters");
         deleteFromTable("customers");
