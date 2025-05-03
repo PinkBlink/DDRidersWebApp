@@ -14,11 +14,6 @@ public abstract class BaseTest {
         cleanTables();
     }
 
-    @AfterEach
-    public void cleanAfter(){
-        cleanTables();
-    }
-
     private void cleanTables(){
         deleteFromTable("orders");
         deleteFromTable("scooters");

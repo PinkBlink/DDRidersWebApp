@@ -39,8 +39,6 @@ public class ScooterServiceImpl implements ScooterService {
             .map(ScooterDto::fromScooter)
             .toList();
 
-        logger.info("Find {} available scooters", scooterDtoList.size());
-
         return new PageResponseDto<>(
             scooterDtoList,
             page,
@@ -68,7 +66,7 @@ public class ScooterServiceImpl implements ScooterService {
         );
     }
 
-    private int defineOffset(int page, int pageSize){
+    private int defineOffset(int page, int pageSize) {
         return (page - 1) * pageSize;
     }
 }
