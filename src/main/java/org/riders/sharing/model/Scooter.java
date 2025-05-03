@@ -94,12 +94,12 @@ public class Scooter extends BaseEntity {
     }
 
     public static Scooter scooterFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(1));
-        Instant createTime = resultSet.getTimestamp(2).toInstant();
-        Instant updateTime = resultSet.getTimestamp(3).toInstant();
-        ScooterType scooterType = ScooterType.valueOf(resultSet.getString(4));
-        ScooterStatus scooterStatus = ScooterStatus.valueOf(resultSet.getString(5));
-        int batteryLevel = resultSet.getInt(6);
+        final var id = UUID.fromString(resultSet.getString(1));
+        final var createTime = resultSet.getTimestamp(2).toInstant();
+        final var  updateTime = resultSet.getTimestamp(3).toInstant();
+        final var scooterType = ScooterType.valueOf(resultSet.getString(4));
+        final var scooterStatus = ScooterStatus.valueOf(resultSet.getString(5));
+        final var batteryLevel = resultSet.getInt(6);
 
         return new Scooter.Builder()
             .id(id)

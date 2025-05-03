@@ -108,13 +108,13 @@ public class Customer extends BaseEntity {
     }
 
     public static Customer customerFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(1));
-        Instant createTime = resultSet.getTimestamp(2).toInstant();
-        Instant updateTime = resultSet.getTimestamp(3).toInstant();
-        String name = resultSet.getString(4);
-        String surname = resultSet.getString(5);
-        String email = resultSet.getString(6);
-        String password = resultSet.getString(7);
+        final var id = UUID.fromString(resultSet.getString(1));
+        final var createTime = resultSet.getTimestamp(2).toInstant();
+        final var updateTime = resultSet.getTimestamp(3).toInstant();
+        final var name = resultSet.getString(4);
+        final var surname = resultSet.getString(5);
+        final var email = resultSet.getString(6);
+        final var password = resultSet.getString(7);
 
         return new Customer.Builder()
             .id(id)

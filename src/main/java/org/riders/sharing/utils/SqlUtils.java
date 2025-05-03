@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class SqlUtils {
+    public static final String DUPLICATE_ENTRY_SQL_ERR_CODE = "23505";
+
     private static final Logger logger = LogManager.getLogger(SqlUtils.class);
 
     public static void initDatabase(ApplicationConfig applicationConfig) {
@@ -20,7 +22,7 @@ public class SqlUtils {
             applicationConfig.getPassword())) {
 
             logger.info("Attempt to send create db file {}", applicationConfig.getDdRidersDbUrl());
-            sendCreateFile(
+            executeSqlScriptFromFile(
                 applicationConfig.getPathToCreateDbScript(),
                 applicationConfig.getPostgresDbUrl(),
                 applicationConfig.getUser(),
@@ -32,7 +34,7 @@ public class SqlUtils {
                 applicationConfig.getPathToCreateTablesScript()
             );
 
-            sendCreateFile(
+            executeSqlScriptFromFile(
                 applicationConfig.getPathToCreateTablesScript(),
                 applicationConfig.getDdRidersDbUrl(),
                 applicationConfig.getUser(),
@@ -45,7 +47,7 @@ public class SqlUtils {
         }
     }
 
-    private static void sendCreateFile(String path, String url, String user, String password) {
+    private static void executeSqlScriptFromFile(String path, String url, String user, String password) {
         try (final var connection = DriverManager.getConnection(url, user, password)) {
             logger.info("Created connection with {}", url);
 

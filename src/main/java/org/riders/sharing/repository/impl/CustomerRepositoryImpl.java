@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
+
 public class CustomerRepositoryImpl implements CustomerRepository {
     private final ConnectionPool connectionPool;
 
@@ -76,7 +78,12 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             return customerToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(
+            if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
+                throw new DuplicateEntryException(
+                    "Customer with id %s has already existed".formatted(customer.getId()), e);
+            }
+
+            throw new DatabaseException(
                 "Error occurred when trying to save customer with id %s".formatted(customer.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);

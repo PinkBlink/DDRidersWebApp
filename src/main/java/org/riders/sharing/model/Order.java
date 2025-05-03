@@ -6,9 +6,11 @@ import org.riders.sharing.model.enums.ScooterType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Order extends BaseEntity {
@@ -143,12 +145,9 @@ public class Order extends BaseEntity {
         final var customerId = UUID.fromString(resultSet.getString(4));
         final var scooterId = UUID.fromString(resultSet.getString(5));
         final var startTime = resultSet.getTimestamp(6).toInstant();
-        final var maybeEndTime = resultSet.getTimestamp(7);
+        final var maybeEndTime = Optional.ofNullable(resultSet.getTimestamp(7));
         final var orderStatus = OrderStatus.valueOf(resultSet.getString(8));
-        final var endTime = (maybeEndTime == null)
-            ? null
-            : maybeEndTime.toInstant();
-
+        final var endTime = maybeEndTime.map(Timestamp::toInstant).orElse(null);
         final var scooterCreateTime = resultSet.getTimestamp(10).toInstant();
         final var scooterUpdateTime = resultSet.getTimestamp(11).toInstant();
         final var scooterType = ScooterType.valueOf(resultSet.getString(12));
@@ -190,12 +189,13 @@ public class Order extends BaseEntity {
             && customerId.equals(order.customerId)
             && Objects.equals(scooter.getId(), order.scooter.getId())
             && Objects.equals(startTime.truncatedTo(ChronoUnit.MILLIS), order.startTime.truncatedTo(ChronoUnit.MILLIS))
-            && Objects.equals((endTime != null)
-                ? endTime.truncatedTo(ChronoUnit.MILLIS)
-                : null,
-            (order.endTime != null)
-                ? order.endTime.truncatedTo(ChronoUnit.MILLIS)
-                : null)
+            && Objects.equals(
+            Optional.ofNullable(endTime)
+                .map(time -> time.truncatedTo(ChronoUnit.MILLIS))
+                .orElse(null),
+            Optional.ofNullable(order.endTime)
+                .map(time -> time.truncatedTo(ChronoUnit.MILLIS))
+                .orElse(null))
             && status == order.status;
     }
 

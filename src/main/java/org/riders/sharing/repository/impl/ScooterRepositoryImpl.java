@@ -6,6 +6,7 @@ import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
+import org.riders.sharing.utils.SqlUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
 
 public class ScooterRepositoryImpl implements ScooterRepository {
     private final ConnectionPool connectionPool;
@@ -54,7 +57,12 @@ public class ScooterRepositoryImpl implements ScooterRepository {
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(
+            if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
+                throw new DuplicateEntryException(
+                    "Scooter with id %s has already existed".formatted(scooter.getId()), e);
+            }
+
+            throw new DatabaseException(
                 "Error occurred when trying to save scooter with id %s".formatted(scooter.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);

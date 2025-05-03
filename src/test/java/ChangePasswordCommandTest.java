@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -6,6 +5,7 @@ import org.mockito.Mockito;
 import org.riders.sharing.command.ChangePasswordCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.CustomerDto;
+import org.riders.sharing.dto.ModelMapper;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
@@ -32,7 +32,7 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
     private final CustomerService customerService = new CustomerServiceImpl(customerRepository);
     private final ChangePasswordCommand changePasswordCommand = new ChangePasswordCommand(customerService);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ModelMapper modelMapper = ModelMapper.INSTANCE;
 
     @Test
     public void changePasswordRespondsWith201AndCustomer() throws IOException {
@@ -78,7 +78,7 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         verify(response).setStatus(expectedRespStatus);
 
         final var updatedCustomer = customerService.getById(customer.getId());
-        final var customerDtoFromResponse = objectMapper.readValue(stringWriter.toString(), CustomerDto.class);
+        final var customerDtoFromResponse = modelMapper.getAsObject(stringWriter.toString(), CustomerDto.class);
 
         assertEquals(expectedNewPasswordHash, updatedCustomer.getPassword());
         assertEquals(updatedCustomer.getId(), customerDtoFromResponse.id());

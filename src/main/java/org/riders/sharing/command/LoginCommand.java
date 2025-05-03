@@ -1,11 +1,11 @@
 package org.riders.sharing.command;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.LoginDto;
+import org.riders.sharing.dto.ModelMapper;
 import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.exception.BadRequestException;
@@ -16,7 +16,7 @@ import org.riders.sharing.utils.authentication.AuthTokenGenerator;
 
 public class LoginCommand extends Command {
     private final Logger logger = LogManager.getLogger(LoginCommand.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ModelMapper modelMapper = ModelMapper.INSTANCE;
     private final CustomerService customerService;
 
     public LoginCommand(CustomerService customerService) {
@@ -27,7 +27,7 @@ public class LoginCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var loginDto = objectMapper.readValue(requestBody, LoginDto.class);
+            final var loginDto = modelMapper.getAsObject(requestBody, LoginDto.class);
             final var customer = customerService.login(loginDto);
 
             final var appConfig = ApplicationConfig.getInstance();
@@ -41,7 +41,7 @@ public class LoginCommand extends Command {
             final var accessToken = tokenGenerator.generateNewAccessToken(customer);
             final var refreshToken = tokenGenerator.generateNewRefreshToken(customer);
             final var tokensDto = new TokenDto(accessToken, refreshToken);
-            final var json = objectMapper.writeValueAsString(tokensDto);
+            final var json = modelMapper.getAsJson(tokensDto);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(JSON_CONTENT_TYPE);

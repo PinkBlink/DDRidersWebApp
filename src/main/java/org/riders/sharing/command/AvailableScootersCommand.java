@@ -1,10 +1,10 @@
 package org.riders.sharing.command;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.riders.sharing.dto.ModelMapper;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.service.ScooterService;
@@ -12,7 +12,7 @@ import org.riders.sharing.utils.ServletUtils;
 
 public class AvailableScootersCommand extends Command {
     private final Logger logger = LogManager.getLogger(AvailableScootersCommand.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ModelMapper modelMapper = ModelMapper.INSTANCE;
     private final ScooterService scooterService;
 
     public AvailableScootersCommand(ScooterService scooterService) {
@@ -23,9 +23,9 @@ public class AvailableScootersCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var pageRequestDto = objectMapper.readValue(requestBody, PageRequestDto.class);
+            final var pageRequestDto = modelMapper.getAsObject(requestBody, PageRequestDto.class);
             final var pageResponseDto = scooterService.getAvailableScooters(pageRequestDto);
-            final var pageResponseAsJson = objectMapper.writeValueAsString(pageResponseDto);
+            final var pageResponseAsJson = modelMapper.getAsJson(pageResponseDto);
 
             response.setStatus(HttpServletResponse.SC_OK);
 

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
+
 public class OrderRepositoryImpl implements OrderRepository {
     private final ConnectionPool connectionPool;
 
@@ -61,7 +63,11 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(
+            if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
+                throw new DuplicateEntryException(
+                    "Order with id %s has already existed".formatted(order.getId()), e);
+            }
+            throw new DatabaseException(
                 "Error occurred when trying to save order with id %s".formatted(order.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
@@ -100,7 +106,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderToStore;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to update order with id %s".formatted(order.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -124,7 +131,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find order with id %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -147,7 +155,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find all orders", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -164,7 +173,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to delete order with id %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -191,8 +201,12 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             return orderList;
-        } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+        } catch (SQLException exception) {
+            throw new DatabaseException(
+                "Error occurred when trying to find orders with status %s for customer with id %s"
+                    .formatted(status, customerId),
+                exception
+            );
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -218,7 +232,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find orders with status %s".formatted(orderStatus), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
