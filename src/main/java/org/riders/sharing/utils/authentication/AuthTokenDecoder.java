@@ -16,8 +16,10 @@ public class AuthTokenDecoder {
     }
 
     public DecodedJWT decode(String token) {
-        ValidationUtils.checkThat(Objects.nonNull(token) && !token.isBlank(),
-            () -> new InvalidTokenException("Token is empty or null"));
+        ValidationUtils.checkThat(
+            Objects.nonNull(token) && !token.isBlank(),
+            () -> new InvalidTokenException("Token is empty or null")
+        );
 
         return JWT.require(algorithm).build().verify(token);
     }

@@ -12,8 +12,8 @@ import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ServletUtils;
 
 public class RegistrationCommand extends Command {
-    private static final Logger logger = LogManager.getLogger(RegistrationCommand.class);
-
+    private final Logger logger = LogManager.getLogger(RegistrationCommand.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final CustomerService customerService;
 
     public RegistrationCommand(CustomerService customerService) {
@@ -24,7 +24,7 @@ public class RegistrationCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var registrationDto = new ObjectMapper().readValue(requestBody, RegistrationDto.class);
+            final var registrationDto = objectMapper.readValue(requestBody, RegistrationDto.class);
 
             customerService.register(registrationDto);
 

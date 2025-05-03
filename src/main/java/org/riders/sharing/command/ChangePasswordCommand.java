@@ -15,8 +15,7 @@ import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ServletUtils;
 
 public class ChangePasswordCommand extends Command {
-    private static final Logger logger = LogManager.getLogger(ChangePasswordCommand.class);
-
+    private final Logger logger = LogManager.getLogger(ChangePasswordCommand.class);
     private final ObjectMapper objectMapper = new ObjectMapper().registerModules(new JavaTimeModule());
     private final CustomerService customerService;
 

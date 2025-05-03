@@ -33,13 +33,16 @@ public class CustomerServiceImpl implements CustomerService {
         final var email = loginDto.email();
         final var password = loginDto.password();
 
-        ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
-            , () -> new BadRequestException("Email or Password is null."));
+        ValidationUtils.checkThat(
+            Objects.nonNull(email) && Objects.nonNull(password),
+            () -> new BadRequestException("Email or Password is null.")
+        );
 
-        final var customer = customerRepository.findByEmail(email).orElseThrow(() -> {
-            logger.error("Bad attempt to login: {}", email);
-            return new UnauthorizedException("Wrong email or password!");
-        });
+        final var customer = customerRepository.findByEmail(email)
+            .orElseThrow(() -> {
+                logger.error("Bad attempt to login: {}", email);
+                return new UnauthorizedException("Wrong email or password!");
+            });
 
         final var hashedPassword = encryptPassword(password);
 
@@ -57,8 +60,10 @@ public class CustomerServiceImpl implements CustomerService {
         final var email = registrationDto.email();
         final var password = registrationDto.password();
 
-        ValidationUtils.checkThat(Objects.nonNull(email) && Objects.nonNull(password)
-            , () -> new BadRequestException("Email or Password is null."));
+        ValidationUtils.checkThat(
+            Objects.nonNull(email) && Objects.nonNull(password),
+            () -> new BadRequestException("Email or Password is null.")
+        );
 
         final var hashedPassword = encryptPassword(password);
         final var savedCustomer = customerRepository.save(
@@ -82,6 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
                 && Objects.nonNull(changePasswordDto.oldPassword()),
             () -> new BadRequestException("Passwords or Id is null")
         );
+
         final var customerFromDb = getById(UUID.fromString(changePasswordDto.customerId()));
         final var oldPassHash = PasswordEncryptor.encryptPassword(changePasswordDto.oldPassword());
         final var newPassHash = PasswordEncryptor.encryptPassword(changePasswordDto.newPassword());
@@ -94,7 +100,6 @@ public class CustomerServiceImpl implements CustomerService {
         }
         logger.error("Old password does not match: {}", changePasswordDto.customerId());
         throw new UnauthorizedException("Old password does not match!");
-
     }
 
     @Override

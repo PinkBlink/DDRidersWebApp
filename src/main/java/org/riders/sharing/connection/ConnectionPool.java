@@ -38,14 +38,17 @@ public enum ConnectionPool {
     }
 
     private void deregisterDriver() {
-        DriverManager.getDrivers().asIterator().forEachRemaining(driver -> {
-            try {
-                DriverManager.deregisterDriver(driver);
-            } catch (SQLException e) {
-                logger.error("Can't deregister driver {}", e.getMessage());
-                throw new NoSQLConnectionException(e.getMessage());
-            }
-        });
+        DriverManager.getDrivers()
+            .asIterator()
+            .forEachRemaining(
+                driver -> {
+                    try {
+                        DriverManager.deregisterDriver(driver);
+                    } catch (SQLException e) {
+                        logger.error("Can't deregister driver {}", e.getMessage());
+                        throw new NoSQLConnectionException(e.getMessage());
+                    }
+                });
     }
 
     private void initConnections() {
@@ -74,10 +77,14 @@ public enum ConnectionPool {
         }
     }
 
-    private Connection createConnection(String url, String user, String password)
-        throws NoSQLConnectionException {
+    private Connection createConnection(String url, String user, String password) throws NoSQLConnectionException {
         try {
-            final var connection = DriverManager.getConnection(url, user, password);
+            final var connection = DriverManager.getConnection(
+                url,
+                user,
+                password
+            );
+
             logger.info("Create new connection: {}", connection.toString());
             return connection;
         } catch (SQLException e) {

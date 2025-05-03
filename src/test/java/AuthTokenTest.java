@@ -21,11 +21,14 @@ public class AuthTokenTest implements CustomerTestData {
 
     @Test
     public void generateReturnsToken() {
+        //given
         final var customer = aCustomer().build();
 
+        //when
         final var accessToken = authTokenGenerator.generateNewAccessToken(customer);
         final var refreshToken = authTokenGenerator.generateNewRefreshToken(customer);
 
+        //then
         assertNotNull(accessToken);
         assertNotNull(refreshToken);
     }
@@ -42,18 +45,23 @@ public class AuthTokenTest implements CustomerTestData {
 
     @Test
     public void decodesToken() {
+        //given
         final var customer = aCustomer().build();
         final var expectedId = customer.getId();
         final var expectedEmail = customer.getEmail();
+
         final var accessToken = authTokenGenerator.generateNewAccessToken(customer);
         final var refreshToken = authTokenGenerator.generateNewRefreshToken(customer);
 
+        //when
         final var decodedAccess = authTokenDecoder.decode(accessToken);
         final var decodedRefresh = authTokenDecoder.decode(refreshToken);
+
         final var idFromAccess = UUID.fromString(decodedAccess.getSubject());
         final var idFromRefresh = UUID.fromString(decodedRefresh.getSubject());
         final var emailFromAccess = decodedAccess.getClaim("email").asString();
 
+        //then
         assertEquals(expectedId, idFromAccess);
         assertEquals(expectedEmail, emailFromAccess);
         assertEquals(expectedId, idFromRefresh);

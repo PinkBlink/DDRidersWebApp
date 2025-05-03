@@ -22,6 +22,7 @@ public class Order extends BaseEntity {
         setId(builder.id);
         setCreateTime(builder.createTime);
         setUpdateTime(builder.updateTime);
+
         customerId = builder.customerId;
         scooter = builder.scooter;
         startTime = builder.startTime;
@@ -190,11 +191,11 @@ public class Order extends BaseEntity {
             && Objects.equals(scooter.getId(), order.scooter.getId())
             && Objects.equals(startTime.truncatedTo(ChronoUnit.MILLIS), order.startTime.truncatedTo(ChronoUnit.MILLIS))
             && Objects.equals((endTime != null)
-                                    ? endTime.truncatedTo(ChronoUnit.MILLIS)
-                                    : null,
-                                (order.endTime != null)
-                                    ? order.endTime.truncatedTo(ChronoUnit.MILLIS)
-                                    : null)
+                ? endTime.truncatedTo(ChronoUnit.MILLIS)
+                : null,
+            (order.endTime != null)
+                ? order.endTime.truncatedTo(ChronoUnit.MILLIS)
+                : null)
             && status == order.status;
     }
 

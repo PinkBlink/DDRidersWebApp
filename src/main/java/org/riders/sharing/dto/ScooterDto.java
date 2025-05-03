@@ -12,7 +12,6 @@ public record ScooterDto(
     ScooterStatus scooterStatus,
     int batteryLevel
 ) implements Pageable {
-
     public static ScooterDto fromScooter(Scooter scooter) {
         return new ScooterDto(
             scooter.getId(),

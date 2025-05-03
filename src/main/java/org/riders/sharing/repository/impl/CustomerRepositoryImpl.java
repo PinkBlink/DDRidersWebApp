@@ -38,7 +38,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage());
+            throw new DatabaseException("Error occurred when trying to find by email %s".formatted(email), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -49,7 +49,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var preparedStatement = connection.prepareStatement("""
-            INSERT INTO customers(id, create_time, update_time, name, surname, email, password)
+            INSERT INTO customers(
+                id,
+                create_time,
+                update_time,
+                name, surname,
+                email,
+                password
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?);
             """)) {
             final var customerToStore = customer.toBuilder()
@@ -64,11 +71,13 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             preparedStatement.setString(5, customerToStore.getSurname());
             preparedStatement.setString(6, customerToStore.getEmail());
             preparedStatement.setString(7, customerToStore.getPassword());
+
             preparedStatement.executeUpdate();
 
             return customerToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(e.getMessage());
+            throw new DuplicateEntryException(
+                "Error occurred when trying to save customer with id %s".formatted(customer.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -96,11 +105,13 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             preparedStatement.setString(4, customerToStore.getEmail());
             preparedStatement.setString(5, customerToStore.getPassword());
             preparedStatement.setObject(6, customerToStore.getId(), Types.OTHER);
+
             preparedStatement.executeUpdate();
 
             return customerToStore;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to update customer with id %s".formatted(customer.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -113,6 +124,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         try (final var preparedStatement = connection.prepareStatement(
             "SELECT * FROM customers WHERE id = ?")) {
             preparedStatement.setObject(1, id, Types.OTHER);
+
             final var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -121,7 +133,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find customer by id %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -143,7 +155,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             return customerList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to find all customers", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -159,7 +171,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException("Error occurred when trying to delete user with %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }

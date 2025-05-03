@@ -121,6 +121,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
+
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
         //when

@@ -97,6 +97,7 @@ public class ApplicationConfig {
 
     private static ApplicationConfig initFromConfig() {
         final var objectMapper = new ObjectMapper(new YAMLFactory());
+
         try (final var input = ApplicationConfig.class.getClassLoader().getResourceAsStream("config.yml")) {
 
             return objectMapper.readValue(input, ApplicationConfig.class);
