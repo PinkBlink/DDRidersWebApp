@@ -6,7 +6,6 @@ import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
-import org.riders.sharing.utils.SqlUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
