@@ -4,13 +4,11 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.riders.sharing.dto.ModelMapper;
 import org.riders.sharing.exception.ConfigLoadException;
 
 import java.io.IOException;
 
 public class ApplicationConfig {
-    private static final ModelMapper MODEL_MAPPER = ModelMapper.INSTANCE;
     private final String postgresDbUrl;
     private final String ddRidersDbUrl;
     private final String user;
@@ -98,7 +96,7 @@ public class ApplicationConfig {
 
     private static ApplicationConfig initFromConfig() {
         try (final var input = ApplicationConfig.class.getClassLoader().getResourceAsStream("config.yml")) {
-            return MODEL_MAPPER.getAsObject(input, ApplicationConfig.class);
+            return ModelMapper.parse(input, ApplicationConfig.class);
         } catch (IOException e) {
             throw new ConfigLoadException("Error occurred when trying to load config.yml", e);
         }

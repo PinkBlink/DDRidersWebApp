@@ -3,7 +3,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.dto.ModelMapper;
+import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -31,7 +31,6 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final AuthTokenDecoder authTokenDecoder = new AuthTokenDecoder(appConfig.getAlgorithm());
     private final String password = "password";
     private final String hashedPassword = PasswordEncryptor.encryptPassword(password);
-    private final ModelMapper modelMapper = ModelMapper.INSTANCE;
 
     @Test
     public void loginRespondsWith200() throws IOException {
@@ -144,7 +143,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         loginCommand.execute(request, response);
 
         //then
-        final var tokens = modelMapper.getAsObject(stringWriter.toString(), TokenDto.class);
+        final var tokens = ModelMapper.parse(stringWriter.toString(), TokenDto.class);
         final var decodedAccessToken = authTokenDecoder.decode(tokens.accessToken());
         final var idFromAccessToken = UUID.fromString(decodedAccessToken.getSubject());
         final var decodedRefreshToken = authTokenDecoder.decode(tokens.refreshToken());
