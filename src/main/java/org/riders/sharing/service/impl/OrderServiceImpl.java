@@ -41,7 +41,6 @@ public class OrderServiceImpl implements OrderService {
         final var customerId = UUID.fromString(createOrderDto.customerId());
         final var scooterId = UUID.fromString(createOrderDto.scooterId());
 
-
         final var customerFromDb = customerService.getById(customerId);
         final var scooterFromDb = scooterService.getById(scooterId);
         final var rentedScooterFromDb = scooterService.rentScooter(scooterFromDb);
