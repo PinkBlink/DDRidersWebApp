@@ -66,7 +66,6 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Override
     public Scooter rentScooter(Scooter scooter) {
-
         ValidationUtils.checkThat(
             scooter.getStatus().equals(ScooterStatus.AVAILABLE),
             () -> new IllegalStatusException("Scooter has been already rented")

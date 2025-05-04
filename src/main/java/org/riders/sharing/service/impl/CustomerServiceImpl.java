@@ -93,11 +93,16 @@ public class CustomerServiceImpl implements CustomerService {
         final var newPassHash = PasswordEncryptor.encryptPassword(changePasswordDto.newPassword());
 
         if (oldPassHash.equals(customerFromDb.getPassword())) {
-            final var customerToStore = customerFromDb.toBuilder().password(newPassHash).build();
-            customerRepository.update(customerToStore);
+            final var updatedCustomer = customerRepository.update(
+                customerFromDb.toBuilder()
+                    .password(newPassHash)
+                    .build()
+            );
+
             logger.info("Successfully changed password for customer with id {}", customerFromDb.getId());
-            return customerToStore;
+            return updatedCustomer;
         }
+
         logger.error("Old password does not match: {}", changePasswordDto.customerId());
         throw new UnauthorizedException("Old password does not match!");
     }

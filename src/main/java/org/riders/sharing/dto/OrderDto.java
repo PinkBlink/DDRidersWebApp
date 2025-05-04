@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record OrderDto(
-    UUID id,
+    UUID orderId,
     UUID customerId,
     UUID scooterId,
     Instant startTime,

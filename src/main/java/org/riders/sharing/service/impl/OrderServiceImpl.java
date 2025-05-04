@@ -1,7 +1,10 @@
 package org.riders.sharing.service.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.CreateOrderDto;
 import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.service.CustomerService;
@@ -13,9 +16,12 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.riders.sharing.model.Order.Builder.order;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 
 public class OrderServiceImpl implements OrderService {
+    private static final Logger LOGGER = LogManager.getLogger(OrderServiceImpl.class);
+
     private final CustomerService customerService;
     private final ScooterService scooterService;
     private final OrderRepository orderRepository;
@@ -45,14 +51,27 @@ public class OrderServiceImpl implements OrderService {
         final var scooterFromDb = scooterService.getById(scooterId);
         final var rentedScooterFromDb = scooterService.rentScooter(scooterFromDb);
 
-        final var orderToStore = Order.Builder
-            .order()
-            .customerId(customerFromDb.getId())
-            .status(ONGOING)
-            .scooter(rentedScooterFromDb)
-            .startTime(Instant.now())
-            .build();
+        final var savedOrder = orderRepository.save(
+            order()
+                .customerId(customerFromDb.getId())
+                .scooter(rentedScooterFromDb)
+                .startTime(Instant.now())
+                .status(ONGOING)
+                .build()
+        );
 
-        return orderRepository.save(orderToStore);
+        LOGGER.info("Order {} was successfully saved", savedOrder.getId());
+        return savedOrder;
+    }
+
+    @Override
+    public Order getById(UUID id) {
+        final var maybeOrder = orderRepository.findById(id);
+
+        return maybeOrder.orElseThrow(() -> {
+                LOGGER.error("Couldn't find order with id: {}", id);
+                return new NoElementException("Couldn't find order with id: %s".formatted(id));
+            }
+        );
     }
 }
