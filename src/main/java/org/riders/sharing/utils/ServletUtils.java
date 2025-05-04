@@ -1,7 +1,9 @@
 package org.riders.sharing.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.ResponseWritingException;
 
 import java.io.IOException;
 
@@ -20,5 +22,13 @@ public class ServletUtils {
         }
 
         return requestBodyBuilder.toString();
+    }
+
+    public static void writeResponse(HttpServletResponse response, String message) {
+        try (final var writer = response.getWriter()) {
+            writer.write(message);
+        } catch (IOException e) {
+            throw new ResponseWritingException("Couldn't write response.",e);
+        }
     }
 }
