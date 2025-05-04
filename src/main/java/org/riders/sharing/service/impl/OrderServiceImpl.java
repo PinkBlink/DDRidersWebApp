@@ -1,7 +1,5 @@
 package org.riders.sharing.service.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.CreateOrderDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.model.Order;
