@@ -1,10 +1,10 @@
 package org.riders.sharing.command;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.dto.RegistrationDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.DuplicateEntryException;
@@ -12,8 +12,7 @@ import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ServletUtils;
 
 public class RegistrationCommand extends Command {
-    private static final Logger logger = LogManager.getLogger(RegistrationCommand.class);
-
+    private final Logger logger = LogManager.getLogger(RegistrationCommand.class);
     private final CustomerService customerService;
 
     public RegistrationCommand(CustomerService customerService) {
@@ -24,7 +23,7 @@ public class RegistrationCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var registrationDto = new ObjectMapper().readValue(requestBody, RegistrationDto.class);
+            final var registrationDto = ModelMapper.parse(requestBody, RegistrationDto.class);
 
             customerService.register(registrationDto);
 

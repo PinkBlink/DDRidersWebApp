@@ -16,6 +16,7 @@ public class Customer extends BaseEntity {
         setId(builder.id);
         setCreateTime(builder.createTime);
         setUpdateTime(builder.updateTime);
+
         this.name = builder.name;
         this.surname = builder.surname;
         this.email = builder.email;
@@ -43,13 +44,13 @@ public class Customer extends BaseEntity {
 
     public Customer.Builder toBuilder() {
         return new Builder()
-                .id(getId())
-                .createTime(getCreateTime())
-                .updateTime(getUpdateTime())
-                .name(name)
-                .surname(surname)
-                .email(email)
-                .password(password);
+            .id(getId())
+            .createTime(getCreateTime())
+            .updateTime(getUpdateTime())
+            .name(name)
+            .surname(surname)
+            .email(email)
+            .password(password);
     }
 
     public static class Builder {
@@ -107,23 +108,23 @@ public class Customer extends BaseEntity {
     }
 
     public static Customer customerFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(1));
-        Instant createTime = resultSet.getTimestamp(2).toInstant();
-        Instant updateTime = resultSet.getTimestamp(3).toInstant();
-        String name = resultSet.getString(4);
-        String surname = resultSet.getString(5);
-        String email = resultSet.getString(6);
-        String password = resultSet.getString(7);
+        final var id = UUID.fromString(resultSet.getString(1));
+        final var createTime = resultSet.getTimestamp(2).toInstant();
+        final var updateTime = resultSet.getTimestamp(3).toInstant();
+        final var name = resultSet.getString(4);
+        final var surname = resultSet.getString(5);
+        final var email = resultSet.getString(6);
+        final var password = resultSet.getString(7);
 
         return new Customer.Builder()
-                .id(id)
-                .createTime(createTime)
-                .updateTime(updateTime)
-                .name(name)
-                .surname(surname)
-                .email(email)
-                .password(password)
-                .build();
+            .id(id)
+            .createTime(createTime)
+            .updateTime(updateTime)
+            .name(name)
+            .surname(surname)
+            .email(email)
+            .password(password)
+            .build();
     }
 
     @Override
@@ -137,25 +138,31 @@ public class Customer extends BaseEntity {
         }
 
         return getId().equals(customer.getId())
-                && password.equals(customer.password)
-                && Objects.equals(name, customer.name)
-                && Objects.equals(surname, customer.surname)
-                && Objects.equals(email, customer.email);
+            && password.equals(customer.password)
+            && Objects.equals(name, customer.name)
+            && Objects.equals(surname, customer.surname)
+            && Objects.equals(email, customer.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), name, surname, email, password);
+        return Objects.hash(
+            getId(),
+            name,
+            surname,
+            email,
+            password
+        );
     }
 
     @Override
     public String toString() {
         return "Customer{" +
-                "id=" + getId() +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + getId() +
+            ", name='" + name + '\'' +
+            ", surname='" + surname + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

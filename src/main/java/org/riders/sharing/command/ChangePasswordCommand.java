@@ -1,13 +1,12 @@
 package org.riders.sharing.command;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.ChangePasswordDto;
 import org.riders.sharing.dto.CustomerDto;
+import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.exception.UnauthorizedException;
@@ -15,9 +14,7 @@ import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ServletUtils;
 
 public class ChangePasswordCommand extends Command {
-    private static final Logger logger = LogManager.getLogger(ChangePasswordCommand.class);
-
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModules(new JavaTimeModule());
+    private final Logger logger = LogManager.getLogger(ChangePasswordCommand.class);
     private final CustomerService customerService;
 
     public ChangePasswordCommand(CustomerService customerService) {
@@ -28,11 +25,11 @@ public class ChangePasswordCommand extends Command {
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
             final var requestBody = ServletUtils.getRequestBody(request);
-            final var changePassDto = objectMapper.readValue(requestBody, ChangePasswordDto.class);
+            final var changePassDto = ModelMapper.parse(requestBody, ChangePasswordDto.class);
 
             final var updatedCustomer = customerService.changePassword(changePassDto);
             final var customerDtoToResponse = CustomerDto.fromCustomer(updatedCustomer);
-            final var jsonCustomerDto = objectMapper.writeValueAsString(customerDtoToResponse);
+            final var jsonCustomerDto = ModelMapper.toJsonString(customerDtoToResponse);
 
             response.setStatus(HttpServletResponse.SC_CREATED);
             response.setContentType(JSON_CONTENT_TYPE);

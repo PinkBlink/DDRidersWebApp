@@ -17,32 +17,40 @@ public class CustomerServiceTest extends BaseTest implements CustomerTestData {
 
     @Test
     public void loginThrowsUnauthorizedIfWrongPass() {
+        //given
         final var customer = customerRepository.save(aCustomer().build());
 
         final var loginDto = new LoginDto(customer.getEmail(), "wrong_pass");
 
+        //then
         assertThrows(UnauthorizedException.class, () -> customerService.login(loginDto));
     }
 
     @Test
     public void loginThrowsUnauthorizedIfWrongEmail() {
+        //given
         final var customer = customerRepository.save(aCustomer().build());
 
         final var loginDto = new LoginDto("wrong@email", customer.getPassword());
 
+        //then
         assertThrows(UnauthorizedException.class,
             () -> customerService.login(loginDto));
     }
 
     @Test
     public void loginReturnsCustomer() {
+        //given
         final var password = "password";
         final var hashedPassword = PasswordEncryptor.encryptPassword(password);
         final var customer = customerRepository.save(aCustomer().password(hashedPassword).build());
+
         final var loginDto = new LoginDto(customer.getEmail(), password);
 
+        //when
         final var loggedCustomer = customerService.login(loginDto);
 
+        //then
         assertEquals(customer, loggedCustomer);
     }
 

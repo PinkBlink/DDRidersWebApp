@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
+
 public class ScooterRepositoryImpl implements ScooterRepository {
     private final ConnectionPool connectionPool;
 
@@ -29,7 +31,14 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var preparedStatement = connection.prepareStatement("""
-            INSERT INTO scooters(id, create_time, update_time, scooter_type, scooter_status, battery_level)
+            INSERT INTO scooters(
+                id,
+                create_time,
+                update_time,
+                scooter_type,
+                scooter_status,
+                battery_level
+            )
             VALUES( ?, ?, ?, ?, ?, ?);""")) {
             final var scooterToStore = scooter.toBuilder()
                 .createTime(Instant.now())
@@ -42,11 +51,18 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             preparedStatement.setObject(4, scooterToStore.getType(), Types.OTHER);
             preparedStatement.setObject(5, scooterToStore.getStatus(), Types.OTHER);
             preparedStatement.setInt(6, scooterToStore.getBatteryLevel());
+
             preparedStatement.executeUpdate();
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException("Scooter is already exists", e);
+            if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
+                throw new DuplicateEntryException(
+                    "Scooter with id %s has already existed".formatted(scooter.getId()), e);
+            }
+
+            throw new DatabaseException(
+                "Error occurred when trying to save scooter with id %s".formatted(scooter.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -72,11 +88,13 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             statement.setObject(3, scooterToStore.getStatus(), Types.OTHER);
             statement.setInt(4, scooterToStore.getBatteryLevel());
             statement.setObject(5, scooterToStore.getId(), Types.OTHER);
+
             statement.executeUpdate();
 
             return scooterToStore;
         } catch (SQLException e) {
-            throw new DatabaseException("Couldn't update scooter", e);
+            throw new DatabaseException(
+                "Error occurred when trying to update scooter with id %s".formatted(scooter.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -150,6 +168,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         try (final var statement = connection.prepareStatement(
             "SELECT * FROM scooters WHERE scooter_status = ?;")) {
             statement.setObject(1, scooterStatus, Types.OTHER);
+
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -181,6 +200,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
             """)) {
             statement.setInt(1, limit);
             statement.setInt(2, offset);
+
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -205,6 +225,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
                 WHERE scooter_status = 'AVAILABLE'
             """)) {
             final var resultSet = statement.executeQuery();
+
             resultSet.next();
             return resultSet.getInt(1);
 

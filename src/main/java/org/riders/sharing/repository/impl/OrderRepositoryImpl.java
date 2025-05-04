@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
+
 public class OrderRepositoryImpl implements OrderRepository {
     private final ConnectionPool connectionPool;
 
@@ -29,7 +31,16 @@ public class OrderRepositoryImpl implements OrderRepository {
         final var connection = connectionPool.getConnection();
 
         try (final var preparedStatement = connection.prepareStatement("""
-            INSERT INTO orders(id, create_time, update_time, customer_id, scooter_id, start_time, end_time, order_status)
+            INSERT INTO orders(
+                id,
+                create_time,
+                update_time,
+                customer_id,
+                scooter_id,
+                start_time,
+                end_time,
+                order_status
+            )
             VALUES(?, ?, ?, ?, ?, ?, ?, ?)""")) {
             final var orderToStore = order.toBuilder()
                 .createTime(Instant.now())
@@ -47,11 +58,17 @@ public class OrderRepositoryImpl implements OrderRepository {
                 : Timestamp.from(orderToStore.getEndTime()));
 
             preparedStatement.setObject(8, order.getStatus(), Types.OTHER);
+
             preparedStatement.executeUpdate();
 
             return orderToStore;
         } catch (SQLException e) {
-            throw new DuplicateEntryException(e.getMessage(), e);
+            if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
+                throw new DuplicateEntryException(
+                    "Order with id %s has already existed".formatted(order.getId()), e);
+            }
+            throw new DatabaseException(
+                "Error occurred when trying to save order with id %s".formatted(order.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -84,11 +101,13 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             preparedStatement.setObject(6, orderToStore.getStatus(), Types.OTHER);
             preparedStatement.setObject(7, orderToStore.getId(), Types.OTHER);
+
             preparedStatement.executeUpdate();
 
             return orderToStore;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to update order with id %s".formatted(order.getId()), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -103,6 +122,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             JOIN scooters ON scooter_id = scooters.id
             WHERE orders.id = ?""")) {
             preparedStatement.setObject(1, id, Types.OTHER);
+
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -111,7 +131,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find order with id %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -134,7 +155,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find all orders", e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -151,7 +173,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to delete order with id %s".formatted(id), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -169,6 +192,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             AND order_status = ?;""")) {
             preparedStatement.setObject(1, customerId, Types.OTHER);
             preparedStatement.setObject(2, status, Types.OTHER);
+
             final var resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -177,8 +201,12 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             return orderList;
-        } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+        } catch (SQLException exception) {
+            throw new DatabaseException(
+                "Error occurred when trying to find orders with status %s for customer with id %s"
+                    .formatted(status, customerId),
+                exception
+            );
         } finally {
             connectionPool.releaseConnection(connection);
         }
@@ -194,6 +222,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             JOIN scooters ON scooter_id = scooters.id
             WHERE order_status = ?""")) {
             preparedStatement.setObject(1, orderStatus, Types.OTHER);
+
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -203,7 +232,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             return orderList;
         } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
+            throw new DatabaseException(
+                "Error occurred when trying to find orders with status %s".formatted(orderStatus), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }

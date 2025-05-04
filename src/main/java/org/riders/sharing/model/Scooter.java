@@ -18,6 +18,7 @@ public class Scooter extends BaseEntity {
         setId(builder.id);
         setCreateTime(builder.createTime);
         setUpdateTime(builder.updateTime);
+
         type = builder.type;
         status = builder.status;
         batteryLevel = builder.batteryLevel;
@@ -37,12 +38,12 @@ public class Scooter extends BaseEntity {
 
     public Scooter.Builder toBuilder() {
         return new Scooter.Builder()
-                .id(getId())
-                .createTime(getCreateTime())
-                .updateTime(getUpdateTime())
-                .type(type)
-                .status(status)
-                .batteryLevel(batteryLevel);
+            .id(getId())
+            .createTime(getCreateTime())
+            .updateTime(getUpdateTime())
+            .type(type)
+            .status(status)
+            .batteryLevel(batteryLevel);
     }
 
     public static class Builder {
@@ -93,21 +94,21 @@ public class Scooter extends BaseEntity {
     }
 
     public static Scooter scooterFromResultSet(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(1));
-        Instant createTime = resultSet.getTimestamp(2).toInstant();
-        Instant updateTime = resultSet.getTimestamp(3).toInstant();
-        ScooterType scooterType = ScooterType.valueOf(resultSet.getString(4));
-        ScooterStatus scooterStatus = ScooterStatus.valueOf(resultSet.getString(5));
-        int batteryLevel = resultSet.getInt(6);
+        final var id = UUID.fromString(resultSet.getString(1));
+        final var createTime = resultSet.getTimestamp(2).toInstant();
+        final var  updateTime = resultSet.getTimestamp(3).toInstant();
+        final var scooterType = ScooterType.valueOf(resultSet.getString(4));
+        final var scooterStatus = ScooterStatus.valueOf(resultSet.getString(5));
+        final var batteryLevel = resultSet.getInt(6);
 
         return new Scooter.Builder()
-                .id(id)
-                .createTime(createTime)
-                .updateTime(updateTime)
-                .type(scooterType)
-                .status(scooterStatus)
-                .batteryLevel(batteryLevel)
-                .build();
+            .id(id)
+            .createTime(createTime)
+            .updateTime(updateTime)
+            .type(scooterType)
+            .status(scooterStatus)
+            .batteryLevel(batteryLevel)
+            .build();
     }
 
     @Override
@@ -121,8 +122,8 @@ public class Scooter extends BaseEntity {
         }
 
         return getId().equals(scooter.getId())
-                && status == scooter.status
-                && Objects.equals(type, scooter.type);
+            && status == scooter.status
+            && Objects.equals(type, scooter.type);
     }
 
     @Override
@@ -133,10 +134,10 @@ public class Scooter extends BaseEntity {
     @Override
     public String toString() {
         return "Scooter{" +
-                "id=" + getId() +
-                ", scooterType=" + type +
-                ", status=" + status +
-                ", batteryLevel=" + batteryLevel +
-                '}';
+            "id=" + getId() +
+            ", scooterType=" + type +
+            ", status=" + status +
+            ", batteryLevel=" + batteryLevel +
+            '}';
     }
 }

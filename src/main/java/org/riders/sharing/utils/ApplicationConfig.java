@@ -4,8 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.riders.sharing.exception.ConfigLoadException;
 
 import java.io.IOException;
 
@@ -96,12 +95,10 @@ public class ApplicationConfig {
     }
 
     private static ApplicationConfig initFromConfig() {
-        final var objectMapper = new ObjectMapper(new YAMLFactory());
         try (final var input = ApplicationConfig.class.getClassLoader().getResourceAsStream("config.yml")) {
-
-            return objectMapper.readValue(input, ApplicationConfig.class);
+            return ModelMapper.parse(input, ApplicationConfig.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ConfigLoadException("Error occurred when trying to load config.yml", e);
         }
     }
 }

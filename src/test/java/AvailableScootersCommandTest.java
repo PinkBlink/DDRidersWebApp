@@ -1,12 +1,11 @@
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.riders.sharing.command.AvailableScootersCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
 import org.riders.sharing.repository.ScooterRepository;
@@ -32,7 +31,6 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
     private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
     private final ScooterService scooterService = new ScooterServiceImpl(scooterRepository);
     private final AvailableScootersCommand availableScootersCommand = new AvailableScootersCommand(scooterService);
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModules(new JavaTimeModule());
 
     @Test
     public void availableRespondsWith200AndScooters() throws IOException {
@@ -89,7 +87,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         //then
         verify(response).setStatus(expectedResponseStatus);
 
-        final var actualPageResponse = objectMapper.readValue(
+        final var actualPageResponse = ModelMapper.parse(
             stringWriter.toString(),
             new TypeReference<PageResponseDto<ScooterDto>>() {
             }
@@ -121,6 +119,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
+
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
         //when

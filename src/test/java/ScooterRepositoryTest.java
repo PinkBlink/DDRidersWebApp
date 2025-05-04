@@ -89,14 +89,13 @@ public class ScooterRepositoryTest extends BaseTest implements ScooterTestData {
     public void updatesScooterInDB() {
         //given
         final var newStatus = ScooterStatus.RENTED;
-        final var scooter = aScooter().build();
-        scooterRepository.save(scooter);
-        final var updatedScooter = scooter.toBuilder().status(newStatus).updateTime(null).build();
+        final var savedScooter = scooterRepository.save(aScooter().build());
+
+        final var updatedScooter = savedScooter.toBuilder().status(newStatus).updateTime(null).build();
 
         //when
         scooterRepository.update(updatedScooter);
         final var scooterFromDb = scooterRepository.findById(updatedScooter.getId()).get();
-
 
         //then
         assertEquals(updatedScooter, scooterFromDb);

@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class SqlUtils {
+    public static final String DUPLICATE_ENTRY_SQL_ERR_CODE = "23505";
+
     private static final Logger logger = LogManager.getLogger(SqlUtils.class);
 
     public static void initDatabase(ApplicationConfig applicationConfig) {
@@ -20,17 +22,24 @@ public class SqlUtils {
             applicationConfig.getPassword())) {
 
             logger.info("Attempt to send create db file {}", applicationConfig.getDdRidersDbUrl());
-            sendCreateFile(applicationConfig.getPathToCreateDbScript(),
+            executeSqlScriptFromFile(
+                applicationConfig.getPathToCreateDbScript(),
                 applicationConfig.getPostgresDbUrl(),
                 applicationConfig.getUser(),
-                applicationConfig.getPassword());
+                applicationConfig.getPassword()
+            );
 
-            logger.info("Attempt to send create tables file: {}",
-                applicationConfig.getPathToCreateTablesScript());
-            sendCreateFile(applicationConfig.getPathToCreateTablesScript(),
+            logger.info(
+                "Attempt to send create tables file: {}",
+                applicationConfig.getPathToCreateTablesScript()
+            );
+
+            executeSqlScriptFromFile(
+                applicationConfig.getPathToCreateTablesScript(),
                 applicationConfig.getDdRidersDbUrl(),
                 applicationConfig.getUser(),
-                applicationConfig.getPassword());
+                applicationConfig.getPassword()
+            );
 
             logger.info("Database and tables are successfully created");
         } else {
@@ -38,7 +47,7 @@ public class SqlUtils {
         }
     }
 
-    private static void sendCreateFile(String path, String url, String user, String password) {
+    private static void executeSqlScriptFromFile(String path, String url, String user, String password) {
         try (final var connection = DriverManager.getConnection(url, user, password)) {
             logger.info("Created connection with {}", url);
 
@@ -52,8 +61,8 @@ public class SqlUtils {
             logger.info("The script is successfully sent;");
         } catch (SQLException e) {
             logger.error("Couldn't create connection to database with URL: {}", url, e);
-            throw new NoSQLConnectionException("Couldn't create connection to database with URL:" + url,
-                e);
+            throw new NoSQLConnectionException(
+                "Couldn't create connection to database with URL:" + url, e);
         }
     }
 
@@ -73,7 +82,9 @@ public class SqlUtils {
         final var stringBuilder = new StringBuilder();
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        bufferedReader.lines().forEach(line -> stringBuilder.append(line).append("\n"));
+        bufferedReader.lines().forEach(
+            line -> stringBuilder.append(line).append("\n")
+        );
 
         return stringBuilder.toString().trim();
     }
