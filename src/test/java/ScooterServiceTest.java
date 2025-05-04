@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.PageRequestDto;

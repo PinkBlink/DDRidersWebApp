@@ -11,7 +11,6 @@ import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.service.OrderService;
-import org.riders.sharing.utils.JsonErrorMessages;
 import org.riders.sharing.utils.ModelMapper;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
