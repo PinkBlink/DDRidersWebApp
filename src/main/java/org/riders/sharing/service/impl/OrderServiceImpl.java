@@ -18,7 +18,6 @@ import java.util.UUID;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 
 public class OrderServiceImpl implements OrderService {
-    private static final Logger LOGGER = LogManager.getLogger(OrderServiceImpl.class);
     private final CustomerService customerService;
     private final ScooterService scooterService;
     private final OrderRepository orderRepository;
