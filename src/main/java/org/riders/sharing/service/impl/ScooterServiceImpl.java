@@ -1,17 +1,27 @@
 package org.riders.sharing.service.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
 import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.IllegalStatusException;
+import org.riders.sharing.model.Scooter;
+import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.service.ScooterService;
+import org.riders.sharing.utils.ValidationUtils;
+
+import java.util.UUID;
 
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
 
 public class ScooterServiceImpl implements ScooterService {
+    private static final Logger LOGGER = LogManager.getLogger(ScooterServiceImpl.class);
     private static final int DEFAULT_PAGE = 1;
     private static final int MAX_PAGE_SIZE = 1000;
 
@@ -42,6 +52,30 @@ public class ScooterServiceImpl implements ScooterService {
             totalElements,
             totalPages
         );
+    }
+
+    @Override
+    public Scooter getById(UUID id) {
+        final var maybeScooter = scooterRepository.findById(id);
+
+        return maybeScooter.orElseThrow(() -> {
+            LOGGER.error("Couldn't find scooter with id {}", id);
+            return new NoElementException("Couldn't find scooter with id %s".formatted(id));
+        });
+    }
+
+    @Override
+    public Scooter rentScooter(Scooter scooter) {
+        ValidationUtils.checkThat(
+            scooter.getStatus().equals(ScooterStatus.AVAILABLE),
+            () -> new IllegalStatusException("Scooter has been already rented")
+        );
+
+        final var updatedScooter = scooter.toBuilder()
+            .status(ScooterStatus.RENTED)
+            .build();
+
+        return scooterRepository.update(updatedScooter);
     }
 
     private int calculateTotalPages(long totalElements, int pageSize) {
