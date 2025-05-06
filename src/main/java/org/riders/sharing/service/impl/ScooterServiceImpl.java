@@ -9,7 +9,6 @@ import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.model.Scooter;
-import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.service.ScooterService;
 import org.riders.sharing.utils.ValidationUtils;

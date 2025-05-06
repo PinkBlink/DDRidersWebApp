@@ -41,8 +41,6 @@ import static org.riders.sharing.model.enums.ScooterStatus.AVAILABLE;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
 
 public class CompleteOrderCommandTest extends BaseTest implements OrderTestData, CustomerTestData, ScooterTestData {
-    private final Logger logger = LogManager.getLogger();
-
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
     private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
     private final OrderRepository orderRepository = new OrderRepositoryImpl(ConnectionPool.INSTANCE);
