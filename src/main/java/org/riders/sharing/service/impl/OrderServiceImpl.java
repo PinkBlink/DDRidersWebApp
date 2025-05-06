@@ -3,7 +3,9 @@ package org.riders.sharing.service.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.CreateOrderDto;
+import org.riders.sharing.dto.CustomerOrdersRequestDto;
 import org.riders.sharing.dto.OrderDto;
+import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.exception.NoElementException;
@@ -12,6 +14,7 @@ import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.OrderService;
 import org.riders.sharing.service.ScooterService;
+import org.riders.sharing.utils.PaginationUtils;
 import org.riders.sharing.utils.ValidationUtils;
 
 import java.time.Instant;
@@ -102,5 +105,45 @@ public class OrderServiceImpl implements OrderService {
 
         LOGGER.info("Order with id {} has been successfully completed", order.getId());
         return completedOrder;
+    }
+
+    @Override
+    public PageResponseDto<OrderDto> getCompletedCustomerOrders(CustomerOrdersRequestDto requestDto) {
+        ValidationUtils.checkThat(
+            Objects.nonNull(requestDto.customerId()),
+            () -> new BadRequestException("Customer id is null.")
+        );
+
+        final var customerId = UUID.fromString(requestDto.customerId());
+        final var pageRequest = requestDto.pageRequestDto();
+
+        final var page = PaginationUtils.definePage(pageRequest.pageSize());
+        final var pageSize = PaginationUtils.definePageSize(pageRequest.pageSize());
+        final var offset = PaginationUtils.defineOffset(page, pageSize);
+
+        final var completedOrders = orderRepository.findCompletedCustomerOrdersForResponse(
+            customerId,
+            pageSize,
+            offset
+        );
+
+        final var completedOrdersDto = completedOrders
+            .stream()
+            .map(OrderDto::fromOrder)
+            .toList();
+
+        final var totalElements = orderRepository.getCompletedCustomerOrdersAmount(customerId);
+        final var totalPages = PaginationUtils.calculateTotalPages(totalElements, pageSize);
+
+        final var pageResponseDto = new PageResponseDto<OrderDto>(
+            completedOrdersDto,
+            pageRequest.page(),
+            pageRequest.pageSize(),
+            totalElements,
+            totalPages
+        );
+
+        LOGGER.info("Find {} completed orders for customer with id {}", totalElements, customerId);
+        return pageResponseDto;
     }
 }

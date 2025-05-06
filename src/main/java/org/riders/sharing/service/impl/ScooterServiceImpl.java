@@ -5,26 +5,22 @@ import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
-import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.service.ScooterService;
+import org.riders.sharing.utils.PaginationUtils;
 import org.riders.sharing.utils.ValidationUtils;
 
 import java.util.UUID;
 
-import static java.lang.Math.min;
-import static java.lang.Math.max;
 import static org.riders.sharing.model.enums.ScooterStatus.AVAILABLE;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
 
 
 public class ScooterServiceImpl implements ScooterService {
     private static final Logger LOGGER = LogManager.getLogger(ScooterServiceImpl.class);
-    private static final int DEFAULT_PAGE = 1;
-    private static final int MAX_PAGE_SIZE = 1000;
 
     private final ScooterRepository scooterRepository;
 
@@ -34,11 +30,11 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Override
     public PageResponseDto<ScooterDto> getAvailableScooters(PageRequestDto requestDto) {
-        final var page = definePage(requestDto);
-        final var pageSize = definePageSize(requestDto);
-        final var offset = defineOffset(page, pageSize);
+        final var page = PaginationUtils.definePage(requestDto.page());
+        final var pageSize = PaginationUtils.definePageSize(requestDto.pageSize());
+        final var offset = PaginationUtils.defineOffset(page, pageSize);
         final var totalElements = scooterRepository.getAvailableScootersAmount();
-        final var totalPages = calculateTotalPages(totalElements, pageSize);
+        final var totalPages = PaginationUtils.calculateTotalPages(totalElements, pageSize);
 
         final var scooterDtoList = scooterRepository
             .findAvailableScootersForResponse(pageSize, offset)
@@ -92,27 +88,5 @@ public class ScooterServiceImpl implements ScooterService {
 
         return scooterRepository.update(updatedScooter);
 
-    }
-
-    private int calculateTotalPages(long totalElements, int pageSize) {
-        if (pageSize <= 0) {
-            throw new BadRequestException("Value pageSize must be > 0;");
-        }
-        return (int) ((totalElements + pageSize - 1) / pageSize);
-    }
-
-    private int definePage(PageRequestDto requestDto) {
-        return max(requestDto.page(), DEFAULT_PAGE);
-    }
-
-    private int definePageSize(PageRequestDto requestDto) {
-        return min(
-            max(requestDto.size(), 1),
-            MAX_PAGE_SIZE
-        );
-    }
-
-    private int defineOffset(int page, int pageSize) {
-        return (page - 1) * pageSize;
     }
 }
