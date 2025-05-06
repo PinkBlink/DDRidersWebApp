@@ -135,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
         final var totalElements = orderRepository.getCompletedCustomerOrdersAmount(customerId);
         final var totalPages = PaginationUtils.calculateTotalPages(totalElements, pageSize);
 
-        final var pageResponseDto = new PageResponseDto<OrderDto>(
+        final var pageResponseDto = new PageResponseDto<>(
             completedOrdersDto,
             pageRequest.page(),
             pageRequest.pageSize(),
