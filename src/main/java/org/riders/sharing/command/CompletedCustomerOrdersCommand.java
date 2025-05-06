@@ -13,11 +13,11 @@ import org.riders.sharing.utils.ServletUtils;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.riders.sharing.utils.ServletUtils.writeResponse;
 
-public class GetCompletedCustomerOrdersCommand extends Command {
-    private final Logger logger = LogManager.getLogger(GetCompletedCustomerOrdersCommand.class);
+public class CompletedCustomerOrdersCommand extends Command {
+    private final Logger logger = LogManager.getLogger(CompletedCustomerOrdersCommand.class);
     private final OrderService orderService;
 
-    public GetCompletedCustomerOrdersCommand(OrderService orderService) {
+    public CompletedCustomerOrdersCommand(OrderService orderService) {
         this.orderService = orderService;
     }
 

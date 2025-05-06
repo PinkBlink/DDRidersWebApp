@@ -3,7 +3,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.Command;
-import org.riders.sharing.command.GetCompletedCustomerOrdersCommand;
+import org.riders.sharing.command.CompletedCustomerOrdersCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.OrderDto;
 import org.riders.sharing.dto.PageResponseDto;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.riders.sharing.model.enums.OrderStatus.COMPLETED;
 
 
-public class GetCompletedCustomerOrdersCommandTest extends BaseTest
+public class CompletedCustomerOrdersCommandTest extends BaseTest
     implements OrderTestData, CustomerTestData, ScooterTestData {
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
     private final ScooterRepository scooterRepository = new ScooterRepositoryImpl(ConnectionPool.INSTANCE);
@@ -48,7 +48,7 @@ public class GetCompletedCustomerOrdersCommandTest extends BaseTest
     private final ScooterService scooterService = new ScooterServiceImpl(scooterRepository);
     private final OrderService orderService = new OrderServiceImpl(customerService, scooterService, orderRepository);
 
-    private final Command completedCustomerOrdersCommand = new GetCompletedCustomerOrdersCommand(orderService);
+    private final Command completedCustomerOrdersCommand = new CompletedCustomerOrdersCommand(orderService);
 
     @Test
     public void completedCustomerRespondsWith200AndOrders() throws IOException {
