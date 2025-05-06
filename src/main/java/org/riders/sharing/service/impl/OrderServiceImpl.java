@@ -3,7 +3,9 @@ package org.riders.sharing.service.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.CreateOrderDto;
+import org.riders.sharing.dto.OrderDto;
 import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.repository.OrderRepository;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.riders.sharing.model.Order.Builder.order;
+import static org.riders.sharing.model.enums.OrderStatus.COMPLETED;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 
 public class OrderServiceImpl implements OrderService {
@@ -73,5 +76,31 @@ public class OrderServiceImpl implements OrderService {
                 return new NoElementException("Couldn't find order with id: %s".formatted(id));
             }
         );
+    }
+
+    @Override
+    public Order completeOrder(OrderDto orderDto) {
+        ValidationUtils.checkThat(
+            Objects.nonNull(orderDto.orderId()),
+            () -> new BadRequestException("Order id is null.")
+        );
+
+        final var order = getById(orderDto.orderId());
+
+        if (order.getStatus().equals(COMPLETED)) {
+            LOGGER.error("Attempt to complete an already completed Order.");
+            throw new IllegalStatusException("Order with id %s is already completed.".formatted(order.getId()));
+        }
+
+        final var releasedScooter = scooterService.releaseScooter(order.getScooter());
+        final var completedOrder = orderRepository.update(
+            order.toBuilder()
+                .scooter(releasedScooter)
+                .build()
+                .complete()
+        );
+
+        LOGGER.info("Order with id {} has been successfully completed", order.getId());
+        return completedOrder;
     }
 }

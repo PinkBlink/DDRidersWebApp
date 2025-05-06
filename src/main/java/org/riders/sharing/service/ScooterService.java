@@ -9,6 +9,10 @@ import java.util.UUID;
 
 public interface ScooterService {
     PageResponseDto<ScooterDto> getAvailableScooters(PageRequestDto requestDto);
+
     Scooter getById(UUID id);
+
     Scooter rentScooter(Scooter scooter);
+
+    Scooter releaseScooter(Scooter scooter);
 }

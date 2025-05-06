@@ -15,10 +15,12 @@ import java.io.InputStream;
 public final class ModelMapper {
     private static final Logger LOGGER;
 
+    private static final ObjectMapper OBJECT_MAPPER_YAML;
     private static final ObjectMapper OBJECT_MAPPER;
 
     static {
-        OBJECT_MAPPER = new ObjectMapper(new YAMLFactory()).registerModules(new JavaTimeModule());
+        OBJECT_MAPPER_YAML = new ObjectMapper(new YAMLFactory()).registerModules(new JavaTimeModule());
+        OBJECT_MAPPER = new ObjectMapper().registerModules(new JavaTimeModule());
         LOGGER = LogManager.getLogger(ModelMapper.class);
     }
 
@@ -54,7 +56,7 @@ public final class ModelMapper {
 
     public static <T> T parse(InputStream inputStream, Class<T> valueType) {
         try {
-            return OBJECT_MAPPER.readValue(inputStream, valueType);
+            return OBJECT_MAPPER_YAML.readValue(inputStream, valueType);
         } catch (IOException e) {
             LOGGER.error("Couldn't map JSON to Object", e);
             throw new MappingException("Couldn't map JSON to Object", e);
