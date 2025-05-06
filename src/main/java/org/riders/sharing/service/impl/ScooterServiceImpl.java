@@ -18,6 +18,8 @@ import java.util.UUID;
 
 import static java.lang.Math.min;
 import static java.lang.Math.max;
+import static org.riders.sharing.model.enums.ScooterStatus.AVAILABLE;
+import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
 
 
 public class ScooterServiceImpl implements ScooterService {
@@ -67,15 +69,30 @@ public class ScooterServiceImpl implements ScooterService {
     @Override
     public Scooter rentScooter(Scooter scooter) {
         ValidationUtils.checkThat(
-            scooter.getStatus().equals(ScooterStatus.AVAILABLE),
-            () -> new IllegalStatusException("Scooter has been already rented")
+            scooter.getStatus().equals(AVAILABLE),
+            () -> new IllegalStatusException("Scooter is already rented")
         );
 
         final var updatedScooter = scooter.toBuilder()
-            .status(ScooterStatus.RENTED)
+            .status(RENTED)
             .build();
 
         return scooterRepository.update(updatedScooter);
+    }
+
+    @Override
+    public Scooter releaseScooter(Scooter scooter) {
+        ValidationUtils.checkThat(
+            scooter.getStatus().equals(RENTED),
+            () -> new IllegalStatusException("Scooter %s is already available".formatted(scooter.getId()))
+        );
+
+        final var updatedScooter = scooter.toBuilder()
+            .status(AVAILABLE)
+            .build();
+
+        return scooterRepository.update(updatedScooter);
+
     }
 
     private int calculateTotalPages(long totalElements, int pageSize) {

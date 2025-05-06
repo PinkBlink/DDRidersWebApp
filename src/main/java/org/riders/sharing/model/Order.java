@@ -69,12 +69,9 @@ public class Order extends BaseEntity {
     }
 
     public Order complete() {
-        final var updatedScooter = scooter.toBuilder().status(ScooterStatus.AVAILABLE).build();
-
         return this.toBuilder()
             .status(OrderStatus.COMPLETED)
             .endTime(Instant.now())
-            .scooter(updatedScooter)
             .build();
     }
 
