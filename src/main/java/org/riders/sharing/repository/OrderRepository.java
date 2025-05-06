@@ -10,4 +10,8 @@ public interface OrderRepository extends BaseRepository<Order> {
     List<Order> findCustomerOrdersByStatus(UUID customerId, OrderStatus status);
 
     List<Order> findOrdersByStatus(OrderStatus orderStatus);
+
+    int getCompletedCustomerOrdersAmount(UUID customerId);
+
+    List<Order> findCompletedCustomerOrdersForResponse(UUID customerId, int pageSize, int offset);
 }

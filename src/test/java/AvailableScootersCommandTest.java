@@ -52,7 +52,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         final var jsonAsReader = new StringReader("""
             {
             "page" : "%s",
-            "size" : "%s"
+            "pageSize" : "%s"
             }""".formatted(page, pageSize)
         );
 

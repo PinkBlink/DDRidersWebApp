@@ -1,8 +1,8 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.connection.ConnectionPool;
-import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
+import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.repository.impl.ScooterRepositoryImpl;

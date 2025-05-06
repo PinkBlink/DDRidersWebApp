@@ -7,7 +7,6 @@ import org.riders.sharing.model.Order;
 import org.riders.sharing.model.enums.OrderStatus;
 import org.riders.sharing.repository.OrderRepository;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -123,7 +122,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             WHERE orders.id = ?""")) {
             preparedStatement.setObject(1, id, Types.OTHER);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            final var resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
                 return Optional.of(Order.orderFromResultSet(resultSet));
@@ -223,10 +222,10 @@ public class OrderRepositoryImpl implements OrderRepository {
             WHERE order_status = ?""")) {
             preparedStatement.setObject(1, orderStatus, Types.OTHER);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            final var resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                Order order = Order.orderFromResultSet(resultSet);
+                final var order = Order.orderFromResultSet(resultSet);
                 orderList.add(order);
             }
 
@@ -234,6 +233,69 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (SQLException e) {
             throw new DatabaseException(
                 "Error occurred when trying to find orders with status %s".formatted(orderStatus), e);
+        } finally {
+            connectionPool.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public int getCompletedCustomerOrdersAmount(UUID customerId) {
+        final var connection = connectionPool.getConnection();
+
+        try (final var statement = connection.prepareStatement("""
+                SELECT COUNT(*) FROM orders
+                WHERE customer_id = ?
+                AND order_status = 'COMPLETED'
+            """)
+        ) {
+
+            statement.setObject(1, customerId, Types.OTHER);
+
+            final var resultSet = statement.executeQuery();
+
+            resultSet.next();
+
+            return resultSet.getInt(1);
+        } catch (SQLException exception) {
+            throw new DatabaseException(
+                "Error occurred when trying to calculate completed orders for customer %s".formatted(customerId),
+                exception
+            );
+        } finally {
+            connectionPool.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public List<Order> findCompletedCustomerOrdersForResponse(UUID customerId, int pageSize, int offset) {
+        final var connection = connectionPool.getConnection();
+        final var orderList = new ArrayList<Order>();
+
+        try (final var preparedStatement = connection.prepareStatement("""
+            SELECT * FROM orders
+            JOIN scooters ON scooter_id = scooters.id
+            WHERE customer_id = ?
+            AND order_status = 'COMPLETED'
+            ORDER BY scooters.battery_level DESC
+            LIMIT ?
+            OFFSET ?;
+            """)) {
+
+            preparedStatement.setObject(1, customerId, Types.OTHER);
+            preparedStatement.setInt(2, pageSize);
+            preparedStatement.setInt(3, offset);
+
+            final var resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                final var order = Order.orderFromResultSet(resultSet);
+                orderList.add(order);
+            }
+
+            return orderList;
+        } catch (SQLException e) {
+            throw new DatabaseException(
+                "Error occurred when trying to find completed orders for customer with id %s".formatted(customerId), e);
         } finally {
             connectionPool.releaseConnection(connection);
         }
