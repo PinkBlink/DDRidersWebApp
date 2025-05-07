@@ -1,10 +1,12 @@
-package org.riders.sharing.utils.authentication;
+package org.riders.sharing.authentication;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import org.riders.sharing.model.Customer;
 
 import java.time.Instant;
+
+import static org.riders.sharing.authentication.AuthConstants.EMAIL_CLAIM;
 
 public class AuthTokenGenerator {
     private final int accessTtl;
@@ -23,7 +25,7 @@ public class AuthTokenGenerator {
 
         return JWT.create()
             .withSubject(customer.getId().toString())
-            .withClaim("email", customer.getEmail())
+            .withClaim(EMAIL_CLAIM, customer.getEmail())
             .withIssuedAt(issuedAt)
             .withExpiresAt(expiresAt)
             .sign(algorithm);

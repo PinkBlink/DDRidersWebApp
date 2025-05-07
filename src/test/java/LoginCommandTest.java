@@ -10,7 +10,7 @@ import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
 import org.riders.sharing.utils.ApplicationConfig;
 import org.riders.sharing.utils.PasswordEncryptor;
-import org.riders.sharing.utils.authentication.AuthTokenDecoder;
+import org.riders.sharing.authentication.AuthTokenDecoder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
