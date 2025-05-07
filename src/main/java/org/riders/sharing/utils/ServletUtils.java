@@ -28,7 +28,7 @@ public class ServletUtils {
         try (final var writer = response.getWriter()) {
             writer.write(message);
         } catch (IOException e) {
-            throw new ResponseWritingException("Couldn't write response.",e);
+            throw new ResponseWritingException("Couldn't write response.", e);
         }
     }
 }

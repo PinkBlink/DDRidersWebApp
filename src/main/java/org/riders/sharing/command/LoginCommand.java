@@ -12,7 +12,7 @@ import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ApplicationConfig;
 import org.riders.sharing.utils.ServletUtils;
-import org.riders.sharing.utils.authentication.AuthTokenGenerator;
+import org.riders.sharing.authentication.AuthTokenGenerator;
 
 public class LoginCommand extends Command {
     private final Logger logger = LogManager.getLogger(LoginCommand.class);

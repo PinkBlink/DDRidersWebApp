@@ -37,8 +37,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_IS_RENTED;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_OR_CUSTOMER_NOT_FOUND;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_IS_RENTED;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_OR_CUSTOMER_NOT_FOUND;
 
 public class CreateOrderCommandTest extends BaseTest implements OrderTestData, CustomerTestData, ScooterTestData {
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);

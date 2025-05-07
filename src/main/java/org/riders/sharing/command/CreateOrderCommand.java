@@ -18,8 +18,8 @@ import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_IS_RENTED;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_OR_CUSTOMER_NOT_FOUND;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_IS_RENTED;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_OR_CUSTOMER_NOT_FOUND;
 import static org.riders.sharing.utils.ServletUtils.getRequestBody;
 import static org.riders.sharing.utils.ServletUtils.writeResponse;
 
