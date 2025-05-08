@@ -45,7 +45,7 @@ public class AuthenticationFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig){
         final var servletContext = filterConfig.getServletContext();
         this.customerService = (CustomerService) servletContext.getAttribute(CUSTOMER_SERVICE_ATTRIBUTE);
         this.tokenDecoder = (AuthTokenDecoder) servletContext.getAttribute(TOKEN_DECODER_ATTRIBUTE);
