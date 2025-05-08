@@ -5,12 +5,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.authentication.AuthTokenGenerator;
 import org.riders.sharing.authentication.AuthenticationFilter;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.service.CustomerService;
+import org.riders.sharing.service.impl.CustomerServiceImpl;
+import org.riders.sharing.config.ApplicationConfig;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -33,14 +36,16 @@ import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED_ACCESS;
 
 public class AuthenticationFilterTest extends BaseTest implements CustomerTestData {
     private final ApplicationConfig appConfig = ApplicationConfig.getInstance();
+    private final AuthTokenDecoder tokenDecoder = new AuthTokenDecoder(appConfig.getAlgorithm());
     private final AuthTokenGenerator tokenGenerator = new AuthTokenGenerator(
         appConfig.getAccessTokenTtl(),
         appConfig.getRefreshTokenTtl(),
         appConfig.getAlgorithm()
     );
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
+    private final CustomerService customerService = new CustomerServiceImpl(customerRepository);
 
-    private final AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+    private final AuthenticationFilter authenticationFilter = new AuthenticationFilter(customerService, tokenDecoder);
 
     @Test
     public void doFilterAllowsAccess() throws ServletException, IOException {

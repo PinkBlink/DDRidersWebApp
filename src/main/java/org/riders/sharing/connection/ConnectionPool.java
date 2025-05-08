@@ -3,7 +3,7 @@ package org.riders.sharing.connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.riders.sharing.exception.NoSQLConnectionException;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.utils.SqlUtils;
 
 import java.sql.Connection;

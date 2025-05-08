@@ -8,7 +8,7 @@ import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.utils.PasswordEncryptor;
 import org.riders.sharing.authentication.AuthTokenDecoder;
 

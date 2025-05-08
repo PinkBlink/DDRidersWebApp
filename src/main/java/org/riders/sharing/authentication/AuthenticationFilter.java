@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -12,22 +13,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.InvalidTokenException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.exception.UnauthorizedException;
-import org.riders.sharing.repository.CustomerRepository;
-import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.service.impl.CustomerServiceImpl;
-import org.riders.sharing.utils.ApplicationConfig;
 
 import java.io.IOException;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static org.riders.sharing.config.ContextAttributes.CUSTOMER_SERVICE_ATTRIBUTE;
+import static org.riders.sharing.config.ContextAttributes.TOKEN_DECODER_ATTRIBUTE;
 import static org.riders.sharing.utils.ErrorMessages.CUSTOMER_NOT_FOUND;
 import static org.riders.sharing.utils.ErrorMessages.EXPIRED_TOKEN;
 import static org.riders.sharing.utils.ErrorMessages.INVALID_TOKEN;
@@ -38,9 +36,20 @@ import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED_ACCESS;
 public class AuthenticationFilter implements Filter {
     private static final Logger LOGGER = LogManager.getLogger(AuthenticationFilter.class);
 
-    private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
-    private final CustomerService customerService = new CustomerServiceImpl(customerRepository);
-    private final ApplicationConfig config = ApplicationConfig.getInstance();
+    private CustomerService customerService;
+    private AuthTokenDecoder tokenDecoder;
+
+    public AuthenticationFilter(CustomerService customerService, AuthTokenDecoder tokenDecoder) {
+        this.customerService = customerService;
+        this.tokenDecoder = tokenDecoder;
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        final var servletContext = filterConfig.getServletContext();
+        this.customerService = (CustomerService) servletContext.getAttribute(CUSTOMER_SERVICE_ATTRIBUTE);
+        this.tokenDecoder = (AuthTokenDecoder) servletContext.getAttribute(TOKEN_DECODER_ATTRIBUTE);
+    }
 
     @Override
     public void doFilter(ServletRequest servletRequest,
@@ -51,8 +60,6 @@ public class AuthenticationFilter implements Filter {
         final var response = (HttpServletResponse) servletResponse;
 
         try {
-            final var tokenDecoder = new AuthTokenDecoder(config.getAlgorithm());
-
             final var stringToken = tokenDecoder.getAccessTokenFromRequest(request);
             final var decodedToken = tokenDecoder.decode(stringToken);
 

@@ -1,10 +1,11 @@
-package org.riders.sharing.utils;
+package org.riders.sharing.config;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.riders.sharing.exception.ConfigLoadException;
+import org.riders.sharing.utils.ModelMapper;
 
 import java.io.IOException;
 

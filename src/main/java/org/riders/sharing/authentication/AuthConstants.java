@@ -1,8 +1,8 @@
 package org.riders.sharing.authentication;
 
-public interface AuthConstants {
-    String AUTH_HEADER = "Authorization";
-    String BEARER = "Bearer";
-    String EMAIL_CLAIM = "email";
-    String EMPTY_STRING = "";
+public class AuthConstants {
+    public static final String AUTH_HEADER = "Authorization";
+    public static final String BEARER = "Bearer";
+    public static final String EMAIL_CLAIM = "email";
+    public static final String EMPTY_STRING = "";
 }

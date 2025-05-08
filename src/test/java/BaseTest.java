@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.riders.sharing.exception.NoSQLConnectionException;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;

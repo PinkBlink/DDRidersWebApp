@@ -2,6 +2,7 @@ package org.riders.sharing.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.exception.SQLFileNotFoundException;
 import org.riders.sharing.exception.NoSQLConnectionException;
 

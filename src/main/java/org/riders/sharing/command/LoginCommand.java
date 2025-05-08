@@ -10,7 +10,7 @@ import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.utils.ServletUtils;
 import org.riders.sharing.authentication.AuthTokenGenerator;
 

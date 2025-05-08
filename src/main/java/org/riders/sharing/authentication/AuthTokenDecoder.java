@@ -52,10 +52,10 @@ public class AuthTokenDecoder {
 
 
     public String getAccessTokenFromRequest(HttpServletRequest request) {
-        try {
-            return request.getHeader(AUTH_HEADER).replace(BEARER, EMPTY_STRING).trim();
-        } catch (NullPointerException e) {
-            throw new BadRequestException("Header %s is missing.".formatted(AUTH_HEADER));
-        }
+        return Optional.ofNullable(request.getHeader(AUTH_HEADER))
+            .map(header -> header.replace(BEARER, EMPTY_STRING).trim())
+            .orElseThrow(() ->
+                new BadRequestException("Header %s is missing.".formatted(AUTH_HEADER))
+            );
     }
 }

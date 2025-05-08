@@ -11,9 +11,8 @@ import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.dto.UpdateTokensDto;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
-import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.utils.ModelMapper;
 
 import java.io.BufferedReader;
@@ -42,9 +41,11 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
     );
 
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
-    private final CustomerService customerService = new CustomerServiceImpl(customerRepository);
+    private final org.riders.sharing.service.CustomerService customerService = new CustomerServiceImpl(customerRepository);
 
-    private final UpdateTokensCommand updateTokensCommand = new UpdateTokensCommand(customerService);
+    private final UpdateTokensCommand updateTokensCommand = new UpdateTokensCommand(customerService,
+        authTokenDecoder,
+        authTokenGenerator);
 
     @Test
     public void upgradeTokensRespondsWith200AndTokens() throws IOException {

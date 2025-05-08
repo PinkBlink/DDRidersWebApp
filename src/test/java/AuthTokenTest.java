@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.exception.BadRequestException;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.authentication.AuthTokenGenerator;
 

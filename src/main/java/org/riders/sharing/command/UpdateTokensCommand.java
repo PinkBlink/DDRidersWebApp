@@ -13,7 +13,6 @@ import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.InvalidTokenException;
 import org.riders.sharing.exception.NoElementException;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.utils.ApplicationConfig;
 import org.riders.sharing.utils.ModelMapper;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -26,23 +25,19 @@ import static org.riders.sharing.utils.ServletUtils.writeResponse;
 
 public class UpdateTokensCommand extends Command {
     private final Logger logger = LogManager.getLogger(UpdateTokensCommand.class);
-    private final ApplicationConfig config = ApplicationConfig.getInstance();
     private final CustomerService customerService;
+    private final AuthTokenDecoder tokenDecoder;
+    private final AuthTokenGenerator tokenGenerator;
 
-    public UpdateTokensCommand(CustomerService customerService) {
+    public UpdateTokensCommand(CustomerService customerService, AuthTokenDecoder tokenDecoder, AuthTokenGenerator tokenGenerator) {
         this.customerService = customerService;
+        this.tokenDecoder = tokenDecoder;
+        this.tokenGenerator = tokenGenerator;
     }
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) {
         try {
-            final var tokenDecoder = new AuthTokenDecoder(config.getAlgorithm());
-            final var tokenGenerator = new AuthTokenGenerator(
-                config.getAccessTokenTtl(),
-                config.getRefreshTokenTtl(),
-                config.getAlgorithm()
-            );
-
             final var requestBody = getRequestBody(request);
             final var updateTokensDto = ModelMapper.parse(requestBody, UpdateTokensDto.class);
 

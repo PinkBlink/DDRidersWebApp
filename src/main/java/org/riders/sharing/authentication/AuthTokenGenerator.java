@@ -20,23 +20,20 @@ public class AuthTokenGenerator {
     }
 
     public String generateNewAccessToken(Customer customer) {
+        return buildToken(customer, accessTtl);
+    }
+
+    public String generateNewRefreshToken(Customer customer) {
+        return buildToken(customer, refreshTtl);
+    }
+
+    private String buildToken(Customer customer, long ttlSeconds) {
         final var issuedAt = Instant.now();
-        final var expiresAt = issuedAt.plusSeconds(accessTtl);
+        final var expiresAt = issuedAt.plusSeconds(ttlSeconds);
 
         return JWT.create()
             .withSubject(customer.getId().toString())
             .withClaim(EMAIL_CLAIM, customer.getEmail())
-            .withIssuedAt(issuedAt)
-            .withExpiresAt(expiresAt)
-            .sign(algorithm);
-    }
-
-    public String generateNewRefreshToken(Customer customer) {
-        final var issuedAt = Instant.now();
-        final var expiresAt = issuedAt.plusSeconds(refreshTtl);
-
-        return JWT.create()
-            .withSubject(customer.getId().toString())
             .withIssuedAt(issuedAt)
             .withExpiresAt(expiresAt)
             .sign(algorithm);
