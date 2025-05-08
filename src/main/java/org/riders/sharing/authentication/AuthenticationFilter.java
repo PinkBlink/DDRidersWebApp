@@ -56,7 +56,7 @@ public class AuthenticationFilter implements Filter {
             final var stringToken = tokenDecoder.getAccessTokenFromRequest(request);
             final var decodedToken = tokenDecoder.decode(stringToken);
 
-            final var idFromToken = tokenDecoder.getIdFromAccessToken(decodedToken);
+            final var idFromToken = tokenDecoder.getIdFromToken(decodedToken);
             final var emailFromToken = tokenDecoder.getEmailFromAccessToken(decodedToken);
 
             final var customerFromDb = customerService.getById(idFromToken);

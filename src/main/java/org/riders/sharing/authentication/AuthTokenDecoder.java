@@ -34,7 +34,7 @@ public class AuthTokenDecoder {
         return JWT.require(algorithm).build().verify(token);
     }
 
-    public UUID getIdFromAccessToken(DecodedJWT decodedToken) {
+    public UUID getIdFromToken(DecodedJWT decodedToken) {
         try {
             return UUID.fromString(decodedToken.getSubject());
         } catch (IllegalArgumentException e) {
