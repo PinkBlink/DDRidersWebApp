@@ -7,6 +7,7 @@ import org.riders.sharing.command.CompletedCustomerOrdersCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.OrderDto;
 import org.riders.sharing.dto.PageResponseDto;
+import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.repository.ScooterRepository;
@@ -28,10 +29,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -106,10 +106,10 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
             expectedTotalPages
         );
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         completedCustomerOrdersCommand.execute(request, response);
 
         //then
@@ -125,7 +125,7 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
     }
 
     @Test
-    public void completedCustomerOrdersRespondsWith400() throws IOException {
+    public void completedCustomerThrowsBadRequest() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -148,31 +148,12 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
         );
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_BAD_REQUEST;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
-        completedCustomerOrdersCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-    }
-
-    @Test
-    public void completedCustomerOrdersRespondsWith500() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
-
-        //when
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        completedCustomerOrdersCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            BadRequestException.class,
+            () -> completedCustomerOrdersCommand.execute(request, response)
+        );
     }
 }

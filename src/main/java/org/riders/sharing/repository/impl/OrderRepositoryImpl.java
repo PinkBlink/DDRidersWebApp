@@ -6,6 +6,7 @@ import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.model.enums.OrderStatus;
 import org.riders.sharing.repository.OrderRepository;
+import org.riders.sharing.utils.ErrorMessages;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -64,7 +65,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (SQLException e) {
             if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
                 throw new DuplicateEntryException(
-                    "Order with id %s has already existed".formatted(order.getId()), e);
+                    ErrorMessages.ORDER_DUPLICATE.formatted(order.getId()), e);
             }
             throw new DatabaseException(
                 "Error occurred when trying to save order with id %s".formatted(order.getId()), e);

@@ -2,6 +2,7 @@ package org.riders.sharing.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.riders.sharing.config.ApplicationConfig;
 import org.riders.sharing.exception.SQLFileNotFoundException;
 import org.riders.sharing.exception.NoSQLConnectionException;
 
@@ -10,6 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import static org.riders.sharing.utils.ErrorMessages.CANT_CREATE_CONNECTION;
 
 public class SqlUtils {
     public static final String DUPLICATE_ENTRY_SQL_ERR_CODE = "23505";
@@ -62,7 +65,7 @@ public class SqlUtils {
         } catch (SQLException e) {
             logger.error("Couldn't create connection to database with URL: {}", url, e);
             throw new NoSQLConnectionException(
-                "Couldn't create connection to database with URL:" + url, e);
+                CANT_CREATE_CONNECTION + url, e);
         }
     }
 

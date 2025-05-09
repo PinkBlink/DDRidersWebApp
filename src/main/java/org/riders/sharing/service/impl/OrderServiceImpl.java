@@ -8,12 +8,13 @@ import org.riders.sharing.dto.OrderDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.IllegalStatusException;
-import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.model.Order;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.OrderService;
 import org.riders.sharing.service.ScooterService;
+import org.riders.sharing.utils.ErrorMessages;
 import org.riders.sharing.utils.PaginationUtils;
 import org.riders.sharing.utils.ValidationUtils;
 
@@ -24,6 +25,10 @@ import java.util.UUID;
 import static org.riders.sharing.model.Order.Builder.order;
 import static org.riders.sharing.model.enums.OrderStatus.COMPLETED;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
+import static org.riders.sharing.utils.ErrorMessages.NULL_CUSTOMER_ID;
+import static org.riders.sharing.utils.ErrorMessages.NULL_ORDER_ID;
+import static org.riders.sharing.utils.ErrorMessages.ORDER_ALREADY_COMPLETED;
+import static org.riders.sharing.utils.ErrorMessages.ORDER_NOT_FOUND;
 
 public class OrderServiceImpl implements OrderService {
     private static final Logger LOGGER = LogManager.getLogger(OrderServiceImpl.class);
@@ -47,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
         ValidationUtils.checkThat(
             Objects.nonNull(createOrderDto.customerId())
                 && Objects.nonNull(createOrderDto.scooterId()),
-            () -> new BadRequestException("Scooter or customer id is null.")
+            () -> new BadRequestException(ErrorMessages.NULL_SCOOTER_OR_CUSTOMER)
         );
 
         final var customerId = UUID.fromString(createOrderDto.customerId());
@@ -76,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
 
         return maybeOrder.orElseThrow(() -> {
                 LOGGER.error("Couldn't find order with id: {}", id);
-                return new NoElementException("Couldn't find order with id: %s".formatted(id));
+                return new NotFoundException(ORDER_NOT_FOUND.formatted(id));
             }
         );
     }
@@ -85,14 +90,14 @@ public class OrderServiceImpl implements OrderService {
     public Order completeOrder(OrderDto orderDto) {
         ValidationUtils.checkThat(
             Objects.nonNull(orderDto.orderId()),
-            () -> new BadRequestException("Order id is null.")
+            () -> new BadRequestException(NULL_ORDER_ID)
         );
 
         final var order = getById(orderDto.orderId());
 
         if (order.getStatus().equals(COMPLETED)) {
             LOGGER.error("Attempt to complete an already completed Order.");
-            throw new IllegalStatusException("Order with id %s is already completed.".formatted(order.getId()));
+            throw new IllegalStatusException(ORDER_ALREADY_COMPLETED.formatted(order.getId()));
         }
 
         final var releasedScooter = scooterService.releaseScooter(order.getScooter());
@@ -111,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
     public PageResponseDto<OrderDto> getCompletedCustomerOrders(CustomerOrdersRequestDto requestDto) {
         ValidationUtils.checkThat(
             Objects.nonNull(requestDto.customerId()),
-            () -> new BadRequestException("Customer id is null.")
+            () -> new BadRequestException(NULL_CUSTOMER_ID)
         );
 
         final var customerId = UUID.fromString(requestDto.customerId());

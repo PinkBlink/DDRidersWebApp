@@ -5,6 +5,9 @@ import org.riders.sharing.command.Command;
 import org.riders.sharing.command.CreateOrderCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.OrderDto;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.IllegalStatusException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.repository.ScooterRepository;
@@ -26,19 +29,14 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.UUID;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_IS_RENTED;
-import static org.riders.sharing.utils.JsonErrorMessages.SCOOTER_OR_CUSTOMER_NOT_FOUND;
 
 public class CreateOrderCommandTest extends BaseTest implements OrderTestData, CustomerTestData, ScooterTestData {
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
@@ -76,11 +74,10 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var expectedResponseStatus = SC_CREATED;
         final var expectedOrderStatus = ONGOING;
 
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then
@@ -94,7 +91,7 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
     }
 
     @Test
-    public void createOrderRespondsWith400() throws IOException {
+    public void createOrderThrowsBadRequest() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -109,19 +106,17 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         );
         final var badRequestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_BAD_REQUEST;
-
-        //when
         when(request.getReader()).thenReturn(badRequestReader);
 
-        createOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            BadRequestException.class,
+            () -> createOrderCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void createOrderRespondsWith409AndMessageIfScooterAlreadyRented() throws IOException {
+    public void createOrderThrowsIllegalStatus() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -145,25 +140,18 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var stingWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stingWriter);
 
-        final var expectedResponseStatus = SC_CONFLICT;
-        final var expectedErrorMessage = SCOOTER_IS_RENTED;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
-        createOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-
-        final var messageFromResponse = stingWriter.toString();
-
-        assertEquals(expectedErrorMessage, messageFromResponse);
+        //when & then
+        assertThrows(
+            IllegalStatusException.class,
+            () -> createOrderCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void createOrderRespondsWith404AndMessageIfScooterNotFound() throws IOException {
+    public void createOrderThrowsNotFound() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -182,37 +170,13 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var stingWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stingWriter);
 
-        final var expectedResponseStatus = SC_NOT_FOUND;
-        final var expectedErrorMessage = SCOOTER_OR_CUSTOMER_NOT_FOUND;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
-        createOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-
-        final var messageFromResponse = stingWriter.toString();
-
-        assertEquals(expectedErrorMessage, messageFromResponse);
-    }
-
-    @Test
-    public void createOrdersRespondsWith500() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
-
-        //when
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        createOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            NotFoundException.class,
+            () -> createOrderCommand.execute(request, response)
+        );
     }
 }

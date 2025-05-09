@@ -1,17 +1,26 @@
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.RegistrationCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.dto.CustomerDto;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
+import org.riders.sharing.utils.ModelMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,18 +54,31 @@ public class RegistrationCommandTest implements CustomerTestData {
         );
 
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedResponse = HttpServletResponse.SC_CREATED;
+
+        final var stringWriter = new StringWriter();
+        final var responseWriter = new PrintWriter(stringWriter);
+
+        final var expectedResponse = SC_CREATED;
+
+        when(request.getReader()).thenReturn(requestReader);
+        when(response.getWriter()).thenReturn(responseWriter);
 
         //when
-        when(request.getReader()).thenReturn(requestReader);
         registrationCommand.execute(request, response);
 
         //then
         verify(response).setStatus(expectedResponse);
+
+        final var customerDto = ModelMapper.parse(stringWriter.toString(), CustomerDto.class);
+        final var customerDataBase = customerService.getById(customerDto.id());
+
+        assertEquals(newCustomer.getName(), customerDataBase.getName());
+        assertEquals(newCustomer.getEmail(), customerDataBase.getEmail());
+        assertEquals(newCustomer.getSurname(), customerDataBase.getSurname());
     }
 
     @Test
-    public void registerRespondsWith409IfAlreadyExist() throws IOException {
+    public void registerThrowsDuplicate() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -80,18 +102,18 @@ public class RegistrationCommandTest implements CustomerTestData {
         );
 
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedResponse = HttpServletResponse.SC_CONFLICT;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
-        registrationCommand.execute(request, response);
 
-        //then
-        verify(response).setStatus(expectedResponse);
+        //when & then
+        Assertions.assertThrows(
+            DuplicateEntryException.class,
+            () -> registrationCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void registerRespondsWith400IfEmailOrPassIsNull() throws IOException {
+    public void registerThrowsBadRequest() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -114,29 +136,12 @@ public class RegistrationCommandTest implements CustomerTestData {
         );
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
-        registrationCommand.execute(request, response);
 
-        //then
-        verify(response).setStatus(expectedResponse);
-    }
-
-    @Test
-    public void registerRespondsWith500IfException() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedStatus = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-
-        //when
-        when(request.getReader()).thenThrow(new NullPointerException("General Exception check"));
-        registrationCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedStatus);
+        //when & then
+        Assertions.assertThrows(
+            BadRequestException.class,
+            () -> registrationCommand.execute(request, response)
+        );
     }
 }

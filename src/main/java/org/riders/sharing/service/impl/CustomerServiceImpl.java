@@ -6,7 +6,7 @@ import org.riders.sharing.dto.ChangePasswordDto;
 import org.riders.sharing.dto.LoginDto;
 import org.riders.sharing.dto.RegistrationDto;
 import org.riders.sharing.exception.BadRequestException;
-import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
@@ -18,6 +18,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.riders.sharing.model.Customer.Builder.customer;
+import static org.riders.sharing.utils.ErrorMessages.CUSTOMER_NOT_FOUND;
+import static org.riders.sharing.utils.ErrorMessages.NULL_EMAIL_OR_PASSWORD;
+import static org.riders.sharing.utils.ErrorMessages.NULL_ID_OR_PASSWORD;
+import static org.riders.sharing.utils.ErrorMessages.WRONG_EMAIL_PASSWORD;
 import static org.riders.sharing.utils.PasswordEncryptor.encryptPassword;
 
 public class CustomerServiceImpl implements CustomerService {
@@ -35,20 +39,20 @@ public class CustomerServiceImpl implements CustomerService {
 
         ValidationUtils.checkThat(
             Objects.nonNull(email) && Objects.nonNull(password),
-            () -> new BadRequestException("Email or Password is null.")
+            () -> new BadRequestException(NULL_EMAIL_OR_PASSWORD)
         );
 
         final var customer = customerRepository.findByEmail(email)
             .orElseThrow(() -> {
                 logger.error("Bad attempt to login: {}", email);
-                return new UnauthorizedException("Wrong email or password!");
+                return new UnauthorizedException(CUSTOMER_NOT_FOUND.formatted(email));
             });
 
         final var hashedPassword = encryptPassword(password);
 
         if (!customer.getPassword().equals(hashedPassword)) {
             logger.error("Bad attempt to login: {}", email);
-            throw new UnauthorizedException("Wrong email or password!");
+            throw new UnauthorizedException(WRONG_EMAIL_PASSWORD);
         }
 
         logger.info("Customer {} login successfully", email);
@@ -62,7 +66,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         ValidationUtils.checkThat(
             Objects.nonNull(email) && Objects.nonNull(password),
-            () -> new BadRequestException("Email or Password is null.")
+            () -> new BadRequestException(NULL_EMAIL_OR_PASSWORD)
         );
 
         final var hashedPassword = encryptPassword(password);
@@ -85,7 +89,7 @@ public class CustomerServiceImpl implements CustomerService {
             Objects.nonNull(changePasswordDto.customerId())
                 && Objects.nonNull(changePasswordDto.newPassword())
                 && Objects.nonNull(changePasswordDto.oldPassword()),
-            () -> new BadRequestException("Passwords or Id is null")
+            () -> new BadRequestException(NULL_ID_OR_PASSWORD)
         );
 
         final var customerFromDb = getById(UUID.fromString(changePasswordDto.customerId()));
@@ -104,7 +108,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         logger.error("Old password does not match: {}", changePasswordDto.customerId());
-        throw new UnauthorizedException("Old password does not match!");
+        throw new UnauthorizedException(WRONG_EMAIL_PASSWORD);
     }
 
     @Override
@@ -113,7 +117,7 @@ public class CustomerServiceImpl implements CustomerService {
         return maybeCustomer.orElseThrow(
             () -> {
                 logger.error("Couldn't find customer with id: {}", customerId);
-                return new NoElementException("Couldn't find customer with id: %s".formatted(customerId));
+                return new NotFoundException(CUSTOMER_NOT_FOUND.formatted(customerId));
             }
         );
     }

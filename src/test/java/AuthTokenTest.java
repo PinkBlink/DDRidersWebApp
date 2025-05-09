@@ -1,8 +1,8 @@
 import org.junit.jupiter.api.Test;
-import org.riders.sharing.exception.InvalidTokenException;
-import org.riders.sharing.utils.ApplicationConfig;
-import org.riders.sharing.utils.authentication.AuthTokenDecoder;
-import org.riders.sharing.utils.authentication.AuthTokenGenerator;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.config.ApplicationConfig;
+import org.riders.sharing.authentication.AuthTokenDecoder;
+import org.riders.sharing.authentication.AuthTokenGenerator;
 
 import java.util.UUID;
 
@@ -34,12 +34,12 @@ public class AuthTokenTest implements CustomerTestData {
     }
 
     @Test
-    public void decodesTokenThrowsBadTokenIfNullOrEmpty() {
+    public void decodesTokenThrowsBadRequstIfNullOrEmpty() {
         final var emptyToken = "";
 
-        assertThrows(InvalidTokenException.class,
+        assertThrows(BadRequestException.class,
             () -> authTokenDecoder.decode(null));
-        assertThrows(InvalidTokenException.class,
+        assertThrows(BadRequestException.class,
             () -> authTokenDecoder.decode(emptyToken));
     }
 

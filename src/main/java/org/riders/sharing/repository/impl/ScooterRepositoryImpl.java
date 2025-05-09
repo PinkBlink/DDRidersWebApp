@@ -6,6 +6,7 @@ import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.model.enums.ScooterStatus;
 import org.riders.sharing.repository.ScooterRepository;
+import org.riders.sharing.utils.ErrorMessages;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -58,7 +59,7 @@ public class ScooterRepositoryImpl implements ScooterRepository {
         } catch (SQLException e) {
             if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
                 throw new DuplicateEntryException(
-                    "Scooter with id %s has already existed".formatted(scooter.getId()), e);
+                    ErrorMessages.SCOOTER_DUPLICATE.formatted(scooter.getId()), e);
             }
 
             throw new DatabaseException(

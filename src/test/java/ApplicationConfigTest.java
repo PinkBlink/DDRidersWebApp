@@ -1,5 +1,5 @@
 import org.junit.jupiter.api.Test;
-import org.riders.sharing.utils.ApplicationConfig;
+import org.riders.sharing.config.ApplicationConfig;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
