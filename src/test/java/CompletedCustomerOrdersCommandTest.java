@@ -106,10 +106,10 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
             expectedTotalPages
         );
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         completedCustomerOrdersCommand.execute(request, response);
 
         //then
@@ -150,9 +150,9 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
 
         final var expectedResponseStatus = SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
+        //when
         completedCustomerOrdersCommand.execute(request, response);
 
         //then
@@ -167,9 +167,9 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
 
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
 
+        //when
         completedCustomerOrdersCommand.execute(request, response);
 
         //then

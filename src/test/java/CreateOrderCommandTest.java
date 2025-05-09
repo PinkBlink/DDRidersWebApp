@@ -76,11 +76,10 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var expectedResponseStatus = SC_CREATED;
         final var expectedOrderStatus = ONGOING;
 
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then
@@ -111,9 +110,9 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
 
         final var expectedResponseStatus = SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(badRequestReader);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then
@@ -148,10 +147,10 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var expectedResponseStatus = SC_CONFLICT;
         final var expectedErrorMessage = SCOOTER_IS_RENTED;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then
@@ -185,10 +184,10 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
         final var expectedResponseStatus = SC_NOT_FOUND;
         final var expectedErrorMessage = SCOOTER_OR_CUSTOMER_NOT_FOUND;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then
@@ -207,9 +206,9 @@ public class CreateOrderCommandTest extends BaseTest implements OrderTestData, C
 
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
 
+        //when
         createOrderCommand.execute(request, response);
 
         //then

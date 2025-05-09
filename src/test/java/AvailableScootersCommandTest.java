@@ -78,10 +78,10 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
 
         final var expectedResponseStatus = SC_OK;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         availableScootersCommand.execute(request, response);
 
         //then
@@ -106,8 +106,9 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponseStatus = SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         availableScootersCommand.execute(request, response);
 
         //then
@@ -122,8 +123,9 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
 
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
+
+        //when
         availableScootersCommand.execute(request, response);
 
         //then

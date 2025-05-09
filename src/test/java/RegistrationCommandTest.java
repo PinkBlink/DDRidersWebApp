@@ -47,8 +47,9 @@ public class RegistrationCommandTest implements CustomerTestData {
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_CREATED;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         registrationCommand.execute(request, response);
 
         //then
@@ -82,8 +83,9 @@ public class RegistrationCommandTest implements CustomerTestData {
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_CONFLICT;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         registrationCommand.execute(request, response);
 
         //then
@@ -116,8 +118,9 @@ public class RegistrationCommandTest implements CustomerTestData {
 
         final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         registrationCommand.execute(request, response);
 
         //then
@@ -132,8 +135,9 @@ public class RegistrationCommandTest implements CustomerTestData {
 
         final var expectedStatus = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(new NullPointerException("General Exception check"));
+
+        //when
         registrationCommand.execute(request, response);
 
         //then

@@ -49,8 +49,9 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedResponse = HttpServletResponse.SC_OK;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         loginCommand.execute(request, response);
 
         //then
@@ -74,8 +75,9 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
 
         final var expectedResponse = HttpServletResponse.SC_UNAUTHORIZED;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         loginCommand.execute(request, response);
 
         //then
@@ -93,8 +95,9 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
 
         final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         loginCommand.execute(request, response);
 
         //then
@@ -109,8 +112,9 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
 
         final var expectedResponse = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(new IOException("IOException check"));
+
+        //when
         loginCommand.execute(request, response);
 
         //then
@@ -137,9 +141,10 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         final var stringWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stringWriter);
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
+
+        //when
         loginCommand.execute(request, response);
 
         //then

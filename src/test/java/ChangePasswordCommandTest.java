@@ -68,9 +68,10 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var expectedRespStatus = SC_CREATED;
         final var expectedNewPasswordHash = PasswordEncryptor.encryptPassword(newPassword);
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
+
+        //when
         changePasswordCommand.execute(request, response);
 
         //then
@@ -105,8 +106,9 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedRespStatus = SC_NOT_FOUND;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         changePasswordCommand.execute(request, response);
 
         //then
@@ -134,8 +136,9 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedRespStatus = SC_UNAUTHORIZED;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         changePasswordCommand.execute(request, response);
 
         //then
@@ -161,8 +164,9 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         final var requestReader = new BufferedReader(jsonAsReader);
         final var expectedRespStatus = SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
+
+        //when
         changePasswordCommand.execute(request, response);
 
         //then
@@ -177,8 +181,9 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
 
         final var expectedRespStatus = SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
+
+        //when
         changePasswordCommand.execute(request, response);
 
         //then

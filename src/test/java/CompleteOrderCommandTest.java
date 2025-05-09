@@ -82,10 +82,10 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
         final var expectedOrderStatus = COMPLETED;
         final var expectedScooterStatus = AVAILABLE;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         completeOrderCommand.execute(request, response);
 
         //then
@@ -110,9 +110,9 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
 
         final var expectedResponseStatus = SC_BAD_REQUEST;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
+        //when
         completeOrderCommand.execute(request, response);
 
         //then
@@ -151,10 +151,10 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
 
         final var expectedResponseStatus = SC_CONFLICT;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        //when
         completeOrderCommand.execute(request, response);
 
         //then
@@ -187,9 +187,9 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
 
         final var expectedResponseStatus = SC_NOT_FOUND;
 
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
+        //when
         completeOrderCommand.execute(request, response);
 
         //then
@@ -204,9 +204,9 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
 
         final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
 
-        //when
         when(request.getReader()).thenThrow(RuntimeException.class);
 
+        //when
         completeOrderCommand.execute(request, response);
 
         //then

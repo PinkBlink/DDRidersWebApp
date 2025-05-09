@@ -57,9 +57,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var savedCustomer = customerRepository.save(aCustomer().build());
         final var token = tokenGenerator.generateNewAccessToken(savedCustomer);
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(BEARER + token);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -76,9 +76,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_BAD_REQUEST;
         final var expectedResponseMessage = TOKEN_IS_EMPTY;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(null);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -95,9 +95,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_BAD_REQUEST;
         final var expectedResponseMessage = TOKEN_IS_EMPTY;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(EMPTY_STRING);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -117,9 +117,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_NOT_FOUND;
         final var expectedResponseMessage = CUSTOMER_NOT_FOUND;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(BEARER + token);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -143,9 +143,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_UNAUTHORIZED;
         final var expectedResponseMessage = EXPIRED_TOKEN;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(expiredToken);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -170,9 +170,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_UNAUTHORIZED;
         final var expectedResponseMessage = UNAUTHORIZED_ACCESS;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(token);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then
@@ -198,9 +198,9 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
         final var expectedResponseStatus = SC_UNAUTHORIZED;
         final var expectedResponseMessage = INVALID_TOKEN;
 
-        //when
         when(request.getHeader(AUTH_HEADER)).thenReturn(token);
 
+        //when
         authenticationFilter.doFilter(request, response, filterChain);
 
         //then

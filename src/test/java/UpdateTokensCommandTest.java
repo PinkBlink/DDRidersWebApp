@@ -88,9 +88,7 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
 
-        final var stringReader = new StringReader("""
-            {
-            }""");
+        final var stringReader = new StringReader("{}");
         final var requestReader = new BufferedReader(stringReader);
 
 
