@@ -1,6 +1,5 @@
 package org.riders.sharing.command;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
@@ -9,22 +8,14 @@ import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.authentication.AuthTokenGenerator;
 import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.dto.UpdateTokensDto;
-import org.riders.sharing.exception.BadRequestException;
-import org.riders.sharing.exception.InvalidTokenException;
-import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.service.CustomerService;
 import org.riders.sharing.utils.ModelMapper;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
-import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.riders.sharing.utils.ServletUtils.getRequestBody;
 import static org.riders.sharing.utils.ServletUtils.writeResponse;
 
 public class UpdateTokensCommand extends Command {
-    private final Logger logger = LogManager.getLogger(UpdateTokensCommand.class);
     private final CustomerService customerService;
     private final AuthTokenDecoder tokenDecoder;
     private final AuthTokenGenerator tokenGenerator;

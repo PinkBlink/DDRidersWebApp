@@ -3,6 +3,7 @@ package org.riders.sharing.utils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.RequestReadingException;
 import org.riders.sharing.exception.ResponseWritingException;
 
 import java.io.BufferedReader;
@@ -25,7 +26,7 @@ public class ServletUtils {
                 requestBodyBuilder.append(line);
             }
         } catch (IOException e) {
-            throw new ResponseWritingException(e.getMessage(), e);
+            throw new RequestReadingException(e.getMessage(), e);
         }
 
         if (requestBodyBuilder.toString().isBlank()) {
