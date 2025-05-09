@@ -17,6 +17,10 @@ import static org.riders.sharing.authentication.AuthConstants.AUTH_HEADER;
 import static org.riders.sharing.authentication.AuthConstants.BEARER;
 import static org.riders.sharing.authentication.AuthConstants.EMAIL_CLAIM;
 import static org.riders.sharing.authentication.AuthConstants.EMPTY_STRING;
+import static org.riders.sharing.utils.ErrorMessages.CLAIM_IS_MISSING;
+import static org.riders.sharing.utils.ErrorMessages.HEADER_IS_MISSING;
+import static org.riders.sharing.utils.ErrorMessages.INVALID_TOKEN;
+import static org.riders.sharing.utils.ErrorMessages.TOKEN_IS_EMPTY;
 
 public class AuthTokenDecoder {
     private final Algorithm algorithm;
@@ -28,7 +32,7 @@ public class AuthTokenDecoder {
     public DecodedJWT decode(String token) {
         ValidationUtils.checkThat(
             Objects.nonNull(token) && !token.isBlank(),
-            () -> new BadRequestException("Token is empty.")
+            () -> new BadRequestException(TOKEN_IS_EMPTY)
         );
 
         return JWT.require(algorithm).build().verify(token);
@@ -38,7 +42,7 @@ public class AuthTokenDecoder {
         try {
             return UUID.fromString(decodedToken.getSubject());
         } catch (IllegalArgumentException e) {
-            throw new InvalidTokenException("Couldn't parse subject from token to UUID.", e);
+            throw new InvalidTokenException(INVALID_TOKEN, e);
         }
     }
 
@@ -46,7 +50,7 @@ public class AuthTokenDecoder {
         return Optional.ofNullable(decodedToken.getClaim(EMAIL_CLAIM))
             .map(Claim::asString)
             .orElseThrow(
-                () -> new InvalidTokenException("Claim %s is missing".formatted(EMAIL_CLAIM))
+                () -> new InvalidTokenException(CLAIM_IS_MISSING.formatted(EMAIL_CLAIM))
             );
     }
 
@@ -55,7 +59,7 @@ public class AuthTokenDecoder {
         return Optional.ofNullable(request.getHeader(AUTH_HEADER))
             .map(header -> header.replace(BEARER, EMPTY_STRING).trim())
             .orElseThrow(() ->
-                new BadRequestException("Header %s is missing.".formatted(AUTH_HEADER))
+                new BadRequestException(HEADER_IS_MISSING.formatted(AUTH_HEADER))
             );
     }
 }

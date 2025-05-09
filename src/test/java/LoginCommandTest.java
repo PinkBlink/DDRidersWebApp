@@ -3,6 +3,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.LoginCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.repository.CustomerRepository;
@@ -19,7 +21,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.UUID;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,96 +37,7 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
     private final String hashedPassword = PasswordEncryptor.encryptPassword(password);
 
     @Test
-    public void loginRespondsWith200() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var savedCustomer = customerRepository.save(aCustomer().password(hashedPassword).build());
-        final var jsonAsReader = new StringReader("""
-            {
-               "email" : "%s",
-               "password" : "%s"
-            }
-            """.formatted(savedCustomer.getEmail(), password));
-
-        final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedResponse = HttpServletResponse.SC_OK;
-
-        when(request.getReader()).thenReturn(requestReader);
-
-        //when
-        loginCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponse);
-    }
-
-    @Test
-    public void loginRespondsWith401Unauthorized() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var jsonAsReader = new StringReader("""
-            {
-               "email" : "wrong",
-               "password" : "wrong"
-            }
-            """);
-
-        final var requestReader = new BufferedReader(jsonAsReader);
-
-        final var expectedResponse = HttpServletResponse.SC_UNAUTHORIZED;
-
-        when(request.getReader()).thenReturn(requestReader);
-
-        //when
-        loginCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponse);
-    }
-
-    @Test
-    public void loginRespondsWith400IfEmptyRequest() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var emptyJson = new StringReader("");
-        final var requestReader = new BufferedReader(emptyJson);
-
-        final var expectedResponse = HttpServletResponse.SC_BAD_REQUEST;
-
-        when(request.getReader()).thenReturn(requestReader);
-
-        //when
-        loginCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponse);
-    }
-
-    @Test
-    public void loginRespondsWith500IfException() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedResponse = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-
-        when(request.getReader()).thenThrow(new IOException("IOException check"));
-
-        //when
-        loginCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponse);
-    }
-
-    @Test
-    public void loginRespondsWithTokens() throws IOException {
+    public void loginRespondsWith200AndTokens() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -144,10 +59,14 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
+        final var expectedStatus = SC_OK;
+
         //when
         loginCommand.execute(request, response);
 
         //then
+        verify(response).setStatus(expectedStatus);
+
         final var tokens = ModelMapper.parse(stringWriter.toString(), TokenDto.class);
         final var decodedAccessToken = authTokenDecoder.decode(tokens.accessToken());
         final var idFromAccessToken = UUID.fromString(decodedAccessToken.getSubject());
@@ -156,5 +75,48 @@ public class LoginCommandTest extends BaseTest implements CustomerTestData {
 
         assertEquals(savedCustomer.getId(), idFromRefreshToken);
         assertEquals(savedCustomer.getId(), idFromAccessToken);
+    }
+
+    @Test
+    public void loginThrowsUnauthorized() throws IOException {
+        //given
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
+
+        final var jsonAsReader = new StringReader("""
+            {
+               "email" : "wrong",
+               "password" : "wrong"
+            }
+            """);
+
+        final var requestReader = new BufferedReader(jsonAsReader);
+
+        when(request.getReader()).thenReturn(requestReader);
+
+        //when & then
+        assertThrows(
+            UnauthorizedException.class,
+            () -> loginCommand.execute(request, response)
+        );
+    }
+
+    @Test
+    public void loginThrowsBadRequest() throws IOException {
+        //given
+        final var request = mock(HttpServletRequest.class);
+        final var response = mock(HttpServletResponse.class);
+
+        final var emptyJson = new StringReader("");
+        final var requestReader = new BufferedReader(emptyJson);
+
+
+        when(request.getReader()).thenReturn(requestReader);
+
+        //when & then
+        assertThrows(
+            BadRequestException.class,
+            () -> loginCommand.execute(request, response)
+        );
     }
 }

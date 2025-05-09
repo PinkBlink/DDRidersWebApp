@@ -12,6 +12,11 @@ import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import static org.riders.sharing.utils.ErrorMessages.CANT_CLOSE_CONNECTION;
+import static org.riders.sharing.utils.ErrorMessages.CANT_CREATE_CONNECTION;
+import static org.riders.sharing.utils.ErrorMessages.CANT_DEREGISTER_DRIVER;
+import static org.riders.sharing.utils.ErrorMessages.NO_CONNECTIONS_TO_DB;
+
 public enum ConnectionPool {
     INSTANCE;
     private static final int DEFAULT_CAPACITY = 16;
@@ -46,7 +51,7 @@ public enum ConnectionPool {
                         DriverManager.deregisterDriver(driver);
                     } catch (SQLException e) {
                         logger.error("Can't deregister driver {}", e.getMessage());
-                        throw new NoSQLConnectionException(e.getMessage());
+                        throw new NoSQLConnectionException(CANT_DEREGISTER_DRIVER, e);
                     }
                 });
     }
@@ -71,7 +76,7 @@ public enum ConnectionPool {
 
         if (availableConnections.isEmpty()) {
             logger.error("Available connections amount is zero;");
-            throw new RuntimeException("No connections to database");
+            throw new NoSQLConnectionException(NO_CONNECTIONS_TO_DB);
         } else {
             logger.info("Connections successfully created: {}", availableConnections.size());
         }
@@ -89,7 +94,7 @@ public enum ConnectionPool {
             return connection;
         } catch (SQLException e) {
             logger.error("Can't create connection: {}", e.getMessage());
-            throw new NoSQLConnectionException(e.getMessage(), e);
+            throw new NoSQLConnectionException(CANT_CREATE_CONNECTION, e);
         }
     }
 
@@ -116,7 +121,7 @@ public enum ConnectionPool {
             }
         } catch (SQLException e) {
             logger.error("Can't close connection");
-            throw new NoSQLConnectionException("Can't close connection", e);
+            throw new NoSQLConnectionException(CANT_CLOSE_CONNECTION, e);
         }
         deregisterDriver();
     }

@@ -5,6 +5,7 @@ import org.riders.sharing.exception.DatabaseException;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
+import org.riders.sharing.utils.ErrorMessages;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.riders.sharing.utils.ErrorMessages.CUSTOMER_DUPLICATE;
 import static org.riders.sharing.utils.SqlUtils.DUPLICATE_ENTRY_SQL_ERR_CODE;
 
 public class CustomerRepositoryImpl implements CustomerRepository {
@@ -80,7 +82,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         } catch (SQLException e) {
             if (e.getSQLState().equals(DUPLICATE_ENTRY_SQL_ERR_CODE)) {
                 throw new DuplicateEntryException(
-                    "Customer with id %s has already existed".formatted(customer.getId()), e);
+                    CUSTOMER_DUPLICATE.formatted(customer.getId()), e);
             }
 
             throw new DatabaseException(

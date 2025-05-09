@@ -1,10 +1,12 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.riders.sharing.command.AvailableScootersCommand;
 import org.riders.sharing.connection.ConnectionPool;
+import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
@@ -97,7 +99,7 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
     }
 
     @Test
-    public void availableScootersRespondsWith400() throws IOException {
+    public void availableScootersThrowsBadRequest() throws IOException {
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
@@ -108,27 +110,10 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
 
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        availableScootersCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-    }
-
-    @Test
-    public void availableRespondsWith500() throws IOException {
-        //given
-        final var response = Mockito.mock(HttpServletResponse.class);
-        final var request = Mockito.mock(HttpServletRequest.class);
-
-        final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
-
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        //when
-        availableScootersCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        Assertions.assertThrows(
+            BadRequestException.class,
+            () -> availableScootersCommand.execute(request, response)
+        );
     }
 }

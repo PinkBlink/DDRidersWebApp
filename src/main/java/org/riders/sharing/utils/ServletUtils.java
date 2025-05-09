@@ -5,20 +5,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.ResponseWritingException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 
-public class ServletUtils {
-    public static String getRequestBody(HttpServletRequest request) throws IOException {
-        final var requestBodyBuilder = new StringBuilder();
-        final var reader = request.getReader();
-        var line = "";
+import static org.riders.sharing.utils.ErrorMessages.REQUEST_IS_EMPTY;
 
-        while ((line = reader.readLine()) != null) {
-            requestBodyBuilder.append(line);
+public class ServletUtils {
+    public static String getRequestBody(HttpServletRequest request) {
+        final var requestBodyBuilder = new StringBuilder();
+
+
+        final BufferedReader reader;
+        try {
+            reader = request.getReader();
+
+            var line = "";
+
+            while ((line = reader.readLine()) != null) {
+                requestBodyBuilder.append(line);
+            }
+        } catch (IOException e) {
+            throw new ResponseWritingException(e.getMessage(), e);
         }
 
         if (requestBodyBuilder.toString().isBlank()) {
-            throw new BadRequestException("Attempt to get the body from empty request.");
+            throw new BadRequestException(REQUEST_IS_EMPTY);
         }
 
         return requestBodyBuilder.toString();

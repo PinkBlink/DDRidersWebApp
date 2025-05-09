@@ -5,11 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.riders.sharing.dto.PageRequestDto;
 import org.riders.sharing.dto.PageResponseDto;
 import org.riders.sharing.dto.ScooterDto;
-import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.exception.IllegalStatusException;
 import org.riders.sharing.model.Scooter;
 import org.riders.sharing.repository.ScooterRepository;
 import org.riders.sharing.service.ScooterService;
+import org.riders.sharing.utils.ErrorMessages;
 import org.riders.sharing.utils.PaginationUtils;
 import org.riders.sharing.utils.ValidationUtils;
 
@@ -17,6 +18,9 @@ import java.util.UUID;
 
 import static org.riders.sharing.model.enums.ScooterStatus.AVAILABLE;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_ALREADY_AVAILABLE;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_ALREADY_RENTED;
+import static org.riders.sharing.utils.ErrorMessages.SCOOTER_NOT_FOUND;
 
 
 public class ScooterServiceImpl implements ScooterService {
@@ -57,7 +61,7 @@ public class ScooterServiceImpl implements ScooterService {
 
         return maybeScooter.orElseThrow(() -> {
             LOGGER.error("Couldn't find scooter with id {}", id);
-            return new NoElementException("Couldn't find scooter with id %s".formatted(id));
+            return new NotFoundException(SCOOTER_NOT_FOUND.formatted(id));
         });
     }
 
@@ -65,7 +69,7 @@ public class ScooterServiceImpl implements ScooterService {
     public Scooter rentScooter(Scooter scooter) {
         ValidationUtils.checkThat(
             scooter.getStatus().equals(AVAILABLE),
-            () -> new IllegalStatusException("Scooter is already rented")
+            () -> new IllegalStatusException(SCOOTER_ALREADY_RENTED)
         );
 
         final var updatedScooter = scooter.toBuilder()
@@ -79,7 +83,7 @@ public class ScooterServiceImpl implements ScooterService {
     public Scooter releaseScooter(Scooter scooter) {
         ValidationUtils.checkThat(
             scooter.getStatus().equals(RENTED),
-            () -> new IllegalStatusException("Scooter %s is already available".formatted(scooter.getId()))
+            () -> new IllegalStatusException(SCOOTER_ALREADY_AVAILABLE.formatted(scooter.getId()))
         );
 
         final var updatedScooter = scooter.toBuilder()

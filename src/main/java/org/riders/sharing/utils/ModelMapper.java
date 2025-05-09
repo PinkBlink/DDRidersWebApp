@@ -12,6 +12,9 @@ import org.riders.sharing.exception.MappingException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.riders.sharing.utils.ErrorMessages.ERR_MAP_JSON_TO_OBJECT;
+import static org.riders.sharing.utils.ErrorMessages.ERR_MAP_OBJECT_TO_JSON;
+
 public final class ModelMapper {
     private static final Logger LOGGER;
 
@@ -32,7 +35,7 @@ public final class ModelMapper {
             return OBJECT_MAPPER.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             LOGGER.error("Couldn't map object to JSON", e);
-            throw new MappingException("Couldn't map object to JSON", e);
+            throw new MappingException(ERR_MAP_OBJECT_TO_JSON, e);
         }
     }
 
@@ -41,7 +44,7 @@ public final class ModelMapper {
             return OBJECT_MAPPER.readValue(json, valueType);
         } catch (JsonProcessingException e) {
             LOGGER.error("Couldn't map JSON to Object", e);
-            throw new MappingException("Couldn't map JSON to Object", e);
+            throw new MappingException(ERR_MAP_JSON_TO_OBJECT, e);
         }
     }
 
@@ -50,7 +53,7 @@ public final class ModelMapper {
             return OBJECT_MAPPER.readValue(value, typeReference);
         } catch (JsonProcessingException e) {
             LOGGER.error("Couldn't map JSON to Object", e);
-            throw new MappingException("Couldn't map JSON to Object", e);
+            throw new MappingException(ERR_MAP_JSON_TO_OBJECT, e);
         }
     }
 
@@ -59,7 +62,7 @@ public final class ModelMapper {
             return OBJECT_MAPPER_YAML.readValue(inputStream, valueType);
         } catch (IOException e) {
             LOGGER.error("Couldn't map JSON to Object", e);
-            throw new MappingException("Couldn't map JSON to Object", e);
+            throw new MappingException(ERR_MAP_JSON_TO_OBJECT, e);
         }
     }
 }

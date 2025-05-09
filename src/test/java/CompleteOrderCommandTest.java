@@ -6,6 +6,9 @@ import org.riders.sharing.command.Command;
 import org.riders.sharing.command.CompleteOrderCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.OrderDto;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.IllegalStatusException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.OrderRepository;
 import org.riders.sharing.repository.ScooterRepository;
@@ -26,11 +29,8 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,7 +100,7 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
     }
 
     @Test
-    public void completeRespondsWith400() throws IOException {
+    public void completeThrowsBadRequest() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -108,19 +108,17 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
         final var stringReader = new StringReader("");
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_BAD_REQUEST;
-
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        completeOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            BadRequestException.class,
+            () -> completeOrderCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void completeRespondsWith401() throws IOException {
+    public void completeThrowsIllegalStatus() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -149,20 +147,18 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
         final var stringWriter = new StringWriter();
         final var responseWriter = new PrintWriter(stringWriter);
 
-        final var expectedResponseStatus = SC_CONFLICT;
-
         when(request.getReader()).thenReturn(requestReader);
         when(response.getWriter()).thenReturn(responseWriter);
 
-        //when
-        completeOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            IllegalStatusException.class,
+            () -> completeOrderCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void completeRespondsWith404() throws IOException {
+    public void completeThrowsNotFound() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -185,31 +181,12 @@ public class CompleteOrderCommandTest extends BaseTest implements OrderTestData,
         final var stringReader = new StringReader(unsavedOrderDtoJson);
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_NOT_FOUND;
-
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        completeOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-    }
-
-    @Test
-    public void completeRespondsWith500() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
-
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        //when
-        completeOrderCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        assertThrows(
+            NotFoundException.class,
+            () -> completeOrderCommand.execute(request, response)
+        );
     }
 }

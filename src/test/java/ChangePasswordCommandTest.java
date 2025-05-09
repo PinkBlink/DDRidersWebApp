@@ -5,6 +5,9 @@ import org.mockito.Mockito;
 import org.riders.sharing.command.ChangePasswordCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.CustomerDto;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.NotFoundException;
+import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.utils.ModelMapper;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -20,11 +23,8 @@ import java.io.StringWriter;
 import java.util.UUID;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
-import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,7 +88,7 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
     }
 
     @Test
-    public void changePasswordRespondsWith404() throws IOException {
+    public void changePasswordThrowsNotFound() throws IOException {
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
@@ -104,19 +104,18 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         );
 
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedRespStatus = SC_NOT_FOUND;
 
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        changePasswordCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedRespStatus);
+        //when & then
+        assertThrows(
+            NotFoundException.class,
+            () -> changePasswordCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void changePasswordRespondsWith401() throws IOException {
+    public void changePasswordThrowsUnauthorized() throws IOException {
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
@@ -134,19 +133,18 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         );
 
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedRespStatus = SC_UNAUTHORIZED;
 
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        changePasswordCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedRespStatus);
+        //when & then
+        assertThrows(
+            UnauthorizedException.class,
+            () -> changePasswordCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void changePasswordRespondsWith400() throws IOException {
+    public void changePasswordThrowsBadRequest() throws IOException {
         //given
         final var response = Mockito.mock(HttpServletResponse.class);
         final var request = Mockito.mock(HttpServletRequest.class);
@@ -162,31 +160,13 @@ public class ChangePasswordCommandTest extends BaseTest implements CustomerTestD
         );
 
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedRespStatus = SC_BAD_REQUEST;
 
         when(request.getReader()).thenReturn(requestReader);
 
-        //when
-        changePasswordCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedRespStatus);
-    }
-
-    @Test
-    public void changePasswordRespondsWith500() throws IOException {
-        //given
-        final var response = Mockito.mock(HttpServletResponse.class);
-        final var request = Mockito.mock(HttpServletRequest.class);
-
-        final var expectedRespStatus = SC_INTERNAL_SERVER_ERROR;
-
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        //when
-        changePasswordCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedRespStatus);
+        //when & then
+        assertThrows(
+            BadRequestException.class,
+            () -> changePasswordCommand.execute(request, response)
+        );
     }
 }

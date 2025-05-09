@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.authentication.AuthTokenGenerator;
-import org.riders.sharing.authentication.AuthenticationFilter;
+import org.riders.sharing.filter.AuthenticationFilter;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
@@ -29,10 +29,8 @@ import static org.riders.sharing.authentication.AuthConstants.BEARER;
 import static org.riders.sharing.authentication.AuthConstants.EMAIL_CLAIM;
 import static org.riders.sharing.authentication.AuthConstants.EMPTY_STRING;
 import static org.riders.sharing.utils.ErrorMessages.CUSTOMER_NOT_FOUND;
-import static org.riders.sharing.utils.ErrorMessages.EXPIRED_TOKEN;
-import static org.riders.sharing.utils.ErrorMessages.INVALID_TOKEN;
 import static org.riders.sharing.utils.ErrorMessages.TOKEN_IS_EMPTY;
-import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED_ACCESS;
+import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED;
 
 public class AuthenticationFilterTest extends BaseTest implements CustomerTestData {
     private final ApplicationConfig appConfig = ApplicationConfig.getInstance();
@@ -141,7 +139,7 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
             .sign(appConfig.getAlgorithm());
 
         final var expectedResponseStatus = SC_UNAUTHORIZED;
-        final var expectedResponseMessage = EXPIRED_TOKEN;
+        final var expectedResponseMessage = UNAUTHORIZED;
 
         when(request.getHeader(AUTH_HEADER)).thenReturn(expiredToken);
 
@@ -168,7 +166,7 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
             .sign(appConfig.getAlgorithm());
 
         final var expectedResponseStatus = SC_UNAUTHORIZED;
-        final var expectedResponseMessage = UNAUTHORIZED_ACCESS;
+        final var expectedResponseMessage = UNAUTHORIZED;
 
         when(request.getHeader(AUTH_HEADER)).thenReturn(token);
 
@@ -196,7 +194,7 @@ public class AuthenticationFilterTest extends BaseTest implements CustomerTestDa
 
 
         final var expectedResponseStatus = SC_UNAUTHORIZED;
-        final var expectedResponseMessage = INVALID_TOKEN;
+        final var expectedResponseMessage = UNAUTHORIZED;
 
         when(request.getHeader(AUTH_HEADER)).thenReturn(token);
 

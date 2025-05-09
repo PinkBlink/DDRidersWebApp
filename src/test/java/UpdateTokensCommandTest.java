@@ -1,4 +1,5 @@
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
@@ -9,6 +10,8 @@ import org.riders.sharing.command.UpdateTokensCommand;
 import org.riders.sharing.connection.ConnectionPool;
 import org.riders.sharing.dto.TokenDto;
 import org.riders.sharing.dto.UpdateTokensDto;
+import org.riders.sharing.exception.BadRequestException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.repository.impl.CustomerRepositoryImpl;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
@@ -22,11 +25,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.Instant;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
-import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,7 +82,7 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
     }
 
     @Test
-    public void upgradeTokensRespondsWith400() throws IOException {
+    public void upgradeTokensThrowsBadRequest() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -91,20 +90,17 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
         final var stringReader = new StringReader("{}");
         final var requestReader = new BufferedReader(stringReader);
 
-
-        final var expectedResponseStatus = SC_BAD_REQUEST;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
-        updateTokensCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        Assertions.assertThrows(
+            BadRequestException.class,
+            () -> updateTokensCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void upgradeTokensRespondsWith401() throws IOException {
+    public void upgradeTokensThrowsTokenExpired() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -121,19 +117,17 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
         final var stringReader = new StringReader(updateJson);
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_UNAUTHORIZED;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
-        updateTokensCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        Assertions.assertThrows(
+            TokenExpiredException.class,
+            () -> updateTokensCommand.execute(request, response)
+        );
     }
 
     @Test
-    public void upgradeTokensRespondsWith404() throws IOException {
+    public void upgradeTokensThrowsNotFound() throws IOException {
         //given
         final var request = mock(HttpServletRequest.class);
         final var response = mock(HttpServletResponse.class);
@@ -147,31 +141,12 @@ public class UpdateTokensCommandTest extends BaseTest implements CustomerTestDat
         final var stringReader = new StringReader(updateJson);
         final var requestReader = new BufferedReader(stringReader);
 
-        final var expectedResponseStatus = SC_NOT_FOUND;
-
-        //when
         when(request.getReader()).thenReturn(requestReader);
 
-        updateTokensCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
-    }
-
-    @Test
-    public void upgradeTokensRespondsWith500() throws IOException {
-        //given
-        final var request = mock(HttpServletRequest.class);
-        final var response = mock(HttpServletResponse.class);
-
-        final var expectedResponseStatus = SC_INTERNAL_SERVER_ERROR;
-
-        //when
-        when(request.getReader()).thenThrow(RuntimeException.class);
-
-        updateTokensCommand.execute(request, response);
-
-        //then
-        verify(response).setStatus(expectedResponseStatus);
+        //when & then
+        Assertions.assertThrows(
+            NotFoundException.class,
+            () -> updateTokensCommand.execute(request, response)
+        );
     }
 }

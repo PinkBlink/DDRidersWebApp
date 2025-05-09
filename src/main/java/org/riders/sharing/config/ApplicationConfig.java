@@ -9,6 +9,8 @@ import org.riders.sharing.utils.ModelMapper;
 
 import java.io.IOException;
 
+import static org.riders.sharing.utils.ErrorMessages.ERROR_LOADING_CONFIG;
+
 public class ApplicationConfig {
     private final String postgresDbUrl;
     private final String ddRidersDbUrl;
@@ -99,7 +101,7 @@ public class ApplicationConfig {
         try (final var input = ApplicationConfig.class.getClassLoader().getResourceAsStream("config.yml")) {
             return ModelMapper.parse(input, ApplicationConfig.class);
         } catch (IOException e) {
-            throw new ConfigLoadException("Error occurred when trying to load config.yml", e);
+            throw new ConfigLoadException(ERROR_LOADING_CONFIG, e);
         }
     }
 }

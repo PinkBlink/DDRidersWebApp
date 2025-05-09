@@ -1,7 +1,6 @@
-package org.riders.sharing.authentication;
+package org.riders.sharing.filter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -13,9 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.exception.BadRequestException;
 import org.riders.sharing.exception.InvalidTokenException;
-import org.riders.sharing.exception.NoElementException;
+import org.riders.sharing.exception.NotFoundException;
 import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.service.CustomerService;
 
@@ -27,10 +27,8 @@ import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.riders.sharing.config.ContextAttributes.CUSTOMER_SERVICE_ATTRIBUTE;
 import static org.riders.sharing.config.ContextAttributes.TOKEN_DECODER_ATTRIBUTE;
 import static org.riders.sharing.utils.ErrorMessages.CUSTOMER_NOT_FOUND;
-import static org.riders.sharing.utils.ErrorMessages.EXPIRED_TOKEN;
-import static org.riders.sharing.utils.ErrorMessages.INVALID_TOKEN;
 import static org.riders.sharing.utils.ErrorMessages.TOKEN_IS_EMPTY;
-import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED_ACCESS;
+import static org.riders.sharing.utils.ErrorMessages.UNAUTHORIZED;
 
 @WebFilter("/main-servlet/secure/*")
 public class AuthenticationFilter implements Filter {
@@ -69,7 +67,7 @@ public class AuthenticationFilter implements Filter {
             final var customerFromDb = customerService.getById(idFromToken);
 
             if (!customerFromDb.getEmail().equals(emailFromToken)) {
-                throw new UnauthorizedException("Emails do not match.");
+                throw new UnauthorizedException(UNAUTHORIZED);
             }
 
             LOGGER.info("Successfully authenticated customer with id {}", customerFromDb.getId());
@@ -77,18 +75,12 @@ public class AuthenticationFilter implements Filter {
         } catch (BadRequestException e) {
             LOGGER.error("Authorization header is missing, or the token is empty.", e);
             response.sendError(SC_BAD_REQUEST, TOKEN_IS_EMPTY);
-        } catch (TokenExpiredException e) {
-            LOGGER.error("Access token is expired", e);
-            response.sendError(SC_UNAUTHORIZED, EXPIRED_TOKEN);
-        } catch (JWTVerificationException | InvalidTokenException e) {
-            LOGGER.error("Invalid token!", e);
-            response.sendError(SC_UNAUTHORIZED, INVALID_TOKEN);
-        } catch (NoElementException e) {
+        } catch (UnauthorizedException | JWTVerificationException | InvalidTokenException e) {
+            LOGGER.error(UNAUTHORIZED, e);
+            response.sendError(SC_UNAUTHORIZED, UNAUTHORIZED);
+        } catch (NotFoundException e) {
             LOGGER.error("Couldn't find Customer.", e);
             response.sendError(SC_NOT_FOUND, CUSTOMER_NOT_FOUND);
-        } catch (UnauthorizedException e) {
-            LOGGER.error("Unauthorized access attempt", e);
-            response.sendError(SC_UNAUTHORIZED, UNAUTHORIZED_ACCESS);
         }
     }
 }

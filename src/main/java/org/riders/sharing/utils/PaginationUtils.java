@@ -4,6 +4,7 @@ import org.riders.sharing.exception.BadRequestException;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static org.riders.sharing.utils.ErrorMessages.PAGE_SIZE_IS_ZERO;
 
 public class PaginationUtils {
     private static final int DEFAULT_PAGE = 1;
@@ -11,7 +12,7 @@ public class PaginationUtils {
 
     public static int calculateTotalPages(long totalElements, int pageSize) {
         if (pageSize <= 0) {
-            throw new BadRequestException("Value pageSize must be > 0;");
+            throw new BadRequestException(PAGE_SIZE_IS_ZERO);
         }
         return (int) ((totalElements + pageSize - 1) / pageSize);
     }
