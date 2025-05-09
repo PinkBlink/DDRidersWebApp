@@ -20,7 +20,6 @@ import org.riders.sharing.service.ScooterService;
 import org.riders.sharing.service.impl.CustomerServiceImpl;
 import org.riders.sharing.service.impl.OrderServiceImpl;
 import org.riders.sharing.service.impl.ScooterServiceImpl;
-import org.riders.sharing.utils.ErrorMessages;
 import org.riders.sharing.utils.ModelMapper;
 
 import java.io.BufferedReader;
