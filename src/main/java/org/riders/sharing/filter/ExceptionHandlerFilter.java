@@ -32,7 +32,7 @@ public class ExceptionHandlerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
-                         FilterChain chain) throws IOException, ServletException {
+                         FilterChain chain) throws IOException {
         final var request = (HttpServletRequest) servletRequest;
         final var response = (HttpServletResponse) servletResponse;
 

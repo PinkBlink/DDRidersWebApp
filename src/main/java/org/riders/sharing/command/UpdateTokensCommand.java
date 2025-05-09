@@ -2,8 +2,6 @@ package org.riders.sharing.command;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.riders.sharing.authentication.AuthTokenDecoder;
 import org.riders.sharing.authentication.AuthTokenGenerator;
 import org.riders.sharing.dto.TokenDto;

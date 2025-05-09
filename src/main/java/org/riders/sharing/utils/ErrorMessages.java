@@ -9,7 +9,6 @@ public class ErrorMessages {
     public static final String SCOOTER_DUPLICATE = "Scooter %s is already exists";
     public static final String ORDER_DUPLICATE = "Order %s is already exists";
 
-    public static final String EXPIRED_TOKEN = "Token is expired";
     public static final String TOKEN_IS_EMPTY = "Token is empty";
     public static final String INVALID_TOKEN = "Invalid token!";
     public static final String CLAIM_IS_MISSING = "Claim %s is missing";

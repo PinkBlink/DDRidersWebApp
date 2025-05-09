@@ -11,7 +11,6 @@ import org.riders.sharing.exception.UnauthorizedException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
 import org.riders.sharing.service.CustomerService;
-import org.riders.sharing.utils.ErrorMessages;
 import org.riders.sharing.utils.PasswordEncryptor;
 import org.riders.sharing.utils.ValidationUtils;
 

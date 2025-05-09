@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.util.List;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -106,7 +105,6 @@ public class AvailableScootersCommandTest extends BaseTest implements ScooterTes
 
         final var jsonAsReader = new StringReader("");
         final var requestReader = new BufferedReader(jsonAsReader);
-        final var expectedResponseStatus = SC_BAD_REQUEST;
 
         when(request.getReader()).thenReturn(requestReader);
 

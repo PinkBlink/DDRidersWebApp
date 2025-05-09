@@ -1,7 +1,6 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.riders.sharing.command.Command;
 import org.riders.sharing.command.CompletedCustomerOrdersCommand;
@@ -30,8 +29,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -156,7 +153,7 @@ public class CompletedCustomerOrdersCommandTest extends BaseTest
         //when & then
         assertThrows(
             BadRequestException.class,
-            ()-> completedCustomerOrdersCommand.execute(request, response)
+            () -> completedCustomerOrdersCommand.execute(request, response)
         );
     }
 }

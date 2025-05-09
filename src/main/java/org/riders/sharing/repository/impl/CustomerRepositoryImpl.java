@@ -5,7 +5,6 @@ import org.riders.sharing.exception.DatabaseException;
 import org.riders.sharing.exception.DuplicateEntryException;
 import org.riders.sharing.model.Customer;
 import org.riders.sharing.repository.CustomerRepository;
-import org.riders.sharing.utils.ErrorMessages;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

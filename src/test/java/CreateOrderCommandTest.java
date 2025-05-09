@@ -30,11 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.UUID;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -42,8 +38,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.riders.sharing.model.enums.OrderStatus.ONGOING;
 import static org.riders.sharing.model.enums.ScooterStatus.RENTED;
-import static org.riders.sharing.utils.ErrorMessages.SCOOTER_ALREADY_RENTED;
-import static org.riders.sharing.utils.ErrorMessages.SCOOTER_NOT_FOUND;
 
 public class CreateOrderCommandTest extends BaseTest implements OrderTestData, CustomerTestData, ScooterTestData {
     private final CustomerRepository customerRepository = new CustomerRepositoryImpl(ConnectionPool.INSTANCE);
